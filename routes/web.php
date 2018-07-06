@@ -18,3 +18,4 @@ Route::post('trades/update/{bitfinex_id}','TradesController@update')->middleware
 Route::get('/', 'DashboardController@index')->name('dashboard')->middleware('auth');
 Route::get('/trades/import', 'TradesController@import')->name('import');
 Route::post('/trades/import/upload', 'TradesController@upload')->name('upload');
+Route::get('news', 'NewsController@list')->name('news');
