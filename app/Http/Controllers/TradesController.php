@@ -60,6 +60,7 @@ class TradesController extends Controller
                         unset($allTrades[$key]);
                     }
                 }
+                break;
 
             case '30_days':
                 foreach ($allTrades as $key => $value) {
@@ -67,6 +68,7 @@ class TradesController extends Controller
                         unset($allTrades[$key]);
                     }
                 }
+                break;
 
             case '3_months':
                 foreach ($allTrades as $key => $value) {
@@ -74,6 +76,7 @@ class TradesController extends Controller
                         unset($allTrades[$key]);
                     }
                 }
+                break;
         }
 
         return view('trades.list', ['trades' => $allTrades]);
