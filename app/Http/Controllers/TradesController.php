@@ -111,7 +111,7 @@ class TradesController extends Controller
 
             if ($nextKey <= (count($trades) - 1)) { // not exceeding last trade
                 if (
-                    number_format($amount, 2) == 0.00 &&
+                    round($amount) == 0 &&
                     (array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)) && // this trade is closing
                     (! array_key_exists(strtotime($trades[$nextKey]['date']), $this->closedByTimestamp)) // next trade is not closing
                 ) {
