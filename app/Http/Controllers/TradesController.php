@@ -49,6 +49,10 @@ class TradesController extends Controller
         
         $allTrades = $this->sortByDate($allTrades);
 
+        if (! isset($_GET['show'])) {
+            return redirect('/trades?show=10_trades');
+        }
+
         switch ($_GET['show']) {
             case '10_trades':
                 $allTrades = array_slice($allTrades, -10, 10, true);
