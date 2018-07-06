@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App;
 use H;
-use App\Http\Controllers\Controller;
+use Csv;
+use DB;
+use Request;
+use Auth;
 
 class TradesController extends Controller
 {
@@ -15,20 +19,71 @@ class TradesController extends Controller
      * @return Response
      */
 
-    public function list()
+    public function __construct()
     {
-        $this->closedByTimestamp = $this->getClosedBalancesByTimestamp();
-    	$trades = $this->getTrades();
-    	$trades = $this->getTradesByTrade($trades);
-        $trades = $this->setTradeParameters($trades);
-
-        return view('trades.list', ['trades' => $trades]);
+        $this->middleware('auth');
     }
 
-    private function getTrades()
+    public function list()
     {
-    	$trades = App\Trade::where('date', '>=', '2018-05-01')
-			// ->where('coin', 'BTC/USD')
+        $userId = Auth::id();
+        $this->closedByTimestamp = $this->getClosedBalancesByTimestamp();
+        $coins = DB::table('trades')->select('coin')->groupBy('coin')->get()->toArray();
+        if (isset($_GET['coin'])) {
+            $coins = [];
+            $obj = new \StdClass();
+            $obj->coin = $_GET['coin'];
+            $coins[] = $obj;
+        }
+
+        $allTrades = [];
+        foreach ($coins as $coin) {
+            $trades = $this->getTrades($coin->coin, $userId);
+            $trades = $this->getTradesByTrade($trades);
+            $trades = $this->setTradeParameters($trades);
+
+            $allTrades[] = $trades;
+        }
+
+        $allTrades = array_merge(...$allTrades);
+        
+        $allTrades = $this->sortByDate($allTrades);
+
+        switch ($_GET['show']) {
+            case '10_trades':
+                $allTrades = array_slice($allTrades, -10, 10, true);
+                break;
+
+            case '7_days':
+                foreach ($allTrades as $key => $value) {
+                    if ($key < strtotime('-7 days')) {
+                        unset($allTrades[$key]);
+                    }
+                }
+
+            case '30_days':
+                foreach ($allTrades as $key => $value) {
+                    if ($key < strtotime('-30 days')) {
+                        unset($allTrades[$key]);
+                    }
+                }
+
+            case '3_months':
+                foreach ($allTrades as $key => $value) {
+                    if ($key < strtotime('-3 months')) {
+                        unset($allTrades[$key]);
+                    }
+                }
+        }
+
+        return view('trades.list', ['trades' => $allTrades]);
+    }
+
+    private function getTrades($coin, $userId)
+    {
+    	$trades = App\Trade::where('coin', '=', $coin)
+            ->where('user_id', $userId)
+            ->excludeExchangeTrades()
 			->orderBy('date', 'ASC')
 			->get()
             ->toArray();
@@ -39,15 +94,17 @@ class TradesController extends Controller
     private function getTradesByTrade($trades)
     {
     	$i = 0;
-
+        $amount = 0;
     	$tradesByTrade = [];
     	foreach ($trades as $key => $trade) {
             $tradesByTrade[$i]['trades'][] = $trade;
-
             $nextKey = $key + 1;
+
+            $amount = $amount + $trade['amount'];
 
             if ($nextKey <= (count($trades) - 1)) { // not exceeding last trade
                 if (
+                    number_format($amount, 2) == 0.00 &&
                     (array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)) && // this trade is closing
                     (! array_key_exists(strtotime($trades[$nextKey]['date']), $this->closedByTimestamp)) // next trade is not closing
                 ) {
@@ -63,19 +120,31 @@ class TradesController extends Controller
     {
         foreach ($trades as $key => $trade) {
             $firstTrade = $trade['trades'][0];
+            $lastTrade = $trade['trades'][count($trade['trades']) - 1];
 
             $date = substr($firstTrade['date'], 0, -9);
+            $datetime = $firstTrade['date'];
             $coin = str_replace('/USD', '', $firstTrade['coin']);
             $type = $this->isLongOrShort($firstTrade['amount']);
             $balance = round($this->getClosingBalance($trade));
             $result = $this->getResult($trade, $type);
+            $gain = $this->getResult($trade, $type);
+            $duration['timestamp'] = strtotime($lastTrade['date']) - strtotime($firstTrade['date']);
+            $duration['his'] = gmdate('H:i:s', $duration['timestamp']);
+            $duration['seconds'] = gmdate('s', $duration['timestamp']);
+            $duration['hours'] = gmdate("H", $duration['timestamp']);
+            $duration['minutes'] = gmdate("i", $duration['timestamp']);
 
             $trades[$key]['parameters'] = [
+                'bitfinex_id' => $firstTrade['bitfinex_id'],
                 'date' => $date,
+                'datetime' => $datetime,
                 'coin' => $coin,
                 'type' => $type,
                 'balance' => $balance,
                 'result' => $result,
+                'gain' => $gain,
+                'duration' => $duration,
             ];
         }
 
@@ -95,6 +164,8 @@ class TradesController extends Controller
     private function getClosedBalancesByTimestamp()
     {
         $closedBalances = App\Balance::where('description', 'like', '%closed%')
+            ->orWhere('description', 'like', '%settlement%')
+            ->orderBy('id', 'DESC')
             ->get()
             ->toArray();
 
@@ -122,5 +193,65 @@ class TradesController extends Controller
         $result['fees'] = $fees;
 
         return $result;
+    }
+
+    private function sortByDate($trades)
+    {
+        $tradeByDatetime = [];
+        foreach ($trades as $key => $trade) {
+            $tradeDate = strtotime($trade['parameters']['datetime']);
+            $tradeByDatetime[$tradeDate] = $tradeDate;
+        }
+
+        ksort($tradeByDatetime);
+
+        foreach ($trades as $key => $trade) {
+            $tradeByDatetime[strtotime($trade['parameters']['datetime'])] = $trade;
+        }
+
+        return $tradeByDatetime;
+    }
+
+    public function import()
+    {
+        return view('import');
+    }
+
+    public function upload(Request $request)
+    {
+        $request = Request::instance();
+        foreach ($request->all()['files'] as $file) {
+            $filepath = $file->path();
+            $filename = $file->getClientOriginalName();
+            Csv::uploadCsv($filepath, $filename);
+        }
+        
+        return redirect('trades/import');
+    }
+
+    public function edit($bitfinex_id)
+    {
+        $trade = App\Trade::where('bitfinex_id', $bitfinex_id)->take(1)->get()->toArray();
+        $trade = $trade[0];
+
+        $trade['parameters']['date'] = substr($trade['date'], 0, -9);
+        $trade['parameters']['datetime'] = $trade['date'];
+        $trade['parameters']['coin'] = str_replace('/USD', '', $trade['coin']);
+        $trade['parameters']['type'] = $this->isLongOrShort($trade['amount']);
+
+        return view('trades.edit', ['trade' => $trade]);
+    }
+
+    public function update(Request $request, $bitfinex_id)
+    {
+        $request = Request::instance();
+        $comment = $request->request->get('comment');
+
+        $trade = App\Trade::where('bitfinex_id', $bitfinex_id)->get();
+        $trade = $trade[0];
+        $trade->comment = $comment;
+        $trade->save();
+
+        return redirect(sprintf('/trades/edit/%s', $bitfinex_id));
     }
 }
