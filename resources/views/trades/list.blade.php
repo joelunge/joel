@@ -35,7 +35,7 @@
 		</thead>
 		<tbody>
 			@foreach ($trades as $key => $trade)
-				<tr>
+				<tr id="{{$trade['parameters']['bitfinex_id']}}">
 					<td>{{(new DateTime($trade['parameters']['date']))->format('d M')}} <small>{{substr($trade['parameters']['datetime'], 11, 5)}}</small></td>
 					<td>
 						@if($trade['parameters']['type'] == 'Short')

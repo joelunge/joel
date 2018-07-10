@@ -301,12 +301,13 @@ class TradesController extends Controller
     {
         $request = Request::instance();
         $comment = $request->request->get('comment');
+        $previousUrl = $request->request->get('previous_url');
 
         $trade = App\Trade::where('bitfinex_id', $bitfinex_id)->get();
         $trade = $trade[0];
         $trade->comment = $comment;
         $trade->save();
 
-        return redirect(sprintf('/trades/edit/%s', $bitfinex_id));
+        return redirect($previousUrl . '#' . $bitfinex_id);
     }
 }

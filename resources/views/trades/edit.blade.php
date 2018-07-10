@@ -11,6 +11,7 @@
 <div class="form-group">
   <label for="comment">Comment:</label>
   <textarea class="form-control" rows="5" name="comment" id="comment">{{$trade['comment']}}</textarea>
+  <input type="hidden" name="previous_url" value="{{\URL::previous()}}" />
   <br />
   <input type="submit" class="btn btn-primary" value="Save">
 </div>
