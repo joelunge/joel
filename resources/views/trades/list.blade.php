@@ -54,7 +54,7 @@
 						@else
 							class="text-danger"
 						@endif>
-						{{number_format($trade['parameters']['result']['net_sum'] * \App\Currency::find(1)->value, 0, '.', ' ')}} kr<small style="float: right;">{{number_format($trade['parameters']['result']['net_percentage'], 2, '.', '')}}%</small></span></td>
+						{{number_format($trade['parameters']['result']['net_sum'] * \App\Currency::find(1)->value, 0, '.', ' ')}} kr @if (! $trade['trades'][0]['resolved'] && $trade['parameters']['result']['net_sum'] < 0) <i class="fas fa-exclamation-triangle"></i> @endif<small style="float: right;">{{number_format($trade['parameters']['result']['net_percentage'], 2, '.', '')}}%</small></span></td>
 						<td><small>{{number_format($trade['parameters']['result']['fees']['total'], 2, '.', '')}} ({{number_format($trade['parameters']['result']['fees']['total_avg_percentage'], 2, '.', '')}}%)</small></td>
 					<td>
 						<small @if ($trade['parameters']['duration']['hours'] == 0) class="text-muted" @endif>

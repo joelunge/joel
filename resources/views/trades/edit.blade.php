@@ -11,6 +11,10 @@
 <div class="form-group">
   <label for="comment">Comment:</label>
   <textarea class="form-control" rows="5" name="comment" id="comment">{{$trade['comment']}}</textarea>
+  <br />
+  <label for="resolved">Resolved:</label>
+  <input type="hidden" name="resolved" value="0" />
+  <input type="checkbox" @if ($trade['resolved']) checked @endif id="resolved" name="resolved" value="1" />
   <input type="hidden" name="previous_url" value="{{\URL::previous()}}" />
   <br />
   <input type="submit" class="btn btn-primary" value="Save">
