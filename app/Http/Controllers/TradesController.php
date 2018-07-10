@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App;
 use H;
+use UsdToSek;
 use Csv;
 use DB;
 use Request;
@@ -83,6 +84,8 @@ class TradesController extends Controller
                 break;
         }
 
+        // H::pr($allTrades);
+
         return view('trades.list', ['trades' => $allTrades]);
     }
 
@@ -110,12 +113,24 @@ class TradesController extends Controller
             $amount = $amount + $trade['amount'];
 
             if ($nextKey <= (count($trades) - 1)) { // not exceeding last trade
-                if (
-                    round($amount) == 0 &&
-                    (array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)) && // this trade is closing
-                    (! array_key_exists(strtotime($trades[$nextKey]['date']), $this->closedByTimestamp)) // next trade is not closing
-                ) {
-                    $i++;
+                if ($trade['price'] > 1000) {
+                    if (round($amount, 2) == 0.00) {
+                        if (
+                            (array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)) && // this trade is closing
+                            (! array_key_exists(strtotime($trades[$nextKey]['date']), $this->closedByTimestamp)) // next trade is not closing
+                        ) {
+                            $i++;
+                        }
+                    }
+                } else {
+                    if (round($amount) == 0) {
+                        if (
+                            (array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)) && // this trade is closing
+                            (! array_key_exists(strtotime($trades[$nextKey]['date']), $this->closedByTimestamp)) // next trade is not closing
+                        ) {
+                            $i++;
+                        }
+                    }
                 }
             }
 		}
@@ -142,13 +157,18 @@ class TradesController extends Controller
             $duration['hours'] = gmdate("H", $duration['timestamp']);
             $duration['minutes'] = gmdate("i", $duration['timestamp']);
 
+            $amount = $this->getTotalAmount($trade);
+
             $trades[$key]['parameters'] = [
                 'bitfinex_id' => $firstTrade['bitfinex_id'],
                 'date' => $date,
                 'datetime' => $datetime,
                 'coin' => $coin,
+                'entry_price' => $firstTrade['price'],
+                'exit_price' => $lastTrade['price'],
                 'type' => $type,
                 'balance' => $balance,
+                'amount' => $amount,
                 'result' => $result,
                 'gain' => $gain,
                 'duration' => $duration,
@@ -156,6 +176,15 @@ class TradesController extends Controller
         }
 
         return $trades;
+    }
+
+    private function getTotalAmount($trades)
+    {
+        $amount = 0;
+        foreach ($trades['trades'] as $key => $trade) {
+            $amount += $trade['amount'];
+        }
+        return $amount;
     }
 
     private function isLongOrShort($firstOrderAmount)
@@ -187,16 +216,35 @@ class TradesController extends Controller
     private function getResult($trade, $type)
     {
         $result = [];
-        $sum = 0; 
-        $fees = ['buy' => 0, 'sell' => 0, 'total' => 0];
+        $gain = 0;
+        $gainPercentage = 0;
+        $sum = 0;
+        $sumBuy = 0;
+        $sumSell = 0;
+        $fees = ['buy' => 0, 'sell' => 0, 'total' => 0, 'buy_percentage' => 0, 'sell_percentage' => 0, 'total_avg_percentage' => 0];
 
         foreach ($trade['trades'] as $k => $t) {
             $sum -= ($t['amount'] * $t['price']);
             $fees['total'] -= $t['fee'];
+
+            if ($t['amount'] > 0) {
+                $sumBuy += $t['amount'] * $t['price'];
+                $fees['buy'] += abs($t['fee']);
+            } else {
+                $sumSell += $t['amount'] * $t['price'];
+                $fees['sell'] += abs($t['fee']);
+            }
         }
+
+        $fees['buy_percentage'] = ($fees['buy'] / abs($sumBuy)) * 100;
+        $fees['sell_percentage'] = ($fees['sell'] / abs($sumSell)) * 100;
+        $fees['total_percentage'] = $fees['buy_percentage'] + $fees['sell_percentage'];
+        $fees['total_avg_percentage'] = ($fees['total'] / (abs($sumSell) + abs($sumBuy))) * 100;
 
         $result['gross_sum'] = $sum;
         $result['net_sum'] = round($sum - $fees['total']);
+        $result['gross_percentage'] = ((abs($sumSell)- abs($sumBuy)) / abs($sumBuy)) * 100;
+        $result['net_percentage'] = (((abs($sumSell) - $fees['total'])- abs($sumBuy)) / abs($sumBuy)) * 100;
         $result['fees'] = $fees;
 
         return $result;

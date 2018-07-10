@@ -38,8 +38,15 @@
 				<tr>
 					<td>{{(new DateTime($trade['parameters']['date']))->format('d M')}} <small>{{substr($trade['parameters']['datetime'], 11, 5)}}</small></td>
 					<td>
-						@if($trade['parameters']['type'] == 'Short')<i style="transform: rotate(180deg) scaleX(-1);" class="text-danger fas fa-chart-line"></i> {{$trade['parameters']['coin']}}@endif
-						@if($trade['parameters']['type'] == 'Long')<i class="text-success fas fa-chart-line"></i> {{$trade['parameters']['coin']}}@endif
+						@if($trade['parameters']['type'] == 'Short')
+							<i style="transform: rotate(180deg) scaleX(-1);" class="{!! (Auth::id() == 1) ? 'text-danger': '' !!}
+ fas fa-chart-line"></i> {{$trade['parameters']['coin']}}
+						@endif
+						
+						@if($trade['parameters']['type'] == 'Long')
+							<i class="{!! (Auth::id() == 1) ? 'text-success': '' !!} fas fa-chart-line"></i> 
+							{{$trade['parameters']['coin']}}
+						@endif
 					</td>
 					<td><span
 						@if($trade['parameters']['result']['net_sum'] > 0)
@@ -47,8 +54,8 @@
 						@else
 							class="text-danger"
 						@endif>
-						{{$trade['parameters']['result']['net_sum']}}<small style="float: right;">1%</small></span></td>
-						<td><small>{{number_format($trade['parameters']['result']['fees']['total'], 2, '.', '')}}</small></td>
+						{{number_format($trade['parameters']['result']['net_sum'] * 8.72, 0, '.', ' ')}} kr<small style="float: right;">{{number_format($trade['parameters']['result']['net_percentage'], 2, '.', '')}}%</small></span></td>
+						<td><small>{{number_format($trade['parameters']['result']['fees']['total'], 2, '.', '')}} ({{number_format($trade['parameters']['result']['fees']['total_avg_percentage'], 2, '.', '')}}%)</small></td>
 					<td>
 						<small @if ($trade['parameters']['duration']['hours'] == 0) class="text-muted" @endif>
 							{{$trade['parameters']['duration']['hours']}}h
@@ -61,7 +68,7 @@
 						</small>
 					</small></td>
 					<td><small>{{$trade['parameters']['balance']}}</small></td>
-					<td><a class="text-white" href="/trades/edit/{{$trade['parameters']['bitfinex_id']}}"><i class="far fa-edit"></i></a></td>
+					<td><a @if (! $trade['trades'][0]['comment']) class="text-danger" @else class="text-white" @endif href="/trades/edit/{{$trade['parameters']['bitfinex_id']}}"><i class="far fa-edit"></i></a></td>
 				</tr>
 			@endforeach
 		</tbody>
