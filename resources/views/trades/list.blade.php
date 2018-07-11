@@ -24,13 +24,15 @@
 	<table class="table table-dark">
 		<thead>
 			<tr>
-				<td>Date</td>
-				<td>Coin</td>
-				<td>Result</td>
-				<td>Fees</td>
-				<td>Duration</td>
-				<td>Balance</td>
-				<td></td>
+				<th>Date</th>
+				<th>Coin</th>
+				<th>Result SEK</th>
+				<th>Result USD</th>
+				<th>Result %</th>
+				<th>Fees</th>
+				<th>Duration</th>
+				<th>Balance</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -48,14 +50,35 @@
 							{{$trade['parameters']['coin']}}
 						@endif
 					</td>
+					<td>
+						<span
+						@if($trade['parameters']['result']['net_sum'] > 0)
+							class="text-success"
+						@else
+							class="text-danger"
+						@endif>
+						{{number_format($trade['parameters']['result']['net_sum'] * \App\Currency::find(1)->value, 0, '.', ' ')}} kr @if (! $trade['trades'][0]['resolved'] && $trade['parameters']['result']['net_sum'] < 0) <i class="fas fa-exclamation-triangle"></i> @endif
+						</span>
+					</td>
 					<td><span
 						@if($trade['parameters']['result']['net_sum'] > 0)
 							class="text-success"
 						@else
 							class="text-danger"
 						@endif>
-						{{number_format($trade['parameters']['result']['net_sum'] * \App\Currency::find(1)->value, 0, '.', ' ')}} kr @if (! $trade['trades'][0]['resolved'] && $trade['parameters']['result']['net_sum'] < 0) <i class="fas fa-exclamation-triangle"></i> @endif<small style="float: right;">{{number_format($trade['parameters']['result']['net_percentage'], 2, '.', '')}}%</small></span></td>
-						<td><small>{{number_format($trade['parameters']['result']['fees']['total'], 2, '.', '')}} ({{number_format($trade['parameters']['result']['fees']['total_avg_percentage'], 2, '.', '')}}%)</small></td>
+						<small>{{$trade['parameters']['result']['net_sum']}} USD</small>
+					</td>
+					<td><span
+						@if($trade['parameters']['result']['net_sum'] > 0)
+							class="text-success"
+						@else
+							class="text-danger"
+						@endif>
+						<small>{{number_format($trade['parameters']['result']['net_percentage'], 2, '.', '')}}%</small></span>
+					</td>
+					<td>
+						<small>{{number_format($trade['parameters']['result']['fees']['total'], 2, '.', '')}} ({{number_format($trade['parameters']['result']['fees']['total_avg_percentage'], 2, '.', '')}}%)</small>
+					</td>
 					<td>
 						<small @if ($trade['parameters']['duration']['hours'] == 0) class="text-muted" @endif>
 							{{$trade['parameters']['duration']['hours']}}h
@@ -66,7 +89,7 @@
 						<small>
 							{{$trade['parameters']['duration']['seconds']}}s
 						</small>
-					</small></td>
+					</td>
 					<td><small>{{$trade['parameters']['balance']}}</small></td>
 					<td><a @if (! $trade['trades'][0]['comment']) class="text-danger" @else class="text-white" @endif href="/trades/edit/{{$trade['parameters']['bitfinex_id']}}"><i class="far fa-edit"></i></a></td>
 				</tr>
