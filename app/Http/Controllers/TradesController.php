@@ -20,6 +20,8 @@ class TradesController extends Controller
      * @return Response
      */
 
+    private $usedHashes = [];
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -29,19 +31,15 @@ class TradesController extends Controller
     {
         $userId = Auth::id();
         $this->closedByTimestamp = $this->getClosedBalancesByTimestamp();
-        $coins = DB::table('trades')->select('coin')->groupBy('coin')->get()->toArray();
-        if (isset($_GET['coin'])) {
-            $coins = [];
-            $obj = new \StdClass();
-            $obj->coin = $_GET['coin'];
-            $coins[] = $obj;
-        }
+        
+        $coins = $this->getCoins();
+        $additionalCosts = $this->getAdditionalCosts($userId);
 
         $allTrades = [];
         foreach ($coins as $coin) {
             $trades = $this->getTrades($coin->coin, $userId);
             $trades = $this->getTradesByTrade($trades);
-            $trades = $this->setTradeParameters($trades);
+            $trades = $this->setTradeParameters($trades, $additionalCosts);
 
             $allTrades[] = $trades;
         }
@@ -84,29 +82,29 @@ class TradesController extends Controller
                 break;
         }
 
-        // H::pr($allTrades);
+        $stats = $this->getStats($allTrades, $additionalCosts);
 
-        return view('trades.list', ['trades' => $allTrades]);
+        return view('trades.list', ['trades' => $allTrades, 'stats' => $stats]);
     }
 
     private function getTrades($coin, $userId)
     {
-    	$trades = App\Trade::where('coin', '=', $coin)
+        $trades = App\Trade::where('coin', '=', $coin)
             ->where('user_id', $userId)
             ->excludeExchangeTrades()
-			->orderBy('date', 'ASC')
-			->get()
+            ->orderBy('date', 'ASC')
+            ->get()
             ->toArray();
 
-		return $trades;
+        return $trades;
     }
 
     private function getTradesByTrade($trades)
     {
-    	$i = 0;
+        $i = 0;
         $amount = 0;
-    	$tradesByTrade = [];
-    	foreach ($trades as $key => $trade) {
+        $tradesByTrade = [];
+        foreach ($trades as $key => $trade) {
             $tradesByTrade[$i]['trades'][] = $trade;
             $nextKey = $key + 1;
 
@@ -133,12 +131,12 @@ class TradesController extends Controller
                     }
                 }
             }
-		}
+        }
 
-		return $tradesByTrade;
+        return $tradesByTrade;
     }
 
-    private function setTradeParameters($trades)
+    private function setTradeParameters($trades, $additionalCosts)
     {
         foreach ($trades as $key => $trade) {
             $firstTrade = $trade['trades'][0];
@@ -148,9 +146,9 @@ class TradesController extends Controller
             $datetime = $firstTrade['date'];
             $coin = str_replace('/USD', '', $firstTrade['coin']);
             $type = $this->isLongOrShort($firstTrade['amount']);
-            $balance = round($this->getClosingBalance($trade));
-            $result = $this->getResult($trade, $type);
-            $gain = $this->getResult($trade, $type);
+            $balance = $this->getClosingBalance($trade);
+            $result = $this->getResult($trade, $additionalCosts);
+            $winloss = ($result['net_sum'] > 0 ? 'win' : 'loss');
             $duration['timestamp'] = strtotime($lastTrade['date']) - strtotime($firstTrade['date']);
             $duration['his'] = gmdate('H:i:s', $duration['timestamp']);
             $duration['seconds'] = gmdate('s', $duration['timestamp']);
@@ -170,10 +168,14 @@ class TradesController extends Controller
                 'balance' => $balance,
                 'amount' => $amount,
                 'result' => $result,
-                'gain' => $gain,
+                'winloss' => $winloss,
+                'start_time' => $firstTrade['date'],
+                'end_time' => $lastTrade['date'],
                 'duration' => $duration,
             ];
         }
+
+        $this->usedHashes = []; // resets loop for additional costs in getResult function
 
         return $trades;
     }
@@ -201,27 +203,63 @@ class TradesController extends Controller
     {
         $closedBalances = App\Balance::where('description', 'like', '%closed%')
             ->orWhere('description', 'like', '%settlement%')
-            ->orderBy('id', 'DESC')
+            ->orderBy('id', 'ASC')
             ->get()
             ->toArray();
 
         $closedByTimestamp = [];
+
         foreach ($closedBalances as $key => $closedBalance) {
-            $closedByTimestamp[strtotime($closedBalance['date'])]['balance'] = $closedBalance['balance'];
+            $balance = 0;
+            $nextKey = $key + 1;
+
+            if ($nextKey <= (count($closedBalances) - 1)) { // not exceeding last trade
+                if (strpos(strtolower($closedBalances[$key+1]['description']), 'settlement') !== false) {
+                    $balance = $closedBalances[$key+1]['balance'];
+                } else {
+                    $balance = $closedBalance['balance'];    
+                }
+            } else {
+                $balance = $closedBalance['balance'];
+            }
+
+            $closedByTimestamp[strtotime($closedBalance['date'])]['balance'] = $balance;
         }
 
         return $closedByTimestamp;
     }
 
-    private function getResult($trade, $type)
+    private function getResult($trade, $additionalCosts)
     {
         $result = [];
-        $gain = 0;
-        $gainPercentage = 0;
         $sum = 0;
         $sumBuy = 0;
         $sumSell = 0;
-        $fees = ['buy' => 0, 'sell' => 0, 'total' => 0, 'buy_percentage' => 0, 'sell_percentage' => 0, 'total_avg_percentage' => 0];
+        $fees = ['buy' => 0, 'sell' => 0, 'total' => 0, 'funding' => 0, 'settlement' => 0, 'buy_percentage' => 0, 'sell_percentage' => 0, 'total_avg_percentage' => 0];
+
+        $startDate = $trade['trades'][0]['date'];
+        $endDate = end($trade['trades'])['date'];
+
+        foreach ($additionalCosts as $key => $cost) {
+            if (! array_key_exists($cost['hash'], $this->usedHashes)) {
+                if (strtotime($startDate) < strtotime($cost['date'])) {
+                    if ((strtotime($endDate) + 10000) > strtotime($cost['date'])) {
+
+                        if (strpos(strtolower($cost['description']), 'funding') !== false) {
+                            $fees['funding'] += abs($cost['amount']);
+                            $fees['total'] += abs($cost['amount']);
+                            $this->usedHashes[$cost['hash']] = $cost['hash'];
+                        }
+
+                        if (strpos(strtolower($cost['description']), 'settlement') !== false) {
+                            $fees['settlement'] += abs($cost['amount']);
+                            $fees['total'] += abs($cost['amount']);
+                            $this->usedHashes[$cost['hash']] = $cost['hash'];
+                        }
+                    }
+                }
+            }
+        }
 
         foreach ($trade['trades'] as $k => $t) {
             $sum -= ($t['amount'] * $t['price']);
@@ -242,7 +280,7 @@ class TradesController extends Controller
         $fees['total_avg_percentage'] = ($fees['total'] / (abs($sumSell) + abs($sumBuy))) * 100;
 
         $result['gross_sum'] = $sum;
-        $result['net_sum'] = round($sum - $fees['total']);
+        $result['net_sum'] = $sum - $fees['total'];
         $result['gross_percentage'] = ((abs($sumSell)- abs($sumBuy)) / abs($sumBuy)) * 100;
         $result['net_percentage'] = (((abs($sumSell) - $fees['total'])- abs($sumBuy)) / abs($sumBuy)) * 100;
         $result['fees'] = $fees;
@@ -265,6 +303,79 @@ class TradesController extends Controller
         }
 
         return $tradeByDatetime;
+    }
+
+    private function getCoins()
+    {
+        $coins = DB::table('trades')->select('coin')->groupBy('coin')->get()->toArray();
+        if (isset($_GET['coin'])) {
+            $coins = [];
+            $obj = new \StdClass();
+            $obj->coin = $_GET['coin'];
+            $coins[] = $obj;
+        }
+
+        return $coins;
+    }
+
+    private function getAdditionalCosts($userId)
+    {
+        $additionalCosts = App\Balance::where('user_id', $userId)
+            ->where(function ($query) {
+                $query->where('description', 'like', '%funding%')
+                ->orWhere('description', 'like', '%settlement%');
+            })
+            ->get()
+            ->toArray();
+
+        return $additionalCosts;
+    }
+
+    private function getStats($allTrades, $additionalCosts)
+    {
+        $wins = 0;
+        $losses = 0;
+        $winrate = 0;
+        $netSum = 0;
+        $netPercentage = 0;
+        $fees = ['buy' => 0, 'sell' => 0, 'total' => 0, 'funding' => 0, 'settlement' => 0, 'buy_percentage' => 0, 'sell_percentage' => 0, 'total_avg_percentage' => 0];
+
+        foreach ($allTrades as $key => $trade) {
+            $params = $trade['parameters'];
+
+            if ($params['winloss'] == 'win') {
+                $wins += 1;
+            }
+
+            if ($params['winloss'] == 'loss') {
+                $losses += 1;
+            }
+
+            $result = $this->getResult($trade, $additionalCosts);
+            $netSum += $result['net_sum'];
+            $netPercentage += $result['net_percentage'];
+            $fees['funding'] += $result['fees']['funding'];
+            $fees['settlement'] += $result['fees']['settlement'];
+            $fees['total'] += ($result['fees']['settlement'] + $result['fees']['funding']);
+        }
+        $this->usedHashes = []; // resets loop for additional costs in getResult function
+
+        if ($wins && $losses) {
+            $winrate = $wins / ($wins + $losses) * 100;
+        } else {
+            $winrate = 0;
+        }
+
+        $stats = [
+            'wins' => $wins,
+            'losses' => $losses,
+            'winrate' => $winrate,
+            'net_sum' => $netSum,
+            'net_percentage' => $netPercentage,
+            'fees' => $fees,
+        ];
+
+        return $stats;
     }
 
     public function import()

@@ -3,23 +3,58 @@
 @section('title', 'Trades')
 
 @section('content')
-	<ul class="nav nav-pills">
-      <li style="margin-right: 15px;">
-      	<a @if($_GET['show'] == "10_trades") class="text-muted" @endif href="?show=10_trades">10 trades </a>
-      </li>
-      <li style="margin-right: 15px;">
-      	<a @if($_GET['show'] == "7_days") class="text-muted" @endif href="?show=7_days">7 days </a>
-      </li>
-      <li style="margin-right: 15px;">
-      	<a @if($_GET['show'] == "30_days") class="text-muted" @endif href="?show=30_days">30 days </a>
-      </li>
-      <li style="margin-right: 15px;">
-      	<a @if($_GET['show'] == "3_months") class="text-muted" @endif href="?show=3_months">3 months </a>
-      </li>
-      <li style="margin-right: 15px;">
-      	<a @if($_GET['show'] == "all") class="text-muted" @endif href="?show=all">All </a>
-      </li>
-    </ul>
+	<div class="row">
+		<div class="col-sm-6">
+			<ul class="nav nav-pills">
+		      <li style="margin-right: 15px;">
+		      	<a @if($_GET['show'] == "10_trades") class="text-muted" @endif href="?show=10_trades">10 trades </a>
+		      </li>
+		      <li style="margin-right: 15px;">
+		      	<a @if($_GET['show'] == "7_days") class="text-muted" @endif href="?show=7_days">7 days </a>
+		      </li>
+		      <li style="margin-right: 15px;">
+		      	<a @if($_GET['show'] == "30_days") class="text-muted" @endif href="?show=30_days">30 days </a>
+		      </li>
+		      <li style="margin-right: 15px;">
+		      	<a @if($_GET['show'] == "3_months") class="text-muted" @endif href="?show=3_months">3 months </a>
+		      </li>
+		      <li style="margin-right: 15px;">
+		      	<a @if($_GET['show'] == "all") class="text-muted" @endif href="?show=all">All </a>
+		      </li>
+		    </ul>
+		</div>
+	    <div class="col-sm-6">
+		    <div class="dropdown float-right">
+			  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			    Users
+			  </button>
+			  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+			    <a class="dropdown-item" href="#">Joel</a>
+			    <a class="dropdown-item" href="#">Markus</a>
+			    <a class="dropdown-item" href="#">Both</a>
+			  </div>
+			</div>
+    	</div>
+	</div>
+	<hr />
+	<div class="row">
+		<div class="col-sm-3 text-center">
+			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['winrate'] > 50) class="text-success" @else class="text-danger" @endif>{{round($stats['winrate'], 1)}}%</h1>
+			<span class="text-uppercase">Winrate</span>
+		</div>
+		<div class="col-sm-3 text-center">
+			<h1 style="font-size: 48px; margin-bottom: 0;">{{$stats['wins']}} - {{$stats['losses']}}</h1>
+			<span class="text-uppercase">Winrate</span>
+		</div>
+		<div class="col-sm-3 text-center">
+			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_percentage'] > 0) class="text-success" @else class="text-danger" @endif>{{round($stats['net_percentage'], 2)}}%</h1>
+			<span class="text-uppercase">Gain (Stämmer inte - fixa funding cost)</span>
+		</div>
+		<div class="col-sm-3 text-center">
+			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_sum'] > 0) class="text-success" @else class="text-danger" @endif>{{number_format($stats['net_sum'] * 1, 0, '.', ' ')}} kr</h1>
+			<span class="text-uppercase">Gain (stämmer inte - fixa funding cost)</span>
+		</div>		
+	</div>
 	<hr />
 	<table class="table table-dark">
 		<thead>
@@ -66,7 +101,7 @@
 						@else
 							class="text-danger"
 						@endif>
-						<small>{{$trade['parameters']['result']['net_sum']}} USD</small>
+						<small>{{round($trade['parameters']['result']['net_sum'])}} USD</small>
 					</td>
 					<td><span
 						@if($trade['parameters']['result']['net_sum'] > 0)
@@ -90,7 +125,7 @@
 							{{$trade['parameters']['duration']['seconds']}}s
 						</small>
 					</td>
-					<td><small>{{$trade['parameters']['balance']}}</small></td>
+					<td><small>{{round($trade['parameters']['balance'])}}</small></td>
 					<td><a @if (! $trade['trades'][0]['comment']) class="text-danger" @else class="text-white" @endif href="/trades/edit/{{$trade['parameters']['bitfinex_id']}}"><i class="far fa-edit"></i></a></td>
 				</tr>
 			@endforeach
