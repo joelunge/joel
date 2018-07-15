@@ -90,6 +90,8 @@ class TradesController extends Controller
     private function getTrades($coin, $userId)
     {
         $trades = App\Trade::where('coin', '=', $coin)
+            ->where('date', '>', '2018-06-01 00:00:00')
+            // ->where('coin', 'like', '%btc%')
             ->where('user_id', $userId)
             ->excludeExchangeTrades()
             ->orderBy('date', 'ASC')
