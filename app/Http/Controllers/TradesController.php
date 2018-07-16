@@ -33,16 +33,40 @@ class TradesController extends Controller
         $this->closedByTimestamp = $this->getClosedBalancesByTimestamp();
         
         $coins = $this->getCoins();
-        $additionalCosts = $this->getAdditionalCosts($userId);
+
+        if (isset($_GET['user']) && $_GET['user'] == 'all') {
+            $additionalCosts = array_merge($this->getAdditionalCosts(1), $this->getAdditionalCosts(2));
+        } else {
+            $additionalCosts = $this->getAdditionalCosts($userId);
+        }
 
         $allTrades = [];
-        foreach ($coins as $coin) {
-            $trades = $this->getTrades($coin->coin, $userId);
-            $trades = $this->getTradesByTrade($trades);
-            $trades = $this->setTradeParameters($trades, $additionalCosts);
 
-            $allTrades[] = $trades;
-        }
+        if (isset($_GET['user']) && $_GET['user'] == 'all') {
+            foreach ($coins as $coin) {
+                $trades = $this->getTrades($coin->coin, 1);
+                $trades = $this->getTradesByTrade($trades);
+                $trades = $this->setTradeParameters($trades, $additionalCosts);
+
+                $allTrades[] = $trades;
+            }
+
+            foreach ($coins as $coin) {
+                $trades = $this->getTrades($coin->coin, 2);
+                $trades = $this->getTradesByTrade($trades);
+                $trades = $this->setTradeParameters($trades, $additionalCosts);
+
+                $allTrades[] = $trades;
+            }
+        } else {
+            foreach ($coins as $coin) {
+                $trades = $this->getTrades($coin->coin, $userId);
+                $trades = $this->getTradesByTrade($trades);
+                $trades = $this->setTradeParameters($trades, $additionalCosts);
+
+                $allTrades[] = $trades;
+            }    
+        }        
 
         $allTrades = array_merge(...$allTrades);
         
@@ -89,10 +113,16 @@ class TradesController extends Controller
 
     private function getTrades($coin, $userId)
     {
-        $trades = App\Trade::where('coin', '=', $coin)
-            ->where('date', '>', '2018-06-01 00:00:00')
-            // ->where('coin', 'like', '%btc%')
-            ->where('user_id', $userId)
+        if (isset($_GET['user']) && $_GET['user'] != 'all') {
+            $userId = $_GET['user'];
+        }
+        $trades = App\Trade::where('coin', '=', $coin);
+
+        if ($userId == 2) {
+            $trades = $trades->where('date', '>', '2018-06-01 00:00:00');
+        }
+            
+        $trades = $trades->where('user_id', $userId)
             ->excludeExchangeTrades()
             ->orderBy('date', 'ASC')
             ->get()
@@ -192,7 +222,7 @@ class TradesController extends Controller
     }
 
     private function isLongOrShort($firstOrderAmount)
-    { 
+    {
         return ($firstOrderAmount > 0) ? 'Long' : 'Short';
     }
 

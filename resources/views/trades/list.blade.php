@@ -7,19 +7,19 @@
 		<div class="col-sm-6">
 			<ul class="nav nav-pills">
 		      <li style="margin-right: 15px;">
-		      	<a @if($_GET['show'] == "10_trades") class="text-muted" @endif href="?show=10_trades">10 trades </a>
+		      	<a @if($_GET['show'] == "10_trades") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=10_trades&user={{$_GET['user']}} @else ?show=10_trades @endif">10 trades </a>
 		      </li>
 		      <li style="margin-right: 15px;">
-		      	<a @if($_GET['show'] == "7_days") class="text-muted" @endif href="?show=7_days">7 days </a>
+		      	<a @if($_GET['show'] == "7_days") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=7_days&user={{$_GET['user']}} @else ?show=7_days @endif">7 days </a>
 		      </li>
 		      <li style="margin-right: 15px;">
-		      	<a @if($_GET['show'] == "30_days") class="text-muted" @endif href="?show=30_days">30 days </a>
+		      	<a @if($_GET['show'] == "30_days") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=30_days&user={{$_GET['user']}} @else ?show=30_days @endif">30 days </a>
 		      </li>
 		      <li style="margin-right: 15px;">
-		      	<a @if($_GET['show'] == "3_months") class="text-muted" @endif href="?show=3_months">3 months </a>
+		      	<a @if($_GET['show'] == "3_months") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=3_months&user={{$_GET['user']}} @else ?show=10_months @endif">3 months </a>
 		      </li>
 		      <li style="margin-right: 15px;">
-		      	<a @if($_GET['show'] == "all") class="text-muted" @endif href="?show=all">All </a>
+		      	<a @if($_GET['show'] == "all") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=all&user={{$_GET['user']}} @else ?show=all @endif">All </a>
 		      </li>
 		    </ul>
 		</div>
@@ -29,9 +29,9 @@
 			    Users
 			  </button>
 			  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-			    <a class="dropdown-item" href="#">Joel</a>
-			    <a class="dropdown-item" href="#">Markus</a>
-			    <a class="dropdown-item" href="#">Both</a>
+			    <a class="dropdown-item" href="{{str_replace(['&user=1', '&user=2', '&user=all'], '', $_SERVER['REQUEST_URI'])}}&user=1">Joel</a>
+			    <a class="dropdown-item" href="{{str_replace(['&user=1', '&user=2', '&user=all'], '', $_SERVER['REQUEST_URI'])}}&user=2">Markus</a>
+			    <a class="dropdown-item" href="{{str_replace(['&user=1', '&user=2', '&user=all'], '', $_SERVER['REQUEST_URI'])}}&user=all">All</a>
 			  </div>
 			</div>
     	</div>
@@ -66,7 +66,11 @@
 				<th>Result %</th>
 				<th>Fees</th>
 				<th>Duration</th>
-				<th>Balance</th>
+				@if ($_GET['user'] == 'all')
+					<th>User</th>
+				@else
+					<th>Balance</th>
+				@endif
 				<th></th>
 			</tr>
 		</thead>
@@ -125,7 +129,11 @@
 							{{$trade['parameters']['duration']['seconds']}}s
 						</small>
 					</td>
-					<td><small>{{round($trade['parameters']['balance'])}}</small></td>
+					@if ($_GET['user'] == 'all')
+						<td><small>@if ($trade['trades'][0]['user_id'] == 1) Joel @else Markus @endif</small></td>
+					@else
+						<td><small>{{round($trade['parameters']['balance'])}}</small></td>
+					@endif
 					<td><a @if (! $trade['trades'][0]['comment']) class="text-danger" @else class="text-white" @endif href="/trades/edit/{{$trade['parameters']['bitfinex_id']}}"><i class="far fa-edit"></i></a></td>
 				</tr>
 			@endforeach
