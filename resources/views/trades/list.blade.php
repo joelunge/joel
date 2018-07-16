@@ -66,7 +66,7 @@
 				<th>Result %</th>
 				<th>Fees</th>
 				<th>Duration</th>
-				@if ($_GET['user'] == 'all')
+				@if (isset($_GET['user']) && $_GET['user'] == 'all')
 					<th>User</th>
 				@else
 					<th>Balance</th>
@@ -129,7 +129,7 @@
 							{{$trade['parameters']['duration']['seconds']}}s
 						</small>
 					</td>
-					@if ($_GET['user'] == 'all')
+					@if (isset($_GET['user']) && $_GET['user'] == 'all')
 						<td><small>@if ($trade['trades'][0]['user_id'] == 1) Joel @else Markus @endif</small></td>
 					@else
 						<td><small>{{round($trade['parameters']['balance'])}}</small></td>
