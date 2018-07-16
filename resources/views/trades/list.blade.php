@@ -48,11 +48,11 @@
 		</div>
 		<div class="col-sm-3 text-center">
 			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_percentage'] > 0) class="text-success" @else class="text-danger" @endif>{{round($stats['net_percentage'], 2)}}%</h1>
-			<span class="text-uppercase">Gain (Stämmer inte - fixa funding cost)</span>
+			<span class="text-uppercase">Gain</span>
 		</div>
 		<div class="col-sm-3 text-center">
 			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_sum'] > 0) class="text-success" @else class="text-danger" @endif>{{number_format($stats['net_sum'] * 1, 0, '.', ' ')}} kr</h1>
-			<span class="text-uppercase">Gain (stämmer inte - fixa funding cost)</span>
+			<span class="text-uppercase">Gain</span>
 		</div>		
 	</div>
 	<hr />
