@@ -16,7 +16,7 @@
 		      	<a @if($_GET['show'] == "30_days") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=30_days&user={{$_GET['user']}} @else ?show=30_days @endif">30 days </a>
 		      </li>
 		      <li style="margin-right: 15px;">
-		      	<a @if($_GET['show'] == "3_months") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=3_months&user={{$_GET['user']}} @else ?show=10_months @endif">3 months </a>
+		      	<a @if($_GET['show'] == "3_months") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=3_months&user={{$_GET['user']}} @else ?show=3_months @endif">3 months </a>
 		      </li>
 		      <li style="margin-right: 15px;">
 		      	<a @if($_GET['show'] == "all") class="text-muted" @endif href="@if (isset($_GET['user'])) ?show=all&user={{$_GET['user']}} @else ?show=all @endif">All </a>
