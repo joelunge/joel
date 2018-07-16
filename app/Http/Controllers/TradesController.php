@@ -198,7 +198,11 @@ class TradesController extends Controller
 
     private function getClosingBalance($trade)
     {
-        return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'];
+        if (isset($this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'])) {
+            return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'];
+        } else {
+            return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 2)]['date'])]['balance'];
+        }
     }
 
     private function getClosedBalancesByTimestamp()
