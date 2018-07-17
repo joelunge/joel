@@ -41,7 +41,6 @@ class TradesController extends Controller
         }
 
         $allTrades = [];
-
         if (isset($_GET['user']) && $_GET['user'] == 'all') {
             foreach ($coins as $coin) {
                 $trades = $this->getTrades($coin->coin, 1);
@@ -67,7 +66,6 @@ class TradesController extends Controller
                 $allTrades[] = $trades;
             }    
         }        
-
         $allTrades = array_merge(...$allTrades);
         
         $allTrades = $this->sortByDate($allTrades);
@@ -230,8 +228,10 @@ class TradesController extends Controller
     {
         if (isset($this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'])) {
             return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'];
-        } else {
+        } elseif (isset($this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 2)]['date'])]['balance'])) {
             return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 2)]['date'])]['balance'];
+        } else {
+            return 0;
         }
     }
 
@@ -267,7 +267,7 @@ class TradesController extends Controller
 
     private function getResult($trade, $additionalCosts)
     {
-        $result = [];
+        $result = ['net_percentage' => 0, 'net_sum' => 0];
         $sum = 0;
         $sumBuy = 0;
         $sumSell = 0;
@@ -310,15 +310,23 @@ class TradesController extends Controller
             }
         }
 
-        $fees['buy_percentage'] = ($fees['buy'] / abs($sumBuy)) * 100;
-        $fees['sell_percentage'] = ($fees['sell'] / abs($sumSell)) * 100;
+        if (abs($sumBuy)) {
+            $fees['buy_percentage'] = ($fees['buy'] / abs($sumBuy)) * 100;
+        }
+
+        if (abs($sumSell)) {
+            $fees['sell_percentage'] = ($fees['sell'] / abs($sumSell)) * 100;
+        }
+
         $fees['total_percentage'] = $fees['buy_percentage'] + $fees['sell_percentage'];
         $fees['total_avg_percentage'] = ($fees['total'] / (abs($sumSell) + abs($sumBuy))) * 100;
 
-        $result['gross_sum'] = $sum;
-        $result['net_sum'] = $sum - $fees['total'];
-        $result['gross_percentage'] = ((abs($sumSell)- abs($sumBuy)) / abs($sumBuy)) * 100;
-        $result['net_percentage'] = (((abs($sumSell) - $fees['total'])- abs($sumBuy)) / abs($sumBuy)) * 100;
+        if (abs($sumBuy) && abs($sumSell)) {
+            $result['gross_sum'] = $sum;
+            $result['net_sum'] = $sum - $fees['total'];
+            $result['gross_percentage'] = ((abs($sumSell) - abs($sumBuy)) / abs($sumBuy)) * 100;
+            $result['net_percentage'] = (((abs($sumSell) - $fees['total'])- abs($sumBuy)) / abs($sumBuy)) * 100;    
+        }
         $result['fees'] = $fees;
 
         return $result;
