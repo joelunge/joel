@@ -74,6 +74,8 @@ class TradesController extends Controller
             return redirect('/trades?show=10_trades');
         }
 
+        $isAllowedToTrade = $this->isAllowedToTrade($allTrades);
+
         switch ($_GET['show']) {
             case '10_trades':
                 $allTrades = array_slice($allTrades, -10, 10, true);
@@ -106,7 +108,7 @@ class TradesController extends Controller
 
         $stats = $this->getStats($allTrades, $additionalCosts);
 
-        return view('trades.list', ['trades' => $allTrades, 'stats' => $stats]);
+        return view('trades.list', ['trades' => $allTrades, 'stats' => $stats, 'isAllowedToTrade' => $isAllowedToTrade]);
     }
 
     private function getTrades($coin, $userId)
@@ -115,10 +117,7 @@ class TradesController extends Controller
             $userId = $_GET['user'];
         }
         $trades = App\Trade::where('coin', '=', $coin);
-
-        if ($userId == 2) {
-            $trades = $trades->where('date', '>', '2018-06-01 00:00:00');
-        }
+        $trades = $trades->where('date', '>', '2018-07-19 00:00:00');
             
         $trades = $trades->where('user_id', $userId)
             ->excludeExchangeTrades()
@@ -226,9 +225,11 @@ class TradesController extends Controller
 
     private function getClosingBalance($trade)
     {
+        $arr = ['oisfjsdf' => 0];
+
         if (isset($this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'])) {
             return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'];
-        } elseif (isset($this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 2)]['date'])]['balance'])) {
+        } elseif (isset($trade['trades'][(count($trade['trades']) - 2)])) {
             return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 2)]['date'])]['balance'];
         } else {
             return 0;
@@ -466,5 +467,17 @@ class TradesController extends Controller
         $trade->save();
 
         return redirect($previousUrl . '#' . $bitfinex_id);
+    }
+
+    private function isAllowedToTrade($allTrades)
+    {
+        $isAllowedToTrade = true;
+        foreach ($allTrades as $key => $trade) {
+            if (! $trade['trades'][0]['resolved']) {
+                $isAllowedToTrade = false;
+            }
+        }
+
+        return $isAllowedToTrade;
     }
 }

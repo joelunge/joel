@@ -3,6 +3,17 @@
 @section('title', 'Trades')
 
 @section('content')
+	@if (! $isAllowedToTrade)
+		<div class="row">
+			<div class="col-md-12">
+				<div class="alert alert-danger" role="alert">
+				  <h4 class="alert-heading">NOT ALLOWED TO TRADE!</h4>
+				  <p>You are <strong>not allowed to trade</strong> due to unresolved losses.</p>
+			  		<p>To keep trading, you need to resolve your previous losses to make sure you never do the same mistakes again.</p>
+				</div>
+			</div>
+		</div>
+	@endif
 	<div class="row">
 		<div class="col-sm-6">
 			<ul class="nav nav-pills">
@@ -53,7 +64,7 @@
 		<div class="col-sm-3 text-center">
 			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_sum'] > 0) class="text-success" @else class="text-danger" @endif>{{number_format($stats['net_sum'] * \App\Currency::find(1)->value, 0, '.', ' ')}} kr</h1>
 			<span class="text-uppercase">Gain</span>
-		</div>		
+		</div>
 	</div>
 	<hr />
 	<table class="table table-dark">
