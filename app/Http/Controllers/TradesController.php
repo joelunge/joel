@@ -117,7 +117,7 @@ class TradesController extends Controller
             $userId = $_GET['user'];
         }
         $trades = App\Trade::where('coin', '=', $coin);
-        $trades = $trades->where('date', '>', '2018-07-19 00:00:00');
+        $trades = $trades->where('date', '>', '2018-06-19 00:00:00');
             
         $trades = $trades->where('user_id', $userId)
             ->excludeExchangeTrades()
@@ -450,7 +450,7 @@ class TradesController extends Controller
         $trade['parameters']['coin'] = str_replace('/USD', '', $trade['coin']);
         $trade['parameters']['type'] = $this->isLongOrShort($trade['amount']);
 
-        return view('trades.edit', ['trade' => $trade]);
+        return view('trades.edit', ['trade' => $trade, 'indicators' => config('trade.indicators'), 'indicator_names' => config('trade.indicator_names')]);
     }
 
     public function update(Request $request, $bitfinex_id)
@@ -463,6 +463,15 @@ class TradesController extends Controller
         $trade = App\Trade::where('bitfinex_id', $bitfinex_id)->get();
         $trade = $trade[0];
         $trade->comment = $comment;
+
+        foreach (config('trade.indicators') as $key => $value) {
+            if ($request->request->get($key) == 'null' || $request->request->get($key) == null) {
+                $trade->{$key} = null;
+            } else {
+                $trade->{$key} = $request->request->get($key);
+            }
+        }
+
         $trade->resolved = $resolved;
         $trade->save();
 
