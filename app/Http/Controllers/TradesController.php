@@ -229,7 +229,7 @@ class TradesController extends Controller
 
         if (isset($this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'])) {
             return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'];
-        } elseif (isset($trade['trades'][(count($trade['trades']) - 2)])) {
+        } elseif ((isset($trade['trades'][(count($trade['trades']) - 2)])) && (isset($trade['trades'][(count($trade['trades']) - 2)]['date']['balance']))) {
             return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 2)]['date'])]['balance'];
         } else {
             return 0;
