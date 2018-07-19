@@ -482,7 +482,7 @@ class TradesController extends Controller
     {
         $isAllowedToTrade = true;
         foreach ($allTrades as $key => $trade) {
-            if (! $trade['trades'][0]['resolved']) {
+            if (! $trade['trades'][0]['resolved'] && $trade['parameters']['result']['net_sum'] < 0) {
                 $isAllowedToTrade = false;
             }
         }
