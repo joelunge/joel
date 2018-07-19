@@ -180,7 +180,7 @@
 						<small>{{number_format($trade['parameters']['result']['net_percentage'], 2, '.', '')}}%</small></span>
 					</td>
 					@foreach ($indicator_names as $key => $indicatorName)
-						<td>{{$trade['trades'][0][$key]}}</td>
+						<td>@if (isset($indicators[$key][$trade['trades'][0][$key]])) {{$indicators[$key][$trade['trades'][0][$key]]}} @endif</td>
 					@endforeach
 					@if (isset($_GET['user']) && $_GET['user'] == 'all')
 						<td><small>@if ($trade['trades'][0]['user_id'] == 1) Joel @else Markus @endif</small></td>
