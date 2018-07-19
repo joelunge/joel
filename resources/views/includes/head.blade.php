@@ -22,8 +22,19 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
 	<script src="https://code.highcharts.com/modules/exporting.js"></script>
 
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <script>
+        $(function() {
+            $('#show_indicators').click(function() {
+                $('.table-trades').toggleClass('d-none');
+                $('.table-indicators').toggleClass('d-none');
+            });
+        });
+    </script>
 </head>
 <body>
 	@include('includes.header')

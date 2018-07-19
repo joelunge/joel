@@ -108,7 +108,7 @@ class TradesController extends Controller
 
         $stats = $this->getStats($allTrades, $additionalCosts);
 
-        return view('trades.list', ['trades' => $allTrades, 'stats' => $stats, 'isAllowedToTrade' => $isAllowedToTrade]);
+        return view('trades.list', ['trades' => $allTrades, 'stats' => $stats, 'isAllowedToTrade' => $isAllowedToTrade, 'indicators' => config('trade.indicators'), 'indicator_names' => config('trade.indicator_names')]);
     }
 
     private function getTrades($coin, $userId)

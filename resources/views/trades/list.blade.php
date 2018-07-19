@@ -36,6 +36,7 @@
 		</div>
 	    <div class="col-sm-6">
 		    <div class="dropdown float-right">
+		    	<button class="btn btn-secondary" type="button" id="show_indicators" class="show_indicators">Indicators</button>
 			  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 			    Users
 			  </button>
@@ -67,7 +68,8 @@
 		</div>
 	</div>
 	<hr />
-	<table class="table table-dark">
+
+	<table class="table table-dark table-trades">
 		<thead>
 			<tr>
 				<th>Date</th>
@@ -140,6 +142,46 @@
 							{{$trade['parameters']['duration']['seconds']}}s
 						</small>
 					</td>
+					@if (isset($_GET['user']) && $_GET['user'] == 'all')
+						<td><small>@if ($trade['trades'][0]['user_id'] == 1) Joel @else Markus @endif</small></td>
+					@else
+						<td><small>{{round($trade['parameters']['balance'])}}</small></td>
+					@endif
+					<td><a @if (! $trade['trades'][0]['comment']) class="text-danger" @else class="text-white" @endif href="/trades/edit/{{$trade['parameters']['bitfinex_id']}}"><i class="far fa-edit"></i></a></td>
+				</tr>
+			@endforeach
+		</tbody>
+	</table>
+
+	<table class="table table-dark d-none table-indicators">
+		<thead>
+			<tr>
+				<th>Result %</th>
+				@foreach ($indicator_names as $indicatorName)
+				<th>{{$indicatorName}}</th>
+				@endforeach
+				@if (isset($_GET['user']) && $_GET['user'] == 'all')
+					<th>User</th>
+				@else
+					<th>Balance</th>
+				@endif
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach ($trades as $key => $trade)
+				<tr id="{{$trade['parameters']['bitfinex_id']}}">
+					<td><span
+						@if($trade['parameters']['result']['net_sum'] > 0)
+							class="text-success"
+						@else
+							class="text-danger"
+						@endif>
+						<small>{{number_format($trade['parameters']['result']['net_percentage'], 2, '.', '')}}%</small></span>
+					</td>
+					@foreach ($indicator_names as $key => $indicatorName)
+						<td>{{$trade['trades'][0][$key]}}</td>
+					@endforeach
 					@if (isset($_GET['user']) && $_GET['user'] == 'all')
 						<td><small>@if ($trade['trades'][0]['user_id'] == 1) Joel @else Markus @endif</small></td>
 					@else
