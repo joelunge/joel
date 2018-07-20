@@ -70,9 +70,9 @@ return [
 			'resistance_line' => 'Resistance Line',
     	],
     	'ema' => [
-    		'55_crossover' => '55 Crossover',
-			'100_crossover' => '100 Crossover',
-			'200_crossover' => '200 Crossover',
+    		'crossover_55' => '55 Crossover',
+			'crossover_100' => '100 Crossover',
+			'crossover_200' => '200 Crossover',
 			'13' => '13',
 			'21' => '21',
 			'55' => '55',
