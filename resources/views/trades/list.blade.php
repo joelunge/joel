@@ -66,10 +66,6 @@
 			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_sum'] > 0) class="text-success" @else class="text-danger" @endif>{{number_format($stats['net_sum'] * \App\Currency::find(1)->value, 0, '.', ' ')}} kr</h1>
 			<span class="text-uppercase">Gain</span>
 		</div>
-		<div class="col-sm-3 text-center">
-			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_sum'] > 0) class="text-success" @else class="text-danger" @endif>{{number_format($stats['net_sum'] * 1, 0, '.', ' ')}} usd</h1>
-			<span class="text-uppercase">Gain</span>
-		</div>
 	</div>
 	<hr />
 

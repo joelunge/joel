@@ -73,16 +73,11 @@ return [
     		'55_crossover' => '55 Crossover',
 			'100_crossover' => '100 Crossover',
 			'200_crossover' => '200 Crossover',
-			'13_support' => '13 Support',
-			'21_support' => '21 Support',
-			'55_support' => '55 Support',
-			'100_support' => '100 Support',
-			'200_support' => '200 Support',
-			'13_resistance' => '13 Resistance',
-			'21_resistance' => '21 Resistance',
-			'55_resistance' => '55 Resistance',
-			'100_resistance' => '100 Resistance',
-			'200_resistance' => '200 Resistance',
+			'13' => '13',
+			'21' => '21',
+			'55' => '55',
+			'100' => '100',
+			'200' => '200',
     	],
     	'candles' => [
 			'bearish' => 'Bearish',
@@ -99,8 +94,8 @@ return [
     	'fundamental' => [
     		'bullish_news' => 'Bullish News',
     		'bearish_news' => 'Bearish News',
-    		'bullish_hype' => 'Bullish Hype',
-    		'bearish_hype' => 'Bearish Hype',
+    		'bullish_hype' => 'Bullish Tone',
+    		'bearish_hype' => 'Bearish Tone',
     	]
     ],
 
