@@ -30,7 +30,7 @@ class TradesController extends Controller
     public function list()
     {
         $userId = Auth::id();
-        $this->closedByTimestamp = $this->getClosedBalancesByTimestamp();
+        $this->closedByTimestamp = $this->getClosedBalancesByTimestamp($userId);
         
         $coins = $this->getCoins();
 
@@ -116,6 +116,7 @@ class TradesController extends Controller
         if (isset($_GET['user']) && $_GET['user'] != 'all') {
             $userId = $_GET['user'];
         }
+
         $trades = App\Trade::where('coin', '=', $coin);
         $trades = $trades->where('date', '>', '2018-06-19 00:00:00');
             
@@ -225,8 +226,6 @@ class TradesController extends Controller
 
     private function getClosingBalance($trade)
     {
-        $arr = ['oisfjsdf' => 0];
-
         if (isset($this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'])) {
             return $this->closedByTimestamp[strtotime($trade['trades'][(count($trade['trades']) - 1)]['date'])]['balance'];
         } elseif ((isset($trade['trades'][(count($trade['trades']) - 2)])) && (isset($trade['trades'][(count($trade['trades']) - 2)]['date']['balance']))) {
@@ -236,11 +235,20 @@ class TradesController extends Controller
         }
     }
 
-    private function getClosedBalancesByTimestamp()
+    private function getClosedBalancesByTimestamp($userId)
     {
+        if (isset($_GET['user']) && $_GET['user'] != 'all') {
+            $userId = $_GET['user'];
+        }
+
         $closedBalances = App\Balance::where('description', 'like', '%closed%')
-            ->orWhere('description', 'like', '%settlement%')
-            ->orderBy('id', 'ASC')
+            ->orWhere('description', 'like', '%settlement%');
+
+        if (isset($_GET['user']) && $_GET['user'] != 'all') {
+            $closedBalances = $closedBalances->where('user_id', $userId);
+        }
+            
+        $closedBalances = $closedBalances->orderBy('id', 'ASC')
             ->get()
             ->toArray();
 
