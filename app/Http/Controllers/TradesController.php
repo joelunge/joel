@@ -531,7 +531,7 @@ class TradesController extends Controller
 
         if (is_array($request->request->get('new_reason_fail'))) {
             foreach ($request->request->get('new_reason_fail') as $newReason) {
-                if (! count(App\Reason::where('reason', $newReason)->get())) {
+                if (! count(App\Reason::where('reason', $newReason)->get()) && $newReason != '') {
                     $reason = new App\Reason;
                     $reason->reason = $newReason;
                     $reason->type = 'fail';
@@ -545,7 +545,7 @@ class TradesController extends Controller
 
         if ($request->request->get('new_reason_success')) {
             foreach ($request->request->get('new_reason_success') as $newReason) {
-                if (! count(App\Reason::where('reason', $newReason)->get())) {
+                if (! count(App\Reason::where('reason', $newReason)->get()) && $newReason != '') {
                     $reason = new App\Reason;
                     $reason->reason = $newReason;
                     $reason->type = 'success';
