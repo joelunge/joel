@@ -67,6 +67,30 @@
 			<span class="text-uppercase">Gain</span>
 		</div>
 	</div>
+
+	<br />
+
+	<div class="row">
+		<div class="col-sm-6">
+			<ul class="list-group">
+			  <li class="list-group-item">Trading volume<span class="float-right">{{number_format($stats['volume'], 0, ',', ' ')}} USD</span></li>
+			  <li class="list-group-item">Avg. position size<span class="float-right">{{number_format($stats['position_size'], 0, ',', ' ')}} USD</span></li>
+			  <li class="list-group-item">Avg. duration<span class="float-right">{{gmdate('H:i:s', $stats['duration'])}}</span></li>
+			  <li class="list-group-item">Avg. duration (wins)<span class="float-right">{{gmdate('H:i:s', $stats['duration_wins'])}}</span></li>
+			  <li class="list-group-item">Avg. duration (losses)<span class="float-right">{{gmdate('H:i:s', $stats['duration_losses'])}}</span></li>
+			</ul>
+		</div>
+		<div class="col-sm-6">
+			<ul class="list-group">
+			  <li class="list-group-item">Gain (USD)<span class="float-right">{{number_format($stats['net_sum'], 0, '.', ' ')}} USD</span></li>
+			  <li class="list-group-item">Avg. gain USD<span class="float-right">{{number_format($stats['avg_usd_wins'], 0, '.', ' ')}} USD</span></li>
+			  <li class="list-group-item">Avg. loss USD<span class="float-right">{{number_format($stats['avg_usd_losses'], 0, '.', ' ')}} USD</span></li>
+			  <li class="list-group-item">Avg. gain %<span class="float-right">{{number_format($stats['avg_percentage_wins'], 2, '.', ' ')}} %</span></li>
+			  <li class="list-group-item">Avg. loss %<span class="float-right">{{number_format($stats['avg_percentage_losses'], 2, '.', ' ')}} %</span></li>
+			</ul>
+		</div>
+	</div>
+
 	<hr />
 
 	<table class="table table-dark table-trades">

@@ -181,11 +181,12 @@ class TradesController extends Controller
             $winloss = ($result['net_sum'] > 0 ? 'win' : 'loss');
             $duration['timestamp'] = strtotime($lastTrade['date']) - strtotime($firstTrade['date']);
             $duration['his'] = gmdate('H:i:s', $duration['timestamp']);
+            $duration['hours'] = gmdate('H', $duration['timestamp']);
+            $duration['minutes'] = gmdate('i', $duration['timestamp']);
             $duration['seconds'] = gmdate('s', $duration['timestamp']);
-            $duration['hours'] = gmdate("H", $duration['timestamp']);
-            $duration['minutes'] = gmdate("i", $duration['timestamp']);
 
-            $amount = $this->getTotalAmount($trade);
+            $amount = $this->getTotals($trade)['amount'];
+            $volume = $this->getTotals($trade)['volume'];
 
             $trades[$key]['parameters'] = [
                 'bitfinex_id' => $firstTrade['bitfinex_id'],
@@ -197,6 +198,7 @@ class TradesController extends Controller
                 'type' => $type,
                 'balance' => $balance,
                 'amount' => $amount,
+                'volume' => $volume,
                 'result' => $result,
                 'winloss' => $winloss,
                 'start_time' => $firstTrade['date'],
@@ -210,13 +212,19 @@ class TradesController extends Controller
         return $trades;
     }
 
-    private function getTotalAmount($trades)
+    private function getTotals($trades)
     {
-        $amount = 0;
+        $totals = [
+            'amount' => 0,
+            'volume' => 0,
+        ];
+
         foreach ($trades['trades'] as $key => $trade) {
-            $amount += $trade['amount'];
+            $totals['amount'] += (abs($trade['amount']) / 2);
+            $totals['volume'] += (abs($trade['amount']) * $trade['price']);
         }
-        return $amount;
+
+        return $totals;
     }
 
     private function isLongOrShort($firstOrderAmount)
@@ -391,6 +399,15 @@ class TradesController extends Controller
         $winrate = 0;
         $netSum = 0;
         $netPercentage = 0;
+        $gainUsdWins = 0;
+        $gainUsdLosses = 0;
+        $gainPercentageWins = 0;
+        $gainPercentageLosses = 0;
+        $volume = 0;
+        $positionSize = 0;
+        $duration = 0;
+        $durationWins = 0;
+        $durationLosses = 0;
         $fees = ['buy' => 0, 'sell' => 0, 'total' => 0, 'funding' => 0, 'settlement' => 0, 'buy_percentage' => 0, 'sell_percentage' => 0, 'total_avg_percentage' => 0];
 
         foreach ($allTrades as $key => $trade) {
@@ -398,15 +415,25 @@ class TradesController extends Controller
 
             if ($params['winloss'] == 'win') {
                 $wins += 1;
+                $gainUsdWins += $params['result']['net_sum'];
+                $gainPercentageWins += $params['result']['net_percentage'];
+                $durationWins += $params['duration']['timestamp'];
             }
 
             if ($params['winloss'] == 'loss') {
                 $losses += 1;
+                $gainUsdLosses += $params['result']['net_sum'];
+                $gainPercentageLosses += $params['result']['net_percentage'];
+                $durationLosses += $params['duration']['timestamp'];
             }
+
+            $duration += $params['duration']['timestamp'];
 
             $result = $this->getResult($trade, $additionalCosts);
             $netSum += $result['net_sum'];
             $netPercentage += $result['net_percentage'];
+            $volume += $params['volume'];
+            $positionSize = ($volume / count($allTrades)) / 2;
             $fees['funding'] += $result['fees']['funding'];
             $fees['settlement'] += $result['fees']['settlement'];
             $fees['total'] += ($result['fees']['settlement'] + $result['fees']['funding']);
@@ -425,6 +452,16 @@ class TradesController extends Controller
             'winrate' => $winrate,
             'net_sum' => $netSum,
             'net_percentage' => $netPercentage,
+            'avg_usd_wins' => $gainUsdWins / $wins,
+            'avg_usd_losses' => $gainUsdLosses / $losses,
+            'avg_percentage_wins' => $gainPercentageWins / $wins,
+            'avg_percentage_losses' => $gainPercentageLosses / $losses,
+            'net_sum' => $netSum,
+            'volume' => $volume,
+            'position_size' => $positionSize,
+            'duration' => $duration / count($allTrades),
+            'duration_wins' => $durationWins / $wins,
+            'duration_losses' => $durationLosses / $losses,
             'fees' => $fees,
         ];
 
