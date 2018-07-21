@@ -216,4 +216,41 @@
 			@endforeach
 		</tbody>
 	</table>
+
+	<div class="row">
+	    <div class="col-md-6">
+	      <div class="card">
+	        <div class="card-header bg-danger text-white">
+	          Fail reasons
+	        </div>
+	        <ul class="list-group list-group-flush" id="reason-fail">
+	          @foreach ($reasons as $reason)
+	            @if ($reason['type'] == 'fail')
+	              <li class="list-group-item">
+	                    {{$reason['reason']}}
+	                    <span class="badge badge-pill badge-primary float-right">{{$reason['count']}}</span>
+	                </li>
+	            @endif
+	          @endforeach
+	        </ul>
+	      </div>
+	    </div>
+	    <div class="col-md-6">
+	        <div class="card">
+	          <div class="card-header bg-success text-white">
+	            Success reasons
+	          </div>
+	          <ul class="list-group list-group-flush" id="reason-success">
+	            @foreach ($reasons as $reason)
+	              @if ($reason['type'] == 'success')
+	                <li class="list-group-item">
+	                    {{$reason['reason']}}
+	                    <span class="badge badge-pill badge-primary float-right">{{$reason['count']}}</span>
+	                </li>
+	              @endif
+	            @endforeach
+	          </ul>
+	        </div>
+	    </div>
+	  </div>
 @endsection
