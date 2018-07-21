@@ -30,17 +30,65 @@
           </select>
         </div>
       </div>
-    @endforeach 
+    @endforeach
 
   </div>
 
   <br />
-  <label for="resolved">Resolved:</label>
-  <input type="hidden" name="resolved" value="0" />
-  <input type="checkbox" @if ($trade['resolved']) checked @endif id="resolved" name="resolved" value="1" />
-  <input type="hidden" name="previous_url" value="{{\URL::previous()}}" />
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-danger text-white">
+          Fail reasons
+        </div>
+        <ul class="list-group list-group-flush" id="reason-fail">
+          @foreach ($reasons as $reason)
+            @if ($reason['type'] == 'fail')
+              <li class="list-group-item">
+                    <input type="hidden" name="reason_{{$reason->id}}" value="0" />
+                    <input type="checkbox" name="reason_{{$reason->id}}" @if (DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) checked @endif value="1" /> {{$reason['reason']}}
+                </li>
+            @endif
+          @endforeach
+          <li class="list-group-item" id="add-reason-fail-li"><a style="color: #007bff; cursor: pointer;" id="add-reason-fail">Add</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            Success reasons
+          </div>
+          <ul class="list-group list-group-flush" id="reason-success">
+            @foreach ($reasons as $reason)
+              @if ($reason['type'] == 'success')
+                <li class="list-group-item">
+                    <input type="hidden" name="reason_{{$reason->id}}" value="0" />
+                    <input type="checkbox" name="reason_{{$reason->id}}" @if (DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) checked @endif value="1" /> {{$reason['reason']}}
+                </li>
+              @endif
+            @endforeach
+            <li class="list-group-item" id="add-reason-success-li"><a style="color: #007bff; cursor: pointer;" id="add-reason-success">Add</a></li>
+          </ul>
+        </div>
+    </div>
+  </div>
+
   <br />
-  <input type="submit" class="btn btn-primary" value="Save">
+
+  <div class="card">
+    <div class="card-body">
+
+      <input type="hidden" name="resolved" value="0" />
+      <input type="checkbox" @if ($trade['resolved']) checked @endif id="resolved" name="resolved" value="1" />
+      <label for="resolved">Resolved</label>
+      <input type="hidden" name="previous_url" value="{{\URL::previous()}}" />
+
+      <br /><br />
+
+      <input type="submit" class="btn btn-primary" value="Save">
+    </div>
+  </div>
 </div>
 </form>
 

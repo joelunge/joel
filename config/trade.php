@@ -96,6 +96,7 @@ return [
     		'bearish_news' => 'Bearish News',
     		'bullish_hype' => 'Bullish Tone',
     		'bearish_hype' => 'Bearish Tone',
+    		'expecting_reversal' => 'Expecting Reversal',
     	]
     ],
 

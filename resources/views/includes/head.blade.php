@@ -33,6 +33,18 @@
                 $('.table-trades').toggleClass('d-none');
                 $('.table-indicators').toggleClass('d-none');
             });
+
+            $('#add-reason-fail').click(function() {
+                $("#reason-fail:last-of-type").append('<li class="list-group-item"><input type="text" name="new_reason_fail[]" /></li>');
+                var addReasonFailLi = $('#add-reason-fail-li');
+                $("#reason-fail:last-of-type").append(addReasonFailLi);
+            });
+
+            $('#add-reason-success').click(function() {
+                $("#reason-success:last-of-type").append('<li class="list-group-item"><input type="text" name="new_reason_success[]" /></li>');
+                var addReasonSuccessLi = $('#add-reason-success-li');
+                $("#reason-success:last-of-type").append(addReasonSuccessLi);
+            });
         });
     </script>
 </head>

@@ -495,7 +495,9 @@ class TradesController extends Controller
         $trade['parameters']['coin'] = str_replace('/USD', '', $trade['coin']);
         $trade['parameters']['type'] = $this->isLongOrShort($trade['amount']);
 
-        return view('trades.edit', ['trade' => $trade, 'indicators' => config('trade.indicators'), 'indicator_names' => config('trade.indicator_names')]);
+        $reasons = App\Reason::all();
+
+        return view('trades.edit', ['trade' => $trade, 'indicators' => config('trade.indicators'), 'indicator_names' => config('trade.indicator_names'), 'reasons' => $reasons, 'bitfinex_id' => $bitfinex_id]);
     }
 
     public function update(Request $request, $bitfinex_id)
@@ -503,7 +505,7 @@ class TradesController extends Controller
         $request = Request::instance();
         $comment = $request->request->get('comment');
         $previousUrl = $request->request->get('previous_url');
-        $resolved = $request->request->get('resolved'); 
+        $resolved = $request->request->get('resolved');
 
         $trade = App\Trade::where('bitfinex_id', $bitfinex_id)->get();
         $trade = $trade[0];
@@ -514,6 +516,40 @@ class TradesController extends Controller
                 $trade->{$key} = null;
             } else {
                 $trade->{$key} = $request->request->get($key);
+            }
+        }
+
+        foreach (App\Reason::all() as $reason) {
+            if ($request->request->get('reason_'.$reason->id) == 0 || $request->request->get('reason_' . $reason->id) == 'null' || $request->request->get('reason_'.$reason->id) == null) {
+                DB::table('reasons_trades')->where('reason_id', '=', $reason->id)->where('bitfinex_id', '=', $bitfinex_id)->delete();
+            } else {
+                DB::table('reasons_trades')->insert(['reason_id' => $reason->id, 'bitfinex_id' => $bitfinex_id]);
+            }
+        }
+
+        if (is_array($request->request->get('new_reason_fail'))) {
+            foreach ($request->request->get('new_reason_fail') as $newReason) {
+                if (! count(App\Reason::where('reason', $newReason)->get())) {
+                    $reason = new App\Reason;
+                    $reason->reason = $newReason;
+                    $reason->type = 'fail';
+                    $reason->save();
+
+                    DB::table('reasons_trades')->insert(['reason_id' => $reason->id, 'bitfinex_id' => $bitfinex_id]);
+                }
+            }
+        }
+
+        if ($request->request->get('new_reason_success')) {
+            foreach ($request->request->get('new_reason_success') as $newReason) {
+                if (! count(App\Reason::where('reason', $newReason)->get())) {
+                    $reason = new App\Reason;
+                    $reason->reason = $newReason;
+                    $reason->type = 'success';
+                    $reason->save();
+
+                    DB::table('reasons_trades')->insert(['reason_id' => $reason->id, 'bitfinex_id' => $bitfinex_id]);
+                }
             }
         }
 
