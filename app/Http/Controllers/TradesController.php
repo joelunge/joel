@@ -523,7 +523,9 @@ class TradesController extends Controller
             if ($request->request->get('reason_'.$reason->id) == 0 || $request->request->get('reason_' . $reason->id) == 'null' || $request->request->get('reason_'.$reason->id) == null) {
                 DB::table('reasons_trades')->where('reason_id', '=', $reason->id)->where('bitfinex_id', '=', $bitfinex_id)->delete();
             } else {
-                DB::table('reasons_trades')->insert(['reason_id' => $reason->id, 'bitfinex_id' => $bitfinex_id]);
+                if (! DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->count()) {
+                    DB::table('reasons_trades')->insert(['reason_id' => $reason->id, 'bitfinex_id' => $bitfinex_id]);
+                }
             }
         }
 
@@ -533,6 +535,7 @@ class TradesController extends Controller
                     $reason = new App\Reason;
                     $reason->reason = $newReason;
                     $reason->type = 'fail';
+                    $reason->added_by = Auth::id();
                     $reason->save();
 
                     DB::table('reasons_trades')->insert(['reason_id' => $reason->id, 'bitfinex_id' => $bitfinex_id]);
@@ -546,6 +549,7 @@ class TradesController extends Controller
                     $reason = new App\Reason;
                     $reason->reason = $newReason;
                     $reason->type = 'success';
+                    $reason->added_by = Auth::id();
                     $reason->save();
 
                     DB::table('reasons_trades')->insert(['reason_id' => $reason->id, 'bitfinex_id' => $bitfinex_id]);
