@@ -44,9 +44,10 @@
         <ul class="list-group list-group-flush" id="reason-fail">
           @foreach ($reasons as $reason)
             @if ($reason['type'] == 'fail')
-              <li @if (! DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) class="d-none" @endif class="list-group-item">
-                    <input type="hidden" name="reason_{{$reason->id}}" value="0" />
-                    <input type="checkbox" name="reason_{{$reason->id}}" @if (DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) checked @endif value="1" /> {{$reason['reason']}}
+              <li @if (! DB::table('reasons_trades')->where('reason_id', $reason['id'])->where('bitfinex_id', $bitfinex_id)->get()->count()) class="d-none" @endif class="list-group-item">
+                    <input type="hidden" name="reason_{{$reason['id']}}" value="0" />
+                    <input type="checkbox" name="reason_{{$reason['id']}}" @if (DB::table('reasons_trades')->where('reason_id', $reason['id'])->where('bitfinex_id', $bitfinex_id)->get()->count()) checked @endif value="1" /> {{$reason['reason']}}
+                    <span class="badge badge-pill badge-primary float-right">{{$reason['count']}}</span>
                 </li>
             @endif
           @endforeach
@@ -62,9 +63,10 @@
           <ul class="list-group list-group-flush" id="reason-success">
             @foreach ($reasons as $reason)
               @if ($reason['type'] == 'success')
-                <li @if (! DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) class="d-none" @endif class="list-group-item">
-                    <input type="hidden" name="reason_{{$reason->id}}" value="0" />
-                    <input type="checkbox" name="reason_{{$reason->id}}" @if (DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) checked @endif value="1" /> {{$reason['reason']}}
+                <li @if (! DB::table('reasons_trades')->where('reason_id', $reason['id'])->where('bitfinex_id', $bitfinex_id)->get()->count()) class="d-none" @endif class="list-group-item">
+                    <input type="hidden" name="reason_{{$reason['id']}}" value="0" />
+                    <input type="checkbox" name="reason_{{$reason['id']}}" @if (DB::table('reasons_trades')->where('reason_id', $reason['id'])->where('bitfinex_id', $bitfinex_id)->get()->count()) checked @endif value="1" /> {{$reason['reason']}}
+                    <span class="badge badge-pill badge-primary float-right">{{$reason['count']}}</span>
                 </li>
               @endif
             @endforeach

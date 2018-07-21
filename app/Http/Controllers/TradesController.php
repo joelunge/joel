@@ -495,7 +495,15 @@ class TradesController extends Controller
         $trade['parameters']['coin'] = str_replace('/USD', '', $trade['coin']);
         $trade['parameters']['type'] = $this->isLongOrShort($trade['amount']);
 
-        $reasons = App\Reason::all();
+        $reasons = App\Reason::all()->toArray();
+
+        foreach ($reasons as $key => $reason) {
+            $reasons[$key]['count'] = DB::table('reasons_trades')->where('reason_id', $reason['id'])->count();
+        }
+
+        usort($reasons, function($a, $b) {
+            return $b['count'] <=> $a['count'];
+        });
 
         return view('trades.edit', ['trade' => $trade, 'indicators' => config('trade.indicators'), 'indicator_names' => config('trade.indicator_names'), 'reasons' => $reasons, 'bitfinex_id' => $bitfinex_id]);
     }
