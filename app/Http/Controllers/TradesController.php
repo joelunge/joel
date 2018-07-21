@@ -565,6 +565,12 @@ class TradesController extends Controller
             }
         }
 
+        foreach (App\Reason::all() as $reason) {
+            if (! DB::table('reasons_trades')->where('reason_id', $reason->id)->count()) {
+                $reason->delete();
+            }
+        }
+
         $trade->resolved = $resolved;
         $trade->save();
 
