@@ -45,6 +45,16 @@
                 var addReasonSuccessLi = $('#add-reason-success-li');
                 $("#reason-success:last-of-type").append(addReasonSuccessLi);
             });
+
+            $('#show-all-fail').click(function() {
+                $('#reason-fail li').removeClass('d-none');
+                $('#reason-fail li').addClass('list-group-item');
+            });
+
+            $('#show-all-success').click(function() {
+                $('#reason-success li').removeClass('d-none');
+                $('#reason-success li').addClass('list-group-item');
+            });
         });
     </script>
 </head>

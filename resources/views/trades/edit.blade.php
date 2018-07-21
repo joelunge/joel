@@ -44,13 +44,13 @@
         <ul class="list-group list-group-flush" id="reason-fail">
           @foreach ($reasons as $reason)
             @if ($reason['type'] == 'fail')
-              <li class="list-group-item">
+              <li @if (! DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) class="d-none" @endif class="list-group-item">
                     <input type="hidden" name="reason_{{$reason->id}}" value="0" />
                     <input type="checkbox" name="reason_{{$reason->id}}" @if (DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) checked @endif value="1" /> {{$reason['reason']}}
                 </li>
             @endif
           @endforeach
-          <li class="list-group-item" id="add-reason-fail-li"><a style="color: #007bff; cursor: pointer;" id="add-reason-fail">Add</a></li>
+          <li class="list-group-item" id="add-reason-fail-li"><a style="color: #007bff; cursor: pointer;" id="add-reason-fail">Add</a><a style="float: right; color: #007bff; cursor: pointer;" id="show-all-fail">Show all</a></li>
         </ul>
       </div>
     </div>
@@ -62,13 +62,13 @@
           <ul class="list-group list-group-flush" id="reason-success">
             @foreach ($reasons as $reason)
               @if ($reason['type'] == 'success')
-                <li class="list-group-item">
+                <li @if (! DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) class="d-none" @endif class="list-group-item">
                     <input type="hidden" name="reason_{{$reason->id}}" value="0" />
                     <input type="checkbox" name="reason_{{$reason->id}}" @if (DB::table('reasons_trades')->where('reason_id', $reason->id)->where('bitfinex_id', $bitfinex_id)->get()->count()) checked @endif value="1" /> {{$reason['reason']}}
                 </li>
               @endif
             @endforeach
-            <li class="list-group-item" id="add-reason-success-li"><a style="color: #007bff; cursor: pointer;" id="add-reason-success">Add</a></li>
+            <li class="list-group-item" id="add-reason-success-li"><a style="color: #007bff; cursor: pointer;" id="add-reason-success">Add</a><a style="float: right; color: #007bff; cursor: pointer;" id="show-all-success">Show all</a></li>
           </ul>
         </div>
     </div>
