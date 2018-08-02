@@ -9,7 +9,7 @@ chrome.extension.sendMessage({}, function(response) {
 			);
 
 			setTimeout(
-			  function()
+			  function() 
 			  {
 			    $('#sidebar-widget-3 .ui-tabs:last-of-type').delay('10000').trigger("click");
 			  }, 5000);
