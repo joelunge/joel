@@ -71,7 +71,7 @@ class TradesController extends Controller
         $allTrades = $this->sortByDate($allTrades);
 
         if (! isset($_GET['show'])) {
-            return redirect('/trades?show=10_trades');
+            return redirect('/trades?show=30_days');
         }
 
         $isAllowedToTrade = $this->isAllowedToTrade($allTrades);
