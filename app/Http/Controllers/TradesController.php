@@ -27,7 +27,82 @@ class TradesController extends Controller
         $this->middleware('auth');
     }
 
+    public function dashboard()
+    {
+        $allTrades = $this->getAllTrades();
+
+        if (isset($_GET['user']) && $_GET['user'] == 'all') {
+            $additionalCosts = array_merge($this->getAdditionalCosts(1), $this->getAdditionalCosts(2));
+        } else {
+            $additionalCosts = $this->getAdditionalCosts(Auth::id());
+        }
+
+        $baseline = 0;
+        $results = [0];
+        foreach ($allTrades as $key => $trade) {
+            $result = $this->getResult($trade, $additionalCosts);
+            $netSum = $result['net_sum'];
+            $baseline = $baseline + $netSum;
+            $results[] = $baseline;
+        }
+
+        return view('dashboard', ['results' => $results]);
+    }
+
     public function list()
+    {
+        $allTrades = $this->getAllTrades();
+
+        if (! isset($_GET['show'])) {
+            return redirect('/trades?show=30_days');
+        }
+
+        $isAllowedToTrade = $this->isAllowedToTrade($allTrades);
+
+        switch ($_GET['show']) {
+            case '10_trades':
+                $allTrades = array_slice($allTrades, -10, 10, true);
+                break;
+
+            case '7_days':
+                foreach ($allTrades as $key => $value) {
+                    if ($key < strtotime('-7 days')) {
+                        unset($allTrades[$key]);
+                    }
+                }
+                break;
+
+            case '30_days':
+                foreach ($allTrades as $key => $value) {
+                    if ($key < strtotime('-30 days')) {
+                        unset($allTrades[$key]);
+                    }
+                }
+                break;
+
+            case '3_months':
+                foreach ($allTrades as $key => $value) {
+                    if ($key < strtotime('-3 months')) {
+                        unset($allTrades[$key]);
+                    }
+                }
+                break;
+        }
+
+        $reasons = $this->getReasons();
+
+        if (isset($_GET['user']) && $_GET['user'] == 'all') {
+            $additionalCosts = array_merge($this->getAdditionalCosts(1), $this->getAdditionalCosts(2));
+        } else {
+            $additionalCosts = $this->getAdditionalCosts(Auth::id());
+        }
+
+        $stats = $this->getStats($allTrades, $additionalCosts);
+
+        return view('trades.list', ['trades' => $allTrades, 'stats' => $stats, 'isAllowedToTrade' => $isAllowedToTrade, 'indicators' => config('trade.indicators'), 'indicator_names' => config('trade.indicator_names'), 'reasons' => $reasons]);
+    }
+
+    private function getAllTrades()
     {
         $userId = Auth::id();
         $this->closedByTimestamp = $this->getClosedBalancesByTimestamp($userId);
@@ -70,47 +145,7 @@ class TradesController extends Controller
         
         $allTrades = $this->sortByDate($allTrades);
 
-        if (! isset($_GET['show'])) {
-            return redirect('/trades?show=30_days');
-        }
-
-        $isAllowedToTrade = $this->isAllowedToTrade($allTrades);
-
-        switch ($_GET['show']) {
-            case '10_trades':
-                $allTrades = array_slice($allTrades, -10, 10, true);
-                break;
-
-            case '7_days':
-                foreach ($allTrades as $key => $value) {
-                    if ($key < strtotime('-7 days')) {
-                        unset($allTrades[$key]);
-                    }
-                }
-                break;
-
-            case '30_days':
-                foreach ($allTrades as $key => $value) {
-                    if ($key < strtotime('-30 days')) {
-                        unset($allTrades[$key]);
-                    }
-                }
-                break;
-
-            case '3_months':
-                foreach ($allTrades as $key => $value) {
-                    if ($key < strtotime('-3 months')) {
-                        unset($allTrades[$key]);
-                    }
-                }
-                break;
-        }
-
-        $reasons = $this->getReasons();
-
-        $stats = $this->getStats($allTrades, $additionalCosts);
-
-        return view('trades.list', ['trades' => $allTrades, 'stats' => $stats, 'isAllowedToTrade' => $isAllowedToTrade, 'indicators' => config('trade.indicators'), 'indicator_names' => config('trade.indicator_names'), 'reasons' => $reasons]);
+        return $allTrades;
     }
 
     private function getTrades($coin, $userId)
@@ -402,6 +437,7 @@ class TradesController extends Controller
 
     private function getStats($allTrades, $additionalCosts)
     {
+        $baseline = 0;
         $wins = 0;
         $losses = 0;
         $winrate = 0;
@@ -438,7 +474,7 @@ class TradesController extends Controller
             $duration += $params['duration']['timestamp'];
 
             $result = $this->getResult($trade, $additionalCosts);
-            $netSum += $result['net_sum'];
+            $netSum = $netSum + $result['net_sum'];
             $netPercentage += $result['net_percentage'];
             $volume += $params['volume'];
             $positionSize = ($volume / count($allTrades)) / 2;
@@ -464,7 +500,6 @@ class TradesController extends Controller
             'avg_usd_losses' => $gainUsdLosses / $losses,
             'avg_percentage_wins' => $gainPercentageWins / $wins,
             'avg_percentage_losses' => $gainPercentageLosses / $losses,
-            'net_sum' => $netSum,
             'volume' => $volume,
             'position_size' => $positionSize,
             'duration' => $duration / count($allTrades),
