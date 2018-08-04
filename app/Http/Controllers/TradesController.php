@@ -146,7 +146,10 @@ class TradesController extends Controller
                 if ($trade['price'] > 1000) {
                     if (round($amount, 2) == 0.00) {
                         if (
-                            (array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)) && // this trade is closing
+                            (
+                                array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)
+                                || array_key_exists(strtotime($trade['date'])+1, $this->closedByTimestamp) // sometimes the closed position row is lagging 1 second
+                            ) && // this trade is closing
                             (! array_key_exists(strtotime($trades[$nextKey]['date']), $this->closedByTimestamp)) // next trade is not closing
                         ) {
                             $i++;
@@ -155,7 +158,10 @@ class TradesController extends Controller
                 } else {
                     if (round($amount) == 0) {
                         if (
-                            (array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)) && // this trade is closing
+                            (
+                                array_key_exists(strtotime($trade['date']), $this->closedByTimestamp)
+                                || array_key_exists(strtotime($trade['date'])+1, $this->closedByTimestamp) // sometimes the closed position row is lagging 1 second
+                            ) && // this trade is closing
                             (! array_key_exists(strtotime($trades[$nextKey]['date']), $this->closedByTimestamp)) // next trade is not closing
                         ) {
                             $i++;
