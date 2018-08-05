@@ -25,7 +25,7 @@ $(function() {
       },
 
       subtitle: {
-        text: 'USD by trade'
+        text: 'SEK by trade'
       },
 
       yAxis: {
