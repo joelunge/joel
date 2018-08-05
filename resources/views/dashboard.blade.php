@@ -30,7 +30,7 @@ $(function() {
 
       yAxis: {
         title: {
-          text: ''
+          text: 'SEK'
         }
       },
       xAxis: {
@@ -58,10 +58,18 @@ $(function() {
       },
 
       series: [{
-        name: 'Joel',
+        @if (isset($_GET["user"]))
+            name: '@if (isset($_GET["user"]) && $_GET["user"] == 1) Joel @elseif (isset($_GET["user"]) && $_GET["user"] == 2) Markus @endif',
+        @else
+            @if (Auth::id() == 1)
+                name: 'Joel',
+            @elseif (Auth::id() == 2)
+                name: 'Markus',
+            @endif
+        @endif
         data: [
             @foreach ($results as $result)
-                {{round($result)}},
+                {{round(\App\Currency::find(1)->value * $result)}},
             @endforeach
         ]
       }],
