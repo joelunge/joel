@@ -486,7 +486,9 @@ class TradesController extends Controller
 
         if ($wins && $losses) {
             $winrate = $wins / ($wins + $losses) * 100;
-        } else {
+        } elseif ($wins && ! $losses) {
+            $winrate = 100;
+        } elseif (! $wins && $losses) {
             $winrate = 0;
         }
 
@@ -497,14 +499,14 @@ class TradesController extends Controller
             'net_sum' => $netSum,
             'net_percentage' => $netPercentage,
             'avg_usd_wins' => $gainUsdWins / $wins,
-            'avg_usd_losses' => $gainUsdLosses / $losses,
+            'avg_usd_losses' => ($losses) ? $gainUsdLosses / $losses : 0,
             'avg_percentage_wins' => $gainPercentageWins / $wins,
-            'avg_percentage_losses' => $gainPercentageLosses / $losses,
+            'avg_percentage_losses' => ($losses) ? $gainPercentageLosses / $losses : 0,
             'volume' => $volume,
             'position_size' => $positionSize,
             'duration' => $duration / count($allTrades),
             'duration_wins' => $durationWins / $wins,
-            'duration_losses' => $durationLosses / $losses,
+            'duration_losses' => ($losses) ? $durationLosses / $losses : 0,
             'fees' => $fees,
         ];
 
