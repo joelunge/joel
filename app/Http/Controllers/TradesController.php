@@ -295,7 +295,7 @@ class TradesController extends Controller
         $closedBalances = App\Balance::where('description', 'like', '%closed%')
             ->orWhere('description', 'like', '%settlement%');
 
-        if (isset($_GET['user']) && $_GET['user'] != 'all') {
+        if ((! isset($_GET['user'])) || (isset($_GET['user']) && $_GET['user'] != 'all')) {
             $closedBalances = $closedBalances->where('user_id', $userId);
         }
             
