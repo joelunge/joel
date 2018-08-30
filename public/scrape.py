@@ -12,7 +12,7 @@ page = urllib2.urlopen(quote_page)
 soup = BeautifulSoup(page, 'html.parser')
 
 # Take out the <span> of price and get its value
-name_box = soup.find('span', attrs={'class': 'uccResultAmount'})
+name_box = soup.find('span', attrs={'class': 'converterresult-toAmount'})
 
 price = name_box.text.strip() # strip() is used to remove starting and trailing
 print price
