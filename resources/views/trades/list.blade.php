@@ -63,8 +63,8 @@
 			<span class="text-uppercase">Gain</span>
 		</div>
 		<div class="col-sm-3 text-center">
-			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_sum'] > 0) class="text-success" @else class="text-danger" @endif>{{number_format($stats['net_sum'] * \App\Currency::find(1)->value, 0, '.', ' ')}} kr</h1>
-			<span class="text-uppercase">Gain</span>
+			<h1 style="font-size: 48px; margin-bottom: 0;" @if ($stats['net_sum'] > 0) class="text-success" @else class="text-danger" @endif>{{number_format($stats['net_sum'], 0, '.', ' ')}}</h1>
+			<span class="text-uppercase">Gain <small>USD</small></span>
 		</div>
 	</div>
 
@@ -98,7 +98,6 @@
 			<tr>
 				<th>Date</th>
 				<th>Coin</th>
-				<th>Result SEK</th>
 				<th>Result USD</th>
 				<th>Result %</th>
 				<th>Fees</th>
@@ -125,16 +124,6 @@
 							<i class="{!! (Auth::id() == 1) ? 'text-success': '' !!} fas fa-chart-line"></i> 
 							{{$trade['parameters']['coin']}}
 						@endif
-					</td>
-					<td>
-						<span
-						@if($trade['parameters']['result']['net_sum'] > 0)
-							class="text-success"
-						@else
-							class="text-danger"
-						@endif>
-						{{number_format($trade['parameters']['result']['net_sum'] * \App\Currency::find(1)->value, 0, '.', ' ')}} kr @if (! $trade['trades'][0]['resolved'] && $trade['parameters']['result']['net_sum'] < 0) <i class="fas fa-exclamation-triangle"></i> @endif
-						</span>
 					</td>
 					<td><span
 						@if($trade['parameters']['result']['net_sum'] > 0)

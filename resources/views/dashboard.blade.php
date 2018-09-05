@@ -25,12 +25,12 @@ $(function() {
       },
 
       subtitle: {
-        text: 'SEK by trade'
+        text: 'USD by trade'
       },
 
       yAxis: {
         title: {
-          text: 'SEK'
+          text: 'USD'
         }
       },
       xAxis: {
@@ -69,7 +69,7 @@ $(function() {
         @endif
         data: [
             @foreach ($results as $result)
-                {{round(\App\Currency::find(1)->value * $result)}},
+                {{round($result)}},
             @endforeach
         ]
       }],
