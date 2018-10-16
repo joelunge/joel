@@ -77,7 +77,11 @@ return [
             'charset' => 'utf8',
             'prefix' => '',
         ],
-
+        'mongodb' => [
+            'driver'   => 'mongodb',
+            'dsn' => env('DB_MONGO_DSN'),
+            'database' => env('DB_MONGO_DATABASE'),
+        ],
     ],
 
     /*
