@@ -5,6 +5,8 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use UsdToSek;
+use Notifications;
+use DB;
 
 class Kernel extends ConsoleKernel
 {
@@ -68,7 +70,7 @@ class Kernel extends ConsoleKernel
                 $latest = DB::connection('mongodb')->table($coin)->orderBy('timestamp', 'DESC')->first();
 
                 if ($latest > $avg) {
-                    \Notifications::slack($coin);
+                    Notifications::slack($coin);
                 }
             }
         })->everyMinute();
