@@ -65,14 +65,18 @@ class Kernel extends ConsoleKernel
                 'trades-tzrxusds',
             ];
 
+            $actionCoins = [];
             foreach ($coins as $coin) {
                 $avg = DB::connection('mongodb')->table($coin)->avg('changedPrice');
                 $latest = DB::connection('mongodb')->table($coin)->orderBy('timestamp', 'DESC')->first();
 
                 if ($latest > $avg) {
-                    Notifications::slack($coin);
+                    $actionCoins[] = strtoupper(str_replace('usds', '', str_replace('trades-t', '', $coin)));
                 }
             }
+
+            Notifications::slack($actionCoins);
+
         })->everyMinute();
     }
 
