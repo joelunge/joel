@@ -67,15 +67,30 @@ class Kernel extends ConsoleKernel
 
             $actionCoins = [];
             foreach ($coins as $coin) {
-                $avg = DB::connection('mongodb')->table($coin)->avg('changedPrice');
+                $avgChangedPrice = DB::connection('mongodb')->table($coin)->avg('changedPrice');
+                $avgCount = DB::connection('mongodb')->table($coin)->avg('count');
                 $latest = DB::connection('mongodb')->table($coin)->orderBy('timestamp', 'DESC')->first();
 
-                if ($latest > $avg) {
+                if (time() - ($latest['timestamp'] / 1000) > 120) {
+                    continue;
+                }
+
+                if ($latest['changedPrice'] > ($avgChangedPrice * 7)) {
                     $actionCoins[] = strtoupper(str_replace('usds', '', str_replace('trades-t', '', $coin)));
+                    $actionCoins[] = 'avgChangedPrice: ' . round($avgChangedPrice);
+                    $actionCoins[] = 'latest: ' . round($latest['changedPrice']);
+                }
+
+                if ($latest['count'] > ($avgCount * 7)) {
+                    $actionCoins[] = strtoupper(str_replace('usds', '', str_replace('trades-t', '', $coin)));
+                    $actionCoins[] = 'avgCount: ' . round($avgCount);
+                    $actionCoins[] = 'latest: ' . round($latest['count']);
                 }
             }
 
-            Notifications::slack($actionCoins);
+            if (count($actionCoins)) {
+                Notifications::slack($actionCoins);
+            }
 
         })->everyMinute();
     }
