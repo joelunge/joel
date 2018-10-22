@@ -52,7 +52,14 @@ class TradesController extends Controller
 
         $tradesData = $tradesData->orderBy('timestamp', 'DESC')->get();
 
-        return view('hot_single', ['trades' => $tradesData, 'avgChangedPrice' => $avgChangedPrice, 'avgCount' => $avgCount]);
+        $validatedTrades = [];
+        foreach ($tradesData as $key => $trade) {
+            if ($trade['changedPrice'] > ($avgChangedPrice * 7) || $trade['count'] > ($avgCount * 7)) {
+                $validatedTrades[] = $trade;
+            }
+        }
+
+        return view('hot_single', ['trades' => $validatd, 'avgChangedPrice' => $avgChangedPrice, 'avgCount' => $avgCount]);
     }
 
     public function dashboard()
