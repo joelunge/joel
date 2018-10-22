@@ -45,9 +45,14 @@ class TradesController extends Controller
 
     public function hotSingle($coin = false)
     {
-        $tradesData = DB::connection('mongodb')->table('trades-t' . $coin . 'usds')->orderBy('timestamp', 'DESC')->get();
+        $tradesData = DB::connection('mongodb')->table('trades-t' . $coin . 'usds');
 
-        return view('hot_single', ['trades' => $tradesData]);
+        $avgChangedPrice = $tradesData->avg('changedPrice');
+        $avgCount = $tradesData->avg('count');
+
+        $tradesData = $tradesData->orderBy('timestamp', 'DESC')->get();
+
+        return view('hot_single', ['trades' => $tradesData, 'avgChangedPrice' => $avgChangedPrice, 'avgCount' => $avgCount]);
     }
 
     public function dashboard()
