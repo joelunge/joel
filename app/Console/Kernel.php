@@ -32,38 +32,7 @@ class Kernel extends ConsoleKernel
         })->hourly();
 
         $schedule->call(function () {
-            $coins = [
-                'trades-tbatusds',
-                'trades-tbchusds',
-                'trades-tbftusds',
-                'trades-tbtcusds',
-                'trades-tbtgusds',
-                'trades-tdaiusds',
-                'trades-tdshusds',
-                'trades-tdthusds',
-                'trades-tedousds',
-                'trades-telfusds',
-                'trades-teosusds',
-                'trades-tetcusds',
-                'trades-tethusds',
-                'trades-tetpusds',
-                'trades-tgntusds',
-                'trades-tiotusds',
-                'trades-tltcusds',
-                'trades-tlymusds',
-                'trades-tneousds',
-                'trades-tomgusds',
-                'trades-tqtmusds',
-                'trades-tsanusds',
-                'trades-ttrxusds',
-                'trades-txlmusds',
-                'trades-txmrusds',
-                'trades-txrpusds',
-                'trades-txtzusds',
-                'trades-txvgusds',
-                'trades-tzecusds',
-                'trades-tzrxusds',
-            ];
+            $coins = config('coins.coins');
 
             $actionCoins = [];
             foreach ($coins as $coin) {

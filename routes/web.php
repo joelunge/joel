@@ -17,5 +17,7 @@ Route::get('trades/edit/{bitfinex_id}', 'TradesController@edit')->middleware('au
 Route::post('trades/update/{bitfinex_id}','TradesController@update')->middleware('auth');
 Route::get('/', 'TradesController@dashboard')->name('dashboard')->middleware('auth');
 Route::get('/trades/import', 'TradesController@import')->name('import');
+Route::get('/hot', 'TradesController@hot')->name('hot');
+Route::get('/hot/{coin}', 'TradesController@hotSingle')->name('hot_single');
 Route::post('/trades/import/upload', 'TradesController@upload')->name('upload');
 Route::get('news', 'NewsController@list')->name('news');

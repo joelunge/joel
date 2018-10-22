@@ -27,8 +27,41 @@ class TradesController extends Controller
         $this->middleware('auth');
     }
 
+    public function hot()
+    {
+        $coins = config('coins.coins');
+
+        $coinsArr = [];
+        foreach ($coins as $coin) {
+            $tradesData = DB::connection('mongodb')->table($coin);
+            $coinsArr[$coin]['avgChangedPrice'] = $tradesData->avg('changedPrice');
+            $coinsArr[$coin]['avgCount'] = $tradesData->avg('count');
+
+            $coinsArr[$coin]['lastMinute'] = DB::connection('mongodb')->table($coin)->orderBy('timestamp', 'DESC')->first();
+        }
+
+        return view('hot', ['coins' => $coinsArr]);
+    }
+
+    public function hotSingle($coin = false)
+    {
+        $tradesData = DB::connection('mongodb')->table('trades-t' . $coin . 'usds')->orderBy('timestamp', 'DESC')->get();
+
+        return view('hot_single', ['trades' => $tradesData]);
+    }
+
     public function dashboard()
     {
+        $hist = \History::trades('XRPUSD', 1540084620000, 1540084679000);
+
+        $trades = explode('],[', str_replace(']]', '', str_replace('[[', '', $hist)));
+
+        foreach ($trades as $key => $trade) {
+            $trades[$key] = explode(',', $trade);
+        }
+
+        H::pr($trades);
+
         $allTrades = $this->getAllTrades();
 
         if (isset($_GET['user']) && $_GET['user'] == 'all') {

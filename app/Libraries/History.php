@@ -8,6 +8,6 @@ class History
 
     	$content = file_get_contents($requestUrl);
 
-    	H::pr($content);
+    	return $content;
     }
 }
