@@ -19,7 +19,7 @@
 		</thead>
 		<tbody>
 			@foreach ($trades as $key => $trade)
-				@if ($trade['changedPrice'] > ($avgChangedPrice * 7) || $trade['count'] > ($avgCount * 7))
+				@if ($trade['changedPrice'] > ($avgChangedPrice * 10) || $trade['count'] > ($avgCount * 10))
 				<tr>
 					<td>{{date('Y-m-d H:i:s', ($trade['timestamp'] / 1000))}}</td>
 					<td>{{$trade['count']}}</td>
