@@ -56,10 +56,16 @@ class TradesController extends Controller
         foreach ($tradesData as $key => $trade) {
             if ($trade['changedPrice'] > ($avgChangedPrice * 7) || $trade['count'] > ($avgCount * 7)) {
                 $validatedTrades[] = $trade;
+
+                $previousCandles = DB::connection('mongodb')->table('trades-t' . $coin . 'usds')->whereBetween('timestamp', [$trade['timestamp'] - (60000*3), $trade['timestamp']])->orderBy('timestamp', 'DESC')->get();
+
+                H::pr($previousCandles);
+
+                H::pr($trade['timestamp']);
             }
         }
 
-        return view('hot_single', ['trades' => $validatd, 'avgChangedPrice' => $avgChangedPrice, 'avgCount' => $avgCount]);
+        return view('hot_single', ['trades' => $validatedTrades, 'avgChangedPrice' => $avgChangedPrice, 'avgCount' => $avgCount]);
     }
 
     public function dashboard()
