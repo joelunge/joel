@@ -60,7 +60,25 @@
         });
     </script>
 </head>
-<body>
-	@include('includes.header')
-    <div class="container" id="app">
+<body style="font-size: .6rem; background-color: #1b262d;">
+    <div class="container" id="app" style="width: 800px;">
     	<main class="py-4">
+    	</main>
+
+	<table class="table table-sm">
+		<tbody>
+			@php ($previousMin = null)
+			@foreach ($trades as $trade)
+				@php ($opacity = abs(($trade->amount * $trade->price) / 50000))
+				@if (date('i', $trade->timestamp / 1000) != $previousMin) <tr style="border: none !important; border-left: 2px solid #000 !important; background-color: rgb(255, 255, 255, .2); opacity: 1;"><td style="border: none !important;"><td style="border: none !important;"><td style="border: none !important;"><span style="opacity: 0;">z</td></tr> @endif
+				@if ($trade->amount > 0) <tr style="color: white; background: rgba(157, 194, 74, {{$opacity}}); border-left: 2px solid rgba(157, 194, 74, 1); border-bottom: 1px solid rgba(157, 194, 74, .3)"> @else <tr style="color: white; background: rgba(225, 86, 86, {{$opacity}}); border-bottom: 1px solid rgba(225, 86, 86, .3); border-left: 2px solid rgba(225, 86, 86, 1);"> @endif
+				<td style="border: none;">{{date('Y-m-d H:i:s', $trade->timestamp / 1000)}} - {{str_replace('15460', '', $trade->timestamp)}}</td>
+				<td style="text-align: right; border: none;">{{number_format(abs(round($trade->amount * $trade->price)), 0, ' ', ' ')}}</td>
+				<td style="border: none;">{{$trade->price}}</td>
+				@php ($previousMin = date('i', $trade->timestamp / 1000))
+			</tr>
+			@endforeach
+		</tbody>
+	</table>
+</div>
+</body>

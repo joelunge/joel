@@ -24,7 +24,7 @@ class TradesController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
     }
 
     public function hot()
@@ -77,8 +77,6 @@ class TradesController extends Controller
         foreach ($trades as $key => $trade) {
             $trades[$key] = explode(',', $trade);
         }
-
-        H::pr($trades);
 
         $allTrades = $this->getAllTrades();
 
@@ -690,5 +688,67 @@ class TradesController extends Controller
         }
 
         return $isAllowedToTrade;
+    }
+
+    public function scrape()
+    {
+        // $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-11-15 18:00:00');
+        // $end = $start->modify('+10 hours');
+
+        // $request = sprintf('https://api.bitfinex.com/v2/trades/tBTCUSD/hist?start=%s&end=%s&limit=1000&sort=1', $start->getTimestamp() * 1000, $end->getTimestamp() * 1000);
+
+        $lastTrade = App\Bfxtrade::orderBy('id', 'desc')->first();
+
+        $start = $lastTrade->timestamp;
+        $end = $start + 36000000;
+
+        $request = sprintf('https://api.bitfinex.com/v2/trades/tBTCUSD/hist?start=%s&end=%s&limit=1000&sort=1', $start, $end);
+// H::pr($request);
+        $trades = file_get_contents($request);
+        $trades = json_decode($trades);
+        // H::pr($request);
+
+        foreach ($trades as $trade) {
+            // echo sprintf('%s ___ %s ___ %s ___ %s', $trade[0], date('H:i:s', $trade[1]/1000), $trade[2], $trade[3]);
+            // echo sprintf('%s,    %s,       %s,            %s', $trade[0], $trade[1], $trade[2], $trade[3]);
+            // echo "<br>";
+            // echo "<br>";
+            $exist = App\Bfxtrade::where('bfx_id', $trade[0])->first();
+
+            if ($exist == null) {
+                $bfxtrade = new App\Bfxtrade;
+                $bfxtrade->bfx_id = $trade[0];
+                $bfxtrade->timestamp = $trade[1];
+                $bfxtrade->amount = $trade[2];
+                $bfxtrade->price = $trade[3];
+                $bfxtrade->save();
+            }
+        }
+    }
+
+    public function showBfxTrades()
+    {
+        // $allTrades = \App\Bfxtrade::where('amount', '>', 3)->orWhere('amount', '<', -3)->get();
+        if (isset($_GET['pagination'])) {
+            $pagination = $_GET['pagination'];
+        }
+
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-11-19 00:00:00');
+
+        if (isset($pagination)) {
+            $startDate = $startDate->modify('+'.$pagination.' days');
+        }
+
+        $endDate = $startDate->modify('+5 hours');
+
+        // $allTrades = \App\Bfxtrade::where(function ($query) {
+        //     $query->where('amount', '>', 250);
+        // })->orWhere(function($query) {
+        //     $query->where('amount', '<', -250);
+        // })->get();
+
+        $allTrades = \App\Bfxtrade::whereBetween('timestamp', [$startDate->getTimestamp() * 1000, $endDate->getTimestamp() * 1000])->get();
+
+        return view('bfxtrades', ['trades' => $allTrades]);
     }
 }
