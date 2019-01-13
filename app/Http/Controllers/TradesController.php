@@ -782,6 +782,7 @@ class TradesController extends Controller
 
         H::pr($t);
         exit;
+
         // $allTrades = \App\Bfxtrade::where('amount', '>', 3)->orWhere('amount', '<', -3)->get();
         if (isset($_GET['pagination'])) {
             $pagination = $_GET['pagination'];
