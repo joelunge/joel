@@ -728,6 +728,51 @@ class TradesController extends Controller
 
     public function showBfxTrades()
     {
+        // $data = file_get_contents('https://api.binance.com/api/v1/klines?symbol=BTCUSDT&interval=15m&limit=1000');
+        // $data = json_decode($data, true);
+        
+        // H::pr($data);
+
+        $data = [
+            0.00859,
+            0.006244,
+            0.012042,
+            0.011,
+            0.007434,
+            0.0111,
+            0.0155,
+            0.0155,
+            0.01951,
+            0.02869,
+            0.02625,
+            0.031401,
+            0.033031,
+            0.027,
+            0.03105,
+            0.035351,
+            0.023552,
+            0.01641,
+            0.015,
+            0.02795,
+            0.0275,
+        ];
+
+        // $data = array_reverse($data);
+
+        // H::pr($data);
+        $closes = array();
+        foreach($data as $d) {
+            $closes[] = (double)$d[4];
+        }
+
+        // H::pr($closes);
+
+        $rsi = \Indicators::rsi($closes, 14);
+        //var_dump($closes);
+        H::pr($rsi);
+        exit;
+
+
         // $allTrades = \App\Bfxtrade::where('amount', '>', 3)->orWhere('amount', '<', -3)->get();
         if (isset($_GET['pagination'])) {
             $pagination = $_GET['pagination'];
