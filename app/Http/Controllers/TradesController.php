@@ -697,7 +697,7 @@ class TradesController extends Controller
 
         // $request = sprintf('https://api.bitfinex.com/v2/trades/tBTCUSD/hist?start=%s&end=%s&limit=1000&sort=1', $start->getTimestamp() * 1000, $end->getTimestamp() * 1000);
 
-        $lastTrade = App\Bfxtrade::orderBy('id', 'desc')->first();
+        $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
 
         $start = $lastTrade->timestamp;
         $end = $start + 36000000;
@@ -713,10 +713,10 @@ class TradesController extends Controller
             // echo sprintf('%s,    %s,       %s,            %s', $trade[0], $trade[1], $trade[2], $trade[3]);
             // echo "<br>";
             // echo "<br>";
-            $exist = App\Bfxtrade::where('bfx_id', $trade[0])->first();
+            $exist = App\Btctrade::where('bfx_id', $trade[0])->first();
 
             if ($exist == null) {
-                $bfxtrade = new App\Bfxtrade;
+                $bfxtrade = new App\Btctrade;
                 $bfxtrade->bfx_id = $trade[0];
                 $bfxtrade->timestamp = $trade[1];
                 $bfxtrade->amount = $trade[2];
@@ -726,52 +726,62 @@ class TradesController extends Controller
         }
     }
 
+    public function scrapeCandles()
+    {
+        // $start = 1542301200363;
+        // $end = $start + 86400000;
+
+        $lastCandle = App\Bfxcandle::orderBy('id', 'desc')->first();
+
+        $start = $lastCandle->timestamp;
+        $end = $start + 86400000;
+
+        $request = sprintf('https://api.bitfinex.com/v2/candles/trade:1m:tBTCUSD/hist?sort=1&limit=1000&start=%s&end=%s', $start, $end);
+
+        $candles = file_get_contents($request);
+        $candles = json_decode($candles);
+
+        foreach ($candles as $candle) {
+            $exist = App\Bfxcandle::where('timestamp', $candle[0])->first();
+            if ($exist == null) {
+                $bfxcandle = new App\Bfxcandle;
+                $bfxcandle->timestamp = $candle[0];
+                $bfxcandle->open = $candle[1];
+                $bfxcandle->close = $candle[2];
+                $bfxcandle->high = $candle[3];
+                $bfxcandle->low = $candle[4];
+                $bfxcandle->volume = $candle[5];
+                $bfxcandle->save();
+            }
+        }
+        exit;
+    }
+
     public function showBfxTrades()
     {
-        // $data = file_get_contents('https://api.binance.com/api/v1/klines?symbol=BTCUSDT&interval=15m&limit=1000');
-        // $data = json_decode($data, true);
-        
-        // H::pr($data);
+        $values = [
+            4183.2,
+            3977.3,
+            3957.8,
+            3950.4,
+            3949.8,
+            3946.8,
+            3947.7,
+            3953.5,
+            3954.9,
+            3954.6,
+            3934.8,
+            3928.5,
+            3926.8,
+            3920.1,
+            3925.2,
 
-        $data = [
-            0.00859,
-            0.006244,
-            0.012042,
-            0.011,
-            0.007434,
-            0.0111,
-            0.0155,
-            0.0155,
-            0.01951,
-            0.02869,
-            0.02625,
-            0.031401,
-            0.033031,
-            0.027,
-            0.03105,
-            0.035351,
-            0.023552,
-            0.01641,
-            0.015,
-            0.02795,
-            0.0275,
         ];
 
-        // $data = array_reverse($data);
+        H::pr(\Indicators::rsi($values));
 
-        // H::pr($data);
-        $closes = array();
-        foreach($data as $d) {
-            $closes[] = (double)$d[4];
-        }
-
-        // H::pr($closes);
-
-        $rsi = \Indicators::rsi($closes, 14);
-        //var_dump($closes);
-        H::pr($rsi);
+        H::pr($t);
         exit;
-
 
         // $allTrades = \App\Bfxtrade::where('amount', '>', 3)->orWhere('amount', '<', -3)->get();
         if (isset($_GET['pagination'])) {
@@ -795,5 +805,167 @@ class TradesController extends Controller
         $allTrades = \App\Bfxtrade::whereBetween('timestamp', [$startDate->getTimestamp() * 1000, $endDate->getTimestamp() * 1000])->get();
 
         return view('bfxtrades', ['trades' => $allTrades]);
+    }
+
+    public function makeIndicators()
+    {
+    for( $i = 0; $i<1000; $i++ ) {
+
+        $candle = App\Bfxcandle::where('checked', null)->first();
+
+        $start = $candle->timestamp;
+        $end = $start + 59999;
+
+        $allTrades = \App\Bfxtrade::whereBetween('timestamp', [$start, $end])->get();
+        $buyTrades = \App\Bfxtrade::whereBetween('timestamp', [$start, $end])->where('amount', '>', 0)->get();
+        $sellTrades = \App\Bfxtrade::whereBetween('timestamp', [$start, $end])->where('amount', '<', 0)->get();
+
+        $ind = [
+            'open' => $allTrades[0]->price,
+            'high' => $allTrades[0]->price,
+            'low' => $allTrades[0]->price,
+            'close' => $allTrades[$allTrades->count() -1]->price,
+            'tradeCount' => $allTrades->count(),
+            'buyCount' => 0,
+            'sellCount' => 0,
+            'volume' => 0,
+            'buyVolume' => 0,
+            'sellVolume' => 0,
+            'avgAmount' => 0,
+            'avgBuyAmount' => 0,
+            'avgSellAmount' => 0,
+            'standardDev' => 0,
+            'buyStandardDev' => 0,
+            'sellStandardDev' => 0,
+            'changedPrice' => 0,
+            'changedPriceUp' => 0,
+            'changedPriceDown' => 0,
+            'buyChangedPrice' => 0,
+            'buyChangedPriceUp' => 0,
+            'buyChangedPriceDown' => 0,
+            'sellChangedPrice' => 0,
+            'sellChangedPriceUp' => 0,
+            'sellChangedPriceDown' => 0,
+            'checked' => 1,
+        ];
+
+        $allTradeAmounts = [];
+        $buyTradeAmounts = [];
+        $sellTradeAmounts = [];
+
+        $prevPrice = $allTrades[0]->price;
+
+        foreach ($allTrades as $trade) {
+            if ($trade->price > $ind['high']) {
+                $ind['high'] = $trade->price;
+            }
+
+            if ($trade->price < $ind['low']) {
+                $ind['low'] = $trade->price;
+            }
+
+            $ind['volume'] = $ind['volume'] + abs($trade->amount);
+
+            $allTradeAmounts[] = abs($trade->amount);
+
+            if ($trade->price <> $prevPrice) {
+                $ind['changedPrice'] = $ind['changedPrice'] + 1;
+
+                if ($trade->amount > 0) {
+                    $ind['buyChangedPrice'] = $ind['buyChangedPrice'] + 1;
+                }
+
+                if ($trade->amount <0) {
+                    $ind['sellChangedPrice'] = $ind['sellChangedPrice'] + 1;
+                }
+            }
+
+            if ($trade->price > $prevPrice) {
+                $ind['changedPriceUp'] = $ind['changedPriceUp'] + 1;
+
+                if ($trade->amount > 0) {
+                    $ind['buyChangedPriceUp'] = $ind['buyChangedPriceUp'] + 1;
+                }
+
+                if ($trade->amount <0) {
+                    $ind['sellChangedPriceUp'] = $ind['sellChangedPriceUp'] + 1;
+                }
+            }
+
+            if ($trade->price < $prevPrice) {
+                $ind['changedPriceDown'] = $ind['changedPriceDown'] + 1;
+
+                if ($trade->amount > 0) {
+                    $ind['buyChangedPriceDown'] = $ind['buyChangedPriceDown'] + 1;
+                }
+
+                if ($trade->amount <0) {
+                    $ind['sellChangedPriceDown'] = $ind['sellChangedPriceDown'] + 1;
+                }
+            }
+
+            if ($trade->amount > 0) {
+                $ind['buyCount'] = $ind['buyCount'] + 1;
+                $ind['buyVolume'] = $ind['buyVolume'] + abs($trade->amount);
+                $buyTradeAmounts[] = abs($trade->amount);
+            }
+
+            if ($trade->amount < 0) {
+                $ind['sellCount'] = $ind['sellCount'] + 1;
+                $ind['sellVolume'] = $ind['sellVolume'] + abs($trade->amount);
+                $sellTradeAmounts[] = abs($trade->amount);
+            }
+
+            $prevPrice = $trade->price;
+        }
+
+        $ind['avgAmount'] = $ind['volume'] / $allTrades->count();
+        if ($buyTrades->count()) {
+            $ind['avgBuyAmount'] = $ind['buyVolume'] / $buyTrades->count();
+        } else {
+            $ind['avgBuyAmount'] = 0;
+        }
+
+        if ($sellTrades->count()) {
+            $ind['avgSellAmount'] = $ind['sellVolume'] / $sellTrades->count();
+        } else {
+            $ind['avgSellAmount'] = 0;
+        }
+
+        $ind['standardDev'] = $this->standardDeviation($allTradeAmounts);
+
+        if ($buyTradeAmounts) {
+            $ind['buyStandardDev'] = $this->standardDeviation($buyTradeAmounts);    
+        }
+        
+        if ($sellTradeAmounts) {
+            $ind['sellStandardDev'] = $this->standardDeviation($sellTradeAmounts);
+        }
+
+        $candle->fill($ind);
+        $candle->save();
+        // exit;
+        // H::pr($ind);
+        }
+        exit;
+    }
+
+    private function standardDeviation($arr) 
+    { 
+        $num_of_elements = count($arr); 
+          
+        $variance = 0.0; 
+          
+                // calculating mean using array_sum() method 
+        $average = array_sum($arr)/$num_of_elements; 
+          
+        foreach($arr as $i) 
+        { 
+            // sum of squares of differences between  
+                        // all numbers and means. 
+            $variance += pow(($i - $average), 2); 
+        } 
+          
+        return (float)sqrt($variance/$num_of_elements); 
     }
 }
