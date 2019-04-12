@@ -1,7 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
-/public/5_1.csv
+/public/v5_1.csv
 /storage/*.key
 /vendor
 /.idea
