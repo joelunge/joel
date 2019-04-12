@@ -27,6 +27,24 @@ class TradesController extends Controller
         // $this->middleware('auth');
     }
 
+    public function test()
+    {
+        $curl = curl_init('https://api.apify.com/v2/browser-info');
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_PROXY, 'http://proxy.apify.com:8000');
+        // Replace <YOUR_PROXY_PASSWORD> below with your password
+        // found at https://my.apify.com/proxy
+        curl_setopt($curl, CURLOPT_PROXYUSERPWD, 'auto:E8eGjqtyRkREDFzBfXEdKMi83');
+        $response = curl_exec($curl);
+        curl_close($curl);
+        if ($response) {
+            echo "hej";
+            echo $response;
+        } else {
+            echo "inte hej";
+        }
+    }
+
     public function hot()
     {
         $coins = config('coins.coins');
@@ -692,21 +710,26 @@ class TradesController extends Controller
 
     public function scrape()
     {
+        $coin = 'XRP';
         for ($i=0; $i < 30; $i++) {
-            sleep(4);
-            // $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2013-03-31 00:00:00');
-            // $end = $start->modify('+10 hours');
+            // sleep(1);
+            $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
+            $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $lastTrade->date);
+            $end = $start->modify('+24 hours');
 
-            // $request = sprintf('https://api.bitfinex.com/v2/trades/tBTCUSD/hist?start=%s&end=%s&limit=1000&sort=1', $start->getTimestamp() * 1000, $end->getTimestamp() * 1000);
+            $request = sprintf('https://api.bitfinex.com/v2/trades/t%sUSD/hist?start=%s&end=%s&limit=5000&sort=1', $coin, $start->getTimestamp() * 1000, $end->getTimestamp() * 1000);
             // H::pr($request);
 
-            $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
+            // $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
 
-            $start = $lastTrade->timestamp;
-            $end = $start + (86400000 * 4);
+            // $start = $lastTrade->timestamp;
+            // $end = $start + (86400000 * 1);
 
-            $request = sprintf('https://api.bitfinex.com/v2/trades/tBTCUSD/hist?start=%s&end=%s&limit=1000&sort=1', $start, $end);
-    // // H::pr($request);
+            // $opts = array('http'=>array('header' => "User-Agent:MyAgent/1.0\r\n"));
+            // $context = stream_context_create($opts);
+            // $request = file_get_contents(sprintf('https://api.bitfinex.com/v2/trades/t%sUSD/hist?start=%s&end=1547510400000&limit=5000&sort=1', $coin, $start, $end) ,false,$context);
+            // H::pr($request);
+
             $trades = file_get_contents($request);
             $trades = json_decode($trades);
             // H::pr($request);
@@ -718,12 +741,15 @@ class TradesController extends Controller
                 // echo "<br>";
                 // $exist = App\Btctrade::where('bfx_id', $trade[0])->first();
 
-                if (date('Y', $trade[1] / 1000) == 2019) {
+                $year = date('Y', $trade[1] / 1000);
+                $month = date('m', $trade[1] / 1000);
+                $day = date('d', $trade[1] / 1000);
+
+                if ($year == 2019 && $month == 02 && $day == 02) {
                     echo "wrong start and end timestamps"; exit;
                 }
 
-                DB::statement(sprintf('insert ignore into btctrades (bfx_id, timestamp, date, amount, price, updated_at, created_at) values (%s, %s, "%s", %s, %s, "%s", "%s")', $trade[0], $trade[1], date('Y-m-d H:i:s', $trade[1] / 1000), $trade[2], $trade[3], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
-
+                DB::statement(sprintf('insert ignore into %strades (bfx_id, timestamp, date, amount, price, updated_at, created_at) values (%s, %s, "%s", %s, %s, "%s", "%s")', $coin, $trade[0], $trade[1], date('Y-m-d H:i:s', $trade[1] / 1000), $trade[2], $trade[3], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
                 // if ($exist == null) {
                 //     $btctrade = new App\Btctrade;
                 //     $btctrade->bfx_id = $trade[0];
@@ -739,67 +765,58 @@ class TradesController extends Controller
 
     public function scrapeCandles()
     {
-        // $start = 1542301200363;
-        // $end = $start + 86400000;
+        $coin = 'XRP';
+        $timeframe = '1m';
+        $loop = 30;
 
-        $lastCandle = App\Bfxcandle::orderBy('id', 'desc')->first();
+        for ($i=0; $i < $loop; $i++) {
+            sleep(4);
+            // $start = 1495216644000;
+            // $end = $start + 86400000; // 24 hours
 
-        $start = $lastCandle->timestamp;
-        $end = $start + 86400000;
+            $lastCandle = App\Btccandle::orderBy('id', 'desc')->first();
 
-        $request = sprintf('https://api.bitfinex.com/v2/candles/trade:1m:tBTCUSD/hist?sort=1&limit=1000&start=%s&end=%s', $start, $end);
+            $start = $lastCandle->timestamp;
+            $end = $start + (86400000 * 1);
 
-        $candles = file_get_contents($request);
-        $candles = json_decode($candles);
+            $request = sprintf('https://api.bitfinex.com/v2/candles/trade:%s:t%sUSD/hist?sort=1&limit=5000&start=%s', $timeframe, $coin, $start, $end);
 
-        foreach ($candles as $candle) {
-            $exist = App\Bfxcandle::where('timestamp', $candle[0])->first();
-            if ($exist == null) {
-                $bfxcandle = new App\Bfxcandle;
-                $bfxcandle->timestamp = $candle[0];
-                $bfxcandle->open = $candle[1];
-                $bfxcandle->close = $candle[2];
-                $bfxcandle->high = $candle[3];
-                $bfxcandle->low = $candle[4];
-                $bfxcandle->volume = $candle[5];
-                $bfxcandle->save();
+            $candles = file_get_contents($request);
+            $candles = json_decode($candles);
+
+            foreach ($candles as $candle) {
+                $year = date('Y', $candle[0] / 1000);
+                $month = date('m', $candle[0] / 1000);
+                $day = date('d', $candle[0] / 1000);
+
+                if ($year == 2019 && $month == 02 && $day == 02) {
+                    echo "wrong start and end timestamps"; exit;
+                }
+
+                DB::statement(sprintf('insert ignore into %s_%s_candles (timestamp, open, close, high, low, volume, updated_at, created_at) values (%s, %s, %s, %s, %s, %s, "%s", "%s")', $coin, $timeframe, $candle[0], $candle[1], $candle[2], $candle[3], $candle[4], $candle[5], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
+                // $exist = App\Btccandle::where('timestamp', $candle[0])->first();
+                // if ($exist == null) {
+                //     $bfxcandle = new App\Btccandle;
+                //     $bfxcandle->timestamp = $candle[0];
+                //     $bfxcandle->open = $candle[1];
+                //     $bfxcandle->close = $candle[2];
+                //     $bfxcandle->high = $candle[3];
+                //     $bfxcandle->low = $candle[4];
+                //     $bfxcandle->volume = $candle[5];
+                //     $bfxcandle->save();
+                // }
             }
         }
-        exit;
     }
 
     public function showBfxTrades()
     {
-        $values = [
-            4183.2,
-            3977.3,
-            3957.8,
-            3950.4,
-            3949.8,
-            3946.8,
-            3947.7,
-            3953.5,
-            3954.9,
-            3954.6,
-            3934.8,
-            3928.5,
-            3926.8,
-            3920.1,
-            3925.2,
-
-        ];
-
-        H::pr(\Indicators::rsi($values));
-
-        H::pr($t);
-        exit;
-
         // $allTrades = \App\Bfxtrade::where('amount', '>', 3)->orWhere('amount', '<', -3)->get();
         if (isset($_GET['pagination'])) {
             $pagination = $_GET['pagination'];
         }
 
-        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-11-19 00:00:00');
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-04-18 00:00:00');
 
         if (isset($pagination)) {
             $startDate = $startDate->modify('+'.$pagination.' days');
@@ -818,145 +835,338 @@ class TradesController extends Controller
         return view('bfxtrades', ['trades' => $allTrades]);
     }
 
+    public function showBfxCandles()
+    {
+        if (isset($_GET['pagination'])) {
+            $pagination = $_GET['pagination'];
+        }
+
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-04-18 06:00:00');
+
+        if (isset($pagination)) {
+            $startDate = $startDate->modify('+'.$pagination.' days');
+        }
+
+        $endDate = $startDate->modify('+72 hours');
+
+        // $allTrades = \App\Bfxtrade::where(function ($query) {
+        //     $query->where('amount', '>', 250);
+        // })->orWhere(function($query) {
+        //     $query->where('amount', '<', -250);
+        // })->get();
+
+        $allCandles = \App\Btccandle::whereBetween('date', [$startDate, $endDate])->get();
+
+        return view('bfxcandles', ['candles' => $allCandles]);
+    }
+
+    public function updateRsi()
+    {
+        exit;
+        ini_set('memory_limit', '12000M');
+        ini_set('max_execution_time', 86400);
+
+        // $candles = \App\Btccandle::select('id', 'close', 'rsi', 'timestamp', 'checked')->get();
+        $candles = \App\Btccandle::get();
+
+        foreach ($candles as $key => $candle) {
+            $candle->open = $candle->open * 6000;
+            $candle->close = $candle->close * 6000;
+            $candle->high = $candle->high * 6000;
+            $candle->low = $candle->low * 6000;
+            $candle->save();
+        }
+        exit;
+
+        // foreach ($candles as $key => $c) {
+        //     if ($c->id > 14) {
+        //         // DB::statement(sprintf('update xrp_1m_candles set rsi_5m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 299999)); // 5 min rsi
+        //         // DB::statement(sprintf('update xrp_1m_candles set rsi_15m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 899999)); // 15 min rsi
+        //         // DB::statement(sprintf('update xrp_1m_candles set rsi_30m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 1799999)); // 30 min rsi
+        //         DB::statement(sprintf('update xrp_1m_candles set rsi_1h = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 3599999)); // 1 hour rsi
+        //     }
+        // }
+        // exit;
+
+        foreach ($candles as $key => $c) {
+            $c->date = date('Y-m-d H:i:s', $c->timestamp / 1000);
+            $c->save();
+        }
+        exit;
+
+        $prices = [];
+        $ids = [];
+        foreach ($candles as $key => $c) {
+            $prices[] = $c->close;
+            $ids[] = $c->id;
+        }
+
+        $rsis = \Indicators::Rsi($ids, $prices);
+
+        foreach ($candles as $key => $c) {
+            if ($c->id > 14) {
+                $c->rsi = $rsis[$c->id];
+                $c->save();
+            }
+        }
+        exit;
+
+        // $candles2 = \App\Btccandle::select('id', 'close')->offset(500000)->limit(500000)->get();
+        // $candles3 = \App\Btccandle::select('id', 'close')->offset(1000000)->limit(500000)->get();
+        // $candles4 = \App\Btccandle::select('id', 'close')->offset(1500000)->limit(500000)->get();
+        // $candles5 = \App\Btccandle::select('id', 'close')->offset(2000000)->limit(500000)->get();
+
+        // $candles = \App\Btccandle::select('id', 'close', 'rsi')->limit(100)->get();
+        // $candles2 = \App\Btccandle::select('id', 'close', 'rsi')->offset(100)->limit(100)->get();
+        // $candles3 = \App\Btccandle::select('id', 'close', 'rsi')->offset(200)->limit(100)->get();
+        // $candles4 = \App\Btccandle::select('id', 'close', 'rsi')->offset(300)->limit(100)->get();
+        // $candles5 = \App\Btccandle::select('id', 'close', 'rsi')->offset(400)->limit(100)->get();
+        
+        // $allCandles = array_merge($candles->toArray(), $candles2->toArray(), $candles3->toArray(), $candles4->toArray(), $candles5->toArray());
+
+        $allCandles = $candles->toArray();
+
+        $candlesWithRsi = [];
+        $prices = [];
+        foreach ($allCandles as $key => $c) {
+            $prices[$c['id']] = $c['close'];
+        }
+
+        foreach ($allCandles as $key => $c) {
+            if ($c['id'] > 15) {
+                $tmpPrices = $prices;
+                $keys = array_flip(array_keys($tmpPrices));
+                $rsiData = array_splice($tmpPrices, 0, $keys[$c['id']]);
+                $candlesWithRsi[$key] = \Indicators::Rsi($rsiData);
+            }
+        }
+
+        foreach ($candles as $key => $cc) {
+            if ($cc->id > 15) {
+                if ($cc->rsi == NULL) {
+                    $cc->rsi = $candlesWithRsi[$cc->id];
+                    $cc->save();
+                }
+            }
+        }
+
+        exit;
+
+        // $keys = array_flip(array_keys($prices));
+        // echo $keys[2];
+
+        // H::pr($keys);
+
+        // H::pr($prices);
+        // H::pr(array_splice($prices, 0, $keys[2]));
+
+        H::pr($prices);
+        H::pr(\Indicators::Rsi($prices));
+
+        H::pr(count($allCandles));
+        exit;
+
+        $arr = [];
+        for( $i = 0; $i<2000000; $i++ ) {
+            $arr[$i] = $i;
+        }
+        H::pr($arr);
+        exit;
+
+        for( $i = 0; $i<10000; $i++ ) {
+            $currentCandle = App\Btccandle::where('rsi', null)->where('id', '>', 14)->first();
+
+            $candles = \App\Btccandle::select('close')->where('id', '<=', $currentCandle->id)->orderBy('id', 'DESC')->limit(20000)->get()->toArray();
+
+            $candles = array_reverse($candles);
+
+            $prices = [];
+            foreach ($candles as $key => $candle) {
+                $prices[$key] = $candle['close'];
+            }
+
+            $currentCandle->rsi = \Indicators::Rsi($prices);
+            $currentCandle->save();
+        }
+    }
+
     public function makeIndicators()
     {
-    for( $i = 0; $i<1000; $i++ ) {
+        ini_set('memory_limit', '12000M');
+        ini_set('max_execution_time', 86400);
 
-        $candle = App\Bfxcandle::where('checked', null)->first();
+        $allCandles = App\Btccandle::where('checked', null)->get();
 
-        $start = $candle->timestamp;
-        $end = $start + 59999;
+        foreach ($allCandles as $key => $candle) {
+            $start = $candle->timestamp;
+            // $end = $start + 86399999; // 24 hours - 1 millisecond
+            $end = $start + 59999; // 60 seconds - 1 millisecond
 
-        $allTrades = \App\Bfxtrade::whereBetween('timestamp', [$start, $end])->get();
-        $buyTrades = \App\Bfxtrade::whereBetween('timestamp', [$start, $end])->where('amount', '>', 0)->get();
-        $sellTrades = \App\Bfxtrade::whereBetween('timestamp', [$start, $end])->where('amount', '<', 0)->get();
+            $allTrades = \App\Btctrade::whereBetween('timestamp', [$start, $end])->get();
+            // $buyTrades = \App\Btctrade::whereBetween('timestamp', [$start, $end])->where('amount', '>', 0)->get();
+            // $sellTrades = \App\Btctrade::whereBetween('timestamp', [$start, $end])->where('amount', '<', 0)->get();
 
-        $ind = [
-            'open' => $allTrades[0]->price,
-            'high' => $allTrades[0]->price,
-            'low' => $allTrades[0]->price,
-            'close' => $allTrades[$allTrades->count() -1]->price,
-            'tradeCount' => $allTrades->count(),
-            'buyCount' => 0,
-            'sellCount' => 0,
-            'volume' => 0,
-            'buyVolume' => 0,
-            'sellVolume' => 0,
-            'avgAmount' => 0,
-            'avgBuyAmount' => 0,
-            'avgSellAmount' => 0,
-            'standardDev' => 0,
-            'buyStandardDev' => 0,
-            'sellStandardDev' => 0,
-            'changedPrice' => 0,
-            'changedPriceUp' => 0,
-            'changedPriceDown' => 0,
-            'buyChangedPrice' => 0,
-            'buyChangedPriceUp' => 0,
-            'buyChangedPriceDown' => 0,
-            'sellChangedPrice' => 0,
-            'sellChangedPriceUp' => 0,
-            'sellChangedPriceDown' => 0,
-            'checked' => 1,
-        ];
+            if ($allTrades->isEmpty()) {
+                $ind = [
+                    'open' => 0,
+                    'high' => 0,
+                    'low' => 0,
+                    'close' => 0,
+                    'tradeCount' => 0,
+                    'buyCount' => 0,
+                    'sellCount' => 0,
+                    'volume' => 0,
+                    'buyVolume' => 0,
+                    'sellVolume' => 0,
+                    'avgAmount' => 0,
+                    'avgBuyAmount' => 0,
+                    'avgSellAmount' => 0,
+                    'standardDev' => 0,
+                    'buyStandardDev' => 0,
+                    'sellStandardDev' => 0,
+                    'changedPrice' => 0,
+                    'changedPriceUp' => 0,
+                    'changedPriceDown' => 0,
+                    'buyChangedPrice' => 0,
+                    'buyChangedPriceUp' => 0,
+                    'buyChangedPriceDown' => 0,
+                    'sellChangedPrice' => 0,
+                    'sellChangedPriceUp' => 0,
+                    'sellChangedPriceDown' => 0,
+                    'checked' => 1,
+                ];
 
-        $allTradeAmounts = [];
-        $buyTradeAmounts = [];
-        $sellTradeAmounts = [];
+                $candle->fill($ind);
+                $candle->save();
 
-        $prevPrice = $allTrades[0]->price;
-
-        foreach ($allTrades as $trade) {
-            if ($trade->price > $ind['high']) {
-                $ind['high'] = $trade->price;
+                continue;
+            } else {
+                $ind = [
+                    'open' => $allTrades[0]->price,
+                    'high' => $allTrades[0]->price,
+                    'low' => $allTrades[0]->price,
+                    'close' => $allTrades[$allTrades->count() -1]->price,
+                    'tradeCount' => $allTrades->count(),
+                    'buyCount' => 0,
+                    'sellCount' => 0,
+                    'volume' => 0,
+                    'buyVolume' => 0,
+                    'sellVolume' => 0,
+                    'avgAmount' => 0,
+                    'avgBuyAmount' => 0,
+                    'avgSellAmount' => 0,
+                    'standardDev' => 0,
+                    'buyStandardDev' => 0,
+                    'sellStandardDev' => 0,
+                    'changedPrice' => 0,
+                    'changedPriceUp' => 0,
+                    'changedPriceDown' => 0,
+                    'buyChangedPrice' => 0,
+                    'buyChangedPriceUp' => 0,
+                    'buyChangedPriceDown' => 0,
+                    'sellChangedPrice' => 0,
+                    'sellChangedPriceUp' => 0,
+                    'sellChangedPriceDown' => 0,
+                    'checked' => 1,
+                ];
             }
 
-            if ($trade->price < $ind['low']) {
-                $ind['low'] = $trade->price;
-            }
+            $allTradeAmounts = [];
+            $buyTradeAmounts = [];
+            $sellTradeAmounts = [];
 
-            $ind['volume'] = $ind['volume'] + abs($trade->amount);
+            $prevPrice = $allTrades[0]->price;
 
-            $allTradeAmounts[] = abs($trade->amount);
+            foreach ($allTrades as $trade) {
+                if ($trade->price > $ind['high']) {
+                    $ind['high'] = $trade->price;
+                }
 
-            if ($trade->price <> $prevPrice) {
-                $ind['changedPrice'] = $ind['changedPrice'] + 1;
+                if ($trade->price < $ind['low']) {
+                    $ind['low'] = $trade->price;
+                }
+
+                $ind['volume'] = $ind['volume'] + abs($trade->amount * $trade->price);
+
+                $allTradeAmounts[] = abs($trade->amount);
+
+                if ($trade->price <> $prevPrice) {
+                    $ind['changedPrice'] = $ind['changedPrice'] + 1;
+
+                    if ($trade->amount > 0) {
+                        $ind['buyChangedPrice'] = $ind['buyChangedPrice'] + 1;
+                    }
+
+                    if ($trade->amount <0) {
+                        $ind['sellChangedPrice'] = $ind['sellChangedPrice'] + 1;
+                    }
+                }
+
+                if ($trade->price > $prevPrice) {
+                    $ind['changedPriceUp'] = $ind['changedPriceUp'] + 1;
+
+                    if ($trade->amount > 0) {
+                        $ind['buyChangedPriceUp'] = $ind['buyChangedPriceUp'] + 1;
+                    }
+
+                    if ($trade->amount <0) {
+                        $ind['sellChangedPriceUp'] = $ind['sellChangedPriceUp'] + 1;
+                    }
+                }
+
+                if ($trade->price < $prevPrice) {
+                    $ind['changedPriceDown'] = $ind['changedPriceDown'] + 1;
+
+                    if ($trade->amount > 0) {
+                        $ind['buyChangedPriceDown'] = $ind['buyChangedPriceDown'] + 1;
+                    }
+
+                    if ($trade->amount <0) {
+                        $ind['sellChangedPriceDown'] = $ind['sellChangedPriceDown'] + 1;
+                    }
+                }
 
                 if ($trade->amount > 0) {
-                    $ind['buyChangedPrice'] = $ind['buyChangedPrice'] + 1;
+                    $ind['buyCount'] = $ind['buyCount'] + 1;
+                    $ind['buyVolume'] = $ind['buyVolume'] + abs($trade->amount * $trade->price);
+                    $buyTradeAmounts[] = abs($trade->amount);
                 }
 
-                if ($trade->amount <0) {
-                    $ind['sellChangedPrice'] = $ind['sellChangedPrice'] + 1;
+                if ($trade->amount < 0) {
+                    $ind['sellCount'] = $ind['sellCount'] + 1;
+                    $ind['sellVolume'] = $ind['sellVolume'] + abs($trade->amount * $trade->price);
+                    $sellTradeAmounts[] = abs($trade->amount);
                 }
+
+                $prevPrice = $trade->price;
             }
 
-            if ($trade->price > $prevPrice) {
-                $ind['changedPriceUp'] = $ind['changedPriceUp'] + 1;
+            $ind['avgAmount'] = $ind['volume'] / $allTrades->count();
+            // if ($buyTrades->count()) {
+            //     $ind['avgBuyAmount'] = $ind['buyVolume'] / $buyTrades->count();
+            // } else {
+            //     $ind['avgBuyAmount'] = 0;
+            // }
 
-                if ($trade->amount > 0) {
-                    $ind['buyChangedPriceUp'] = $ind['buyChangedPriceUp'] + 1;
-                }
+            // if ($sellTrades->count()) {
+            //     $ind['avgSellAmount'] = $ind['sellVolume'] / $sellTrades->count();
+            // } else {
+            //     $ind['avgSellAmount'] = 0;
+            // }
 
-                if ($trade->amount <0) {
-                    $ind['sellChangedPriceUp'] = $ind['sellChangedPriceUp'] + 1;
-                }
+            $ind['standardDev'] = $this->standardDeviation($allTradeAmounts);
+
+            if ($buyTradeAmounts) {
+                $ind['buyStandardDev'] = $this->standardDeviation($buyTradeAmounts);    
+            }
+            
+            if ($sellTradeAmounts) {
+                $ind['sellStandardDev'] = $this->standardDeviation($sellTradeAmounts);
             }
 
-            if ($trade->price < $prevPrice) {
-                $ind['changedPriceDown'] = $ind['changedPriceDown'] + 1;
-
-                if ($trade->amount > 0) {
-                    $ind['buyChangedPriceDown'] = $ind['buyChangedPriceDown'] + 1;
-                }
-
-                if ($trade->amount <0) {
-                    $ind['sellChangedPriceDown'] = $ind['sellChangedPriceDown'] + 1;
-                }
-            }
-
-            if ($trade->amount > 0) {
-                $ind['buyCount'] = $ind['buyCount'] + 1;
-                $ind['buyVolume'] = $ind['buyVolume'] + abs($trade->amount);
-                $buyTradeAmounts[] = abs($trade->amount);
-            }
-
-            if ($trade->amount < 0) {
-                $ind['sellCount'] = $ind['sellCount'] + 1;
-                $ind['sellVolume'] = $ind['sellVolume'] + abs($trade->amount);
-                $sellTradeAmounts[] = abs($trade->amount);
-            }
-
-            $prevPrice = $trade->price;
-        }
-
-        $ind['avgAmount'] = $ind['volume'] / $allTrades->count();
-        if ($buyTrades->count()) {
-            $ind['avgBuyAmount'] = $ind['buyVolume'] / $buyTrades->count();
-        } else {
-            $ind['avgBuyAmount'] = 0;
-        }
-
-        if ($sellTrades->count()) {
-            $ind['avgSellAmount'] = $ind['sellVolume'] / $sellTrades->count();
-        } else {
-            $ind['avgSellAmount'] = 0;
-        }
-
-        $ind['standardDev'] = $this->standardDeviation($allTradeAmounts);
-
-        if ($buyTradeAmounts) {
-            $ind['buyStandardDev'] = $this->standardDeviation($buyTradeAmounts);    
-        }
-        
-        if ($sellTradeAmounts) {
-            $ind['sellStandardDev'] = $this->standardDeviation($sellTradeAmounts);
-        }
-
-        $candle->fill($ind);
-        $candle->save();
-        // exit;
-        // H::pr($ind);
+            $candle->fill($ind);
+            $candle->save();
+            // H::pr($ind);
         }
         exit;
     }
@@ -978,5 +1188,280 @@ class TradesController extends Controller
         } 
           
         return (float)sqrt($variance/$num_of_elements); 
+    }
+
+    public function normalizeVolume()
+    {
+        ini_set('memory_limit', '12000M');
+        ini_set('max_execution_time', 86400);
+
+        // Get all 1-minute candles
+        $candles = App\Btccandle::get();
+        
+        // Can't divide by 0, so I set the default value to 1 for each feature
+        $maxVolume = 1;
+        $maxBuyVolume = 1;
+        $maxSellVolume = 1;
+        $maxTradeCount = 1;
+        $maxBuyCount = 1;
+        $maxSellCount = 1;
+        $maxChangedPrice = 1;
+
+        // Loop through all 1-minute candles
+        foreach ($candles as $key => $c) {
+
+            // if the current candles volume bigger than the maxVolume, save this as a new max
+            // also, do volume * open price to get the volume in USD instead of amount of coins
+            if (($c->volume * $c->open) > $maxVolume) {
+                $maxVolume = $c->volume * $c->open;
+            }
+
+            // Same as above, but for buyVolume
+            if (($c->buyVolume * $c->open) > $maxBuyVolume) {
+                $maxBuyVolume = $c->buyVolume * $c->open;
+            }
+
+            // Same as above, but for sellVolume
+            if (($c->sellVolume * $c->open) > $maxSellVolume) {
+                $maxSellVolume = $c->sellVolume * $c->open;
+            }
+
+            // Same as above, but for tradeCount
+            if ($c->tradeCount > $maxTradeCount) {
+                $maxTradeCount = $c->tradeCount;
+            }
+
+            // Same as above, but for buyCount
+            if ($c->buyCount > $maxBuyCount) {
+                $maxBuyCount = $c->buyCount;
+            }
+
+            // Same as above, but for sellCount
+            if ($c->sellCount > $maxSellCount) {
+                $maxSellCount = $c->sellCount;
+            }
+
+            // Same as above, but for changedPrice
+            if ($c->changedPrice > $maxChangedPrice) {
+                $maxChangedPrice = $c->changedPrice;
+            }
+
+            // Store new normalized values
+            $c->volume = ($c->volume * $c->open)  / $maxVolume;
+            $c->buyVolume = ($c->buyVolume * $c->open) / $maxBuyVolume;
+            $c->sellVolume = ($c->sellVolume * $c->open) / $maxSellVolume;
+            $c->tradeCount = $c->tradeCount / $maxTradeCount;
+            $c->buyCount = $c->buyCount / $maxBuyCount;
+            $c->sellCount = $c->sellCount / $maxSellCount;
+            $c->changedPrice = $c->changedPrice / $maxChangedPrice;
+            $c->checked = 1;
+
+            $c->save();
+        }
+    }
+
+    public function analyzeUptrends()
+    {
+        $candles = App\Btccandle::where('timestamp', '<=', 1545048720000)->orderBy('id', 'desc')->take(20)->get();
+        $afterCandles = App\Btccandle::where('timestamp', '>', 1545048720000)->orderBy('id', 'asc')->take(20)->get();
+
+        foreach ($candles as $key => $c) {
+            echo $c->id;
+            echo " - ";
+            if ($c->open && $c->close) {
+                echo $c->open / 6000;
+                echo " & ";
+                echo $c->close / 6000;
+                echo " ";
+                echo number_format((1-($c->open / $c->close)) * 100, 2).'%';
+            } else {
+                echo "N";
+            }
+
+            echo " - ";
+
+            if ($c->buyVolume && $c->sellVolume) {
+                echo number_format($c->buyVolume / $c->sellVolume, 2);
+            } else {
+                echo "N";
+            }
+            echo " - ";
+            echo $c->tradeCount;
+            echo "<br/>";
+        }
+
+        foreach ($afterCandles as $key => $c) {
+            echo $c->id;
+            echo " - ";
+            if ($c->open && $c->close) {
+                echo $c->open / 6000;
+                echo " & ";
+                echo $c->close / 6000;
+                echo " ";
+                echo number_format((1-($c->open / $c->close)) * 100, 2).'%';
+            } else {
+                echo "N";
+            }
+
+            echo " - ";
+
+            if ($c->buyVolume && $c->sellVolume) {
+                echo number_format($c->buyVolume / $c->sellVolume, 2);
+            } else {
+                echo "N";
+            }
+            echo " - ";
+            echo $c->tradeCount;
+            echo "<br/>";
+        }
+    }
+
+    public function fillEmptyMinutes()
+    {
+        ini_set('memory_limit', '12000M');
+        ini_set('max_execution_time', 86400);
+        
+        $csv = array_map('str_getcsv', file(public_path() . '/v5_1.csv'));
+        unset($csv[0]);
+
+        $prevClose = 0;
+        $prevPhil1 = 0;
+        $prevPhil2 = 0;
+        $prevPhil3 = 0;
+        $prevPhil4 = 0;
+        $prevPhil5 = 0;
+
+        $newDatapoints = [];
+        foreach ($csv as $bla) {
+            $newDatapoints[$bla[0]] = $bla;
+        }
+
+        $expectedDate = '2014-04-02 22:00:00';
+
+        for ($i=0; $i < 99999999999999; $i++) {
+
+            if (array_key_exists($expectedDate, $newDatapoints)) {
+                $c = new App\Btccandle;
+
+                $c->date = $newDatapoints[$expectedDate][0];
+                $c->open = $newDatapoints[$expectedDate][1];
+                $c->close = $newDatapoints[$expectedDate][2];
+                $c->high = $newDatapoints[$expectedDate][3];
+                $c->low = $newDatapoints[$expectedDate][4];
+                $c->volume = $newDatapoints[$expectedDate][5];
+                $c->buyVolume  = $newDatapoints[$expectedDate][6];
+                $c->sellVolume  = $newDatapoints[$expectedDate][7];
+                $c->tradeCount  = $newDatapoints[$expectedDate][8];
+                $c->changedPrice  = $newDatapoints[$expectedDate][9];
+                $c->rsi_1m = $newDatapoints[$expectedDate][10];
+                $c->rsi_5m = $newDatapoints[$expectedDate][11];
+                $c->rsi_15m = $newDatapoints[$expectedDate][12];
+                $c->rsi_30m = $newDatapoints[$expectedDate][13];
+                $c->rsi_1h = $newDatapoints[$expectedDate][14];
+
+                $c->save();
+
+                $prevClose = $newDatapoints[$expectedDate][2];
+                $prevPhil1 = $newDatapoints[$expectedDate][10];
+                $prevPhil2 = $newDatapoints[$expectedDate][11];
+                $prevPhil3 = $newDatapoints[$expectedDate][12];
+                $prevPhil4 = $newDatapoints[$expectedDate][13];
+                $prevPhil5 = $newDatapoints[$expectedDate][14];
+            } else {
+                $c = new App\Btccandle;
+
+                $c->date = $expectedDate;
+                $c->open = $prevClose;
+                $c->close = $prevClose;
+                $c->high = $prevClose;
+                $c->low = $prevClose;
+                $c->volume = 0;
+                $c->buyVolume  = 0;
+                $c->sellVolume  = 0;
+                $c->tradeCount  = 0;
+                $c->changedPrice  = 0;
+                $c->rsi_1m = $prevPhil1;
+                $c->rsi_5m = $prevPhil2;
+                $c->rsi_15m = $prevPhil3;
+                $c->rsi_30m = $prevPhil4;
+                $c->rsi_1h = $prevPhil5;
+
+                $c->save();
+            }
+
+            if ($expectedDate == '2019-01-14 23:59:00') {
+                die('DONE');
+            }
+
+            $dateTime = \datetime::createfromformat('Y-m-d H:i:s', $expectedDate);
+            $expectedDate = $dateTime->modify('+1 minute')->format('Y-m-d H:i:s');
+        }
+
+        exit;
+
+        foreach ($newDatapoints as $key => $d) {
+            if ($expectedDate != $d[0]) {
+
+                // $dateTime = \datetime::createfromformat('Y-m-d H:i:s', $expectedDate);
+
+                $c = new App\Btccandle;
+
+                $c->date = $expectedDate;
+                $c->open = $prevClose;
+                $c->close = $prevClose;
+                $c->high = $prevClose;
+                $c->low = $prevClose;
+                $c->volume = 0;
+                $c->buyVolume  = 0;
+                $c->sellVolume  = 0;
+                $c->tradeCount  = 0;
+                $c->changedPrice  = 0;
+                $c->rsi_1m = $prevPhil1;
+                $c->rsi_5m = $prevPhil2;
+                $c->rsi_15m = $prevPhil3;
+                $c->rsi_30m = $prevPhil4;
+                $c->rsi_1h = $prevPhil5;
+
+                $c->save();
+
+                $csv = reset($csv);
+            } else {
+                $c = new App\Btccandle;
+                // $dateTime = \datetime::createfromformat('Y-m-d H:i:s', $d[0]);
+
+                $c->date = $d[0];
+                $c->open = $d[1];
+                $c->close = $d[2];
+                $c->high = $d[3];
+                $c->low = $d[4];
+                $c->volume = $d[5];
+                $c->buyVolume = $d[6];
+                $c->sellVolume = $d[7];
+                $c->tradeCount = $d[8];
+                $c->changedPrice = $d[9];
+                $c->rsi_1m = $d[10];
+                $c->rsi_5m = $d[11];
+                $c->rsi_15m = $d[12];
+                $c->rsi_30m = $d[13];
+                $c->rsi_1h = $d[14];
+
+                $prevClose = $d[2];
+                $prevPhil1 = $d[10];
+                $prevPhil2 = $d[11];
+                $prevPhil3 = $d[12];
+                $prevPhil4 = $d[13];
+                $prevPhil5 = $d[14];
+
+                $c->save();
+            }
+
+            echo $expectedDate . ' - ' . $d[0];
+            echo "<br>";
+
+            $dateTime = \datetime::createfromformat('Y-m-d H:i:s', $expectedDate);
+            $expectedDate = $dateTime->modify('+1 minute')->format('Y-m-d H:i:s');
+            // echo $dateTime->format('Y-m-d H:i:s');
+            // H::pr(strtotime($d[0]));
+        }
     }
 }

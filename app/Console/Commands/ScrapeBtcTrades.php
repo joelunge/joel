@@ -11,7 +11,7 @@ class ScrapeTrades extends Command
      *
      * @var string
      */
-    protected $signature = 'scrape:btctrades';
+    protected $signature = 'scrape:trades';
 
     /**
      * The console command description.
