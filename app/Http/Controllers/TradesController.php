@@ -710,14 +710,17 @@ class TradesController extends Controller
 
     public function scrape()
     {
-        $coin = 'XRP';
+        $coin = 'BTC';
         for ($i=0; $i < 30; $i++) {
             // sleep(1);
             $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
-            $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $lastTrade->date);
-            $end = $start->modify('+24 hours');
+            // $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $lastTrade->timestamp);
+            // $end = $start->modify('+24 hours');
 
-            $request = sprintf('https://api.bitfinex.com/v2/trades/t%sUSD/hist?start=%s&end=%s&limit=5000&sort=1', $coin, $start->getTimestamp() * 1000, $end->getTimestamp() * 1000);
+            $start = $lastTrade->timestamp;
+            $end = $start + (86400000 * 1);
+
+            $request = sprintf('https://api.bitfinex.com/v2/trades/t%sUSD/hist?start=%s&end=%s&limit=5000&sort=1', $coin, $start, $end);
             // H::pr($request);
 
             // $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
@@ -745,11 +748,11 @@ class TradesController extends Controller
                 $month = date('m', $trade[1] / 1000);
                 $day = date('d', $trade[1] / 1000);
 
-                if ($year == 2019 && $month == 02 && $day == 02) {
+                if ($year == 2019 && $month == 04 && $day == 14) {
                     echo "wrong start and end timestamps"; exit;
                 }
 
-                DB::statement(sprintf('insert ignore into %strades (bfx_id, timestamp, date, amount, price, updated_at, created_at) values (%s, %s, "%s", %s, %s, "%s", "%s")', $coin, $trade[0], $trade[1], date('Y-m-d H:i:s', $trade[1] / 1000), $trade[2], $trade[3], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
+                DB::statement(sprintf('insert ignore into %strades (bfx_id, timestamp, amount, price, updated_at, created_at) values (%s, %s, %s, %s, "%s", "%s")', strtolower($coin), $trade[0], $trade[1], $trade[2], $trade[3], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
                 // if ($exist == null) {
                 //     $btctrade = new App\Btctrade;
                 //     $btctrade->bfx_id = $trade[0];
@@ -816,7 +819,7 @@ class TradesController extends Controller
             $pagination = $_GET['pagination'];
         }
 
-        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-04-18 00:00:00');
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2017-12-12 00:00:00');
 
         if (isset($pagination)) {
             $startDate = $startDate->modify('+'.$pagination.' days');
@@ -841,7 +844,7 @@ class TradesController extends Controller
             $pagination = $_GET['pagination'];
         }
 
-        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-04-18 06:00:00');
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-03-06 00:00:00');
 
         if (isset($pagination)) {
             $startDate = $startDate->modify('+'.$pagination.' days');

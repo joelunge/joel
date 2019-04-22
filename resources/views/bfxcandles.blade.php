@@ -83,9 +83,9 @@
 				<td style="border: none;">{{$candle->close}}</td>
 				<td style="border: none;">{{$candle->tradeCount}}</td>
                 <td style="border: none;">{{$candle->changedPrice}}</td>
-                <td style="text-align: right; border: none;">@if ($candle->buyVolume && $candle->sellVolume) x{{round($candle->buyVolume / $candle->sellVolume)}} @endif</td>
-                <td style="text-align: right; border: none;">{{number_format($candle->buyVolume, 0, ' ', ' ')}}</td>
-				<td style="text-align: right; border: none;">{{number_format($candle->sellVolume, 0, ' ', ' ')}}</td>
+                <td style="text-align: right; border: none;">@if ($candle->buyVolumeUsd && $candle->sellVolumeUsd) x{{round($candle->buyVolumeUsd / $candle->sellVolumeUsd)}} @endif</td>
+                <td style="text-align: right; border: none;">{{number_format($candle->buyVolumeUsd, 0, ' ', ' ')}}</td>
+				<td style="text-align: right; border: none;">{{number_format($candle->sellVolumeUsd, 0, ' ', ' ')}}</td>
 			</tr>
 			@endforeach
 		</tbody>

@@ -30,4 +30,7 @@ Route::get('/normalize_volume', 'TradesController@normalizeVolume')->name('norma
 Route::get('/analyze_uptrends', 'TradesController@analyzeUptrends')->name('analyze_uptrends');
 Route::get('news', 'NewsController@list')->name('news');
 Route::get('fill_empty_minutes', 'TradesController@fillEmptyMinutes')->name('fill_empty_minutes');
+Route::get('/alerts/rsi15m', 'AlertsController@rsi15m')->name('alerts_rsi15m');
+Route::get('/candles/scrape_hist', 'CandlesController@scrapeHist')->name('candles_scrape_hist');
+
 Route::get('/test', 'TradesController@test')->name('test');
