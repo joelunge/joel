@@ -4,6 +4,7 @@ class RsiAlerts
 {
     public static function alert()
     {
+    	$messages = [];
     	$tickersUrl = 'https://api-pub.bitfinex.com/v2/tickers?symbols=ALL';
     	$tickersArr = file_get_contents($tickersUrl);
     	$tickersArr = json_decode($tickersArr);
@@ -112,7 +113,7 @@ class RsiAlerts
 		        			if (($lowRsiCheckpoint2 > $lowRsiCheckpoint1) && ($priceAtLowRsiCheckpoint2 < $priceAtLowRsiCheckpoint1)) {
 		        				$condition1 = true;
 		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 150) {
-		        					\Notifications::slackMessage($t->ticker .' - BULLISH DIVERGENCE');
+		        					$messages[] = str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE';
 		        				}
 		        				$lowRsiCheckpoint1 = false;
 						        $priceAtLowRsiCheckpoint1 = false;
@@ -168,7 +169,7 @@ class RsiAlerts
 		        			if (($highRsiCheckpoint2 < $highRsiCheckpoint1) && ($priceAtHighRsiCheckpoint2 > $priceAtHighRsiCheckpoint1)) {
 		        				$condition1 = true;
 		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 150) {
-		        					\Notifications::slackMessage($t->ticker .' - BEARISH DIVERGENCE');
+		        					$messages[] = str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE';
 		        				}
 		        				$highRsiCheckpoint1 = false;
 						        $priceAtHighRsiCheckpoint1 = false;
@@ -179,6 +180,10 @@ class RsiAlerts
 		        	}
 		        }
 			}
+		}
+		foreach ($messages as $key => $m) {
+			\Notifications::slackMessage($m);
+			\Notifications::slackMessage('======================');
 		}
     }
 }
