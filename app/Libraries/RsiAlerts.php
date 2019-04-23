@@ -31,7 +31,7 @@ class RsiAlerts
     	}
 
     	foreach ($tickers as $key => $t) {
-	    	$candleUrl = sprintf('https://api-pub.bitfinex.com/v2/candles/trade:15m:%s/hist?limit=5000', 'tBTCUSD');
+	    	$candleUrl = sprintf('https://api-pub.bitfinex.com/v2/candles/trade:15m:%s/hist?limit=5000', $t->ticker);
 	    	$candlesArr = file_get_contents($candleUrl);
 	    	$candlesArr = json_decode($candlesArr);
 	    	$candlesArr = array_reverse($candlesArr);
@@ -41,6 +41,7 @@ class RsiAlerts
 	    		$candle = new \StdClass;
 	    		$candle->id = $key;
 	    		$candle->timestamp = $c[0];
+	    		$candle->date = date('Y-m-d H:i:s', $candle->timestamp / 1000);
 	    		$candle->open = $c[1];
 	    		$candle->close = $c[2];
 	    		$candle->high = $c[3];
@@ -106,14 +107,14 @@ class RsiAlerts
 		        				$lowRsiCheckpoint2 = $c->rsi;
 		        				$priceAtLowRsiCheckpoint2 = $c->close;
 		        			// }
-		        		} elseif (($c->rsi < $lowRsiCheckpoint2) && ($c->rsi <= 30)) {
+		        		} else {
 		        			$lowRsiCheckpoint2 = $c->rsi;
 		        			$priceAtLowRsiCheckpoint2 = $c->close;
 
 		        			if (($lowRsiCheckpoint2 > $lowRsiCheckpoint1) && ($priceAtLowRsiCheckpoint2 < $priceAtLowRsiCheckpoint1)) {
 		        				$condition1 = true;
-		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16) {
-		        					$messages[] = ':four_leaf_clover: ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE - '  . round((1-($t->low/$t->high))*100, 1);
+		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 160) {
+		        					$messages[] = date('Y-m-d H:i:s', $c->timestamp / 1000) . ':four_leaf_clover: ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE - '  . round((1-($t->low/$t->high))*100, 1);
 		        				}
 		        				$lowRsiCheckpoint1 = false;
 						        $priceAtLowRsiCheckpoint1 = false;
@@ -162,14 +163,14 @@ class RsiAlerts
 		        				$highRsiCheckpoint2 = $c->rsi;
 		        				$priceAtHighRsiCheckpoint2 = $c->close;
 		        			// }
-		        		} elseif (($c->rsi > $highRsiCheckpoint2) && ($c->rsi >= 70)) {
+		        		} else {
 		        			$highRsiCheckpoint2 = $c->rsi;
 		        			$priceAtHighRsiCheckpoint2 = $c->close;
 
 		        			if (($highRsiCheckpoint2 < $highRsiCheckpoint1) && ($priceAtHighRsiCheckpoint2 > $priceAtHighRsiCheckpoint1)) {
 		        				$condition1 = true;
-		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16) {
-		        					$messages[] = ':diamonds: ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BEARISH DIVERGENCE - ' . round((1-($t->low/$t->high))*100, 1);
+		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 160) {
+		        					$messages[] = date('Y-m-d H:i:s', $c->timestamp / 1000) . ':diamonds: ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BEARISH DIVERGENCE - ' . round((1-($t->low/$t->high))*100, 1);
 		        				}
 		        				$highRsiCheckpoint1 = false;
 						        $priceAtHighRsiCheckpoint1 = false;
