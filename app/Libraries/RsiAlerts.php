@@ -112,7 +112,7 @@ class RsiAlerts
 
 		        			if (($lowRsiCheckpoint2 > $lowRsiCheckpoint1) && ($priceAtLowRsiCheckpoint2 < $priceAtLowRsiCheckpoint1)) {
 		        				$condition1 = true;
-		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 150) {
+		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16) {
 		        					$messages[] = str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE';
 		        				}
 		        				$lowRsiCheckpoint1 = false;
@@ -168,8 +168,8 @@ class RsiAlerts
 
 		        			if (($highRsiCheckpoint2 < $highRsiCheckpoint1) && ($priceAtHighRsiCheckpoint2 > $priceAtHighRsiCheckpoint1)) {
 		        				$condition1 = true;
-		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 150) {
-		        					$messages[] = str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE';
+		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16) {
+		        					$messages[] = str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BEARISH DIVERGENCE';
 		        				}
 		        				$highRsiCheckpoint1 = false;
 						        $priceAtHighRsiCheckpoint1 = false;
@@ -181,9 +181,11 @@ class RsiAlerts
 		        }
 			}
 		}
+		if (count($messages) >= 1) {
+			\Notifications::slackMessage('======================');
+		}
 		foreach ($messages as $key => $m) {
 			\Notifications::slackMessage($m);
-			\Notifications::slackMessage('======================');
 		}
     }
 }
