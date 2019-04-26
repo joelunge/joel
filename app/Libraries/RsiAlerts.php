@@ -23,7 +23,7 @@ class RsiAlerts
     	$tickers = [];
     	foreach ($tickersTmp as $key => $t) {
     		$condition1 = strpos($t->ticker, 'USD') !== false;
-    		$condition2 = $t->volume > 500000;
+    		$condition2 = $t->volume > 1000000;
 
     		if ($condition1 and $condition2) {
 			    $tickers[] = $t;
