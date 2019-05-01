@@ -710,58 +710,89 @@ class TradesController extends Controller
 
     public function scrape()
     {
-        $coin = 'BTC';
-        for ($i=0; $i < 30; $i++) {
-            // sleep(1);
-            $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
-            // $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $lastTrade->timestamp);
-            // $end = $start->modify('+24 hours');
+        $coins = [
+            // 'BTC' => 1364688000000, // KLAR
+            // 'ETH' => 1466812800000, // KLAR
+            // 'EOS' => 1498867200000, // KLAR
+            // 'BAB' => 1542067200000, // KLAR
+            // 'LTC' => 1383091200000, // KLAR
+            // 'XRP' => 1495152000000, // KLAR
+            // 'OMG' => 1499990400000, // KLAR
+            // 'IOT' => 1497225600000, // KLAR
+            // 'NEO' => 1504742400000, // KLAR
+            // 'XMR' => 1480464000000, // KLAR
+            // 'ETC' => 1470009600000, // KLAR
+            // 'BCH' => 1513728000000, // KLAR - BEHÖVER INTE UPPDATERAS
+        ];
 
-            $start = $lastTrade->timestamp;
-            $end = $start + (86400000 * 1);
+        foreach ($coins as $coin => $startTimestamp) {
+            for ($i=0; $i < 30; $i++) {
+                sleep(2);
+                $lastTrade = App\Btctrade::from(sprintf('upw_%s_trades', strtolower($coin)))->orderBy('id', 'desc')->first();
+                // $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $lastTrade->timestamp);
+                // $end = $start->modify('+24 hours');
 
-            $request = sprintf('https://api.bitfinex.com/v2/trades/t%sUSD/hist?start=%s&end=%s&limit=5000&sort=1', $coin, $start, $end);
-            // H::pr($request);
-
-            // $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
-
-            // $start = $lastTrade->timestamp;
-            // $end = $start + (86400000 * 1);
-
-            // $opts = array('http'=>array('header' => "User-Agent:MyAgent/1.0\r\n"));
-            // $context = stream_context_create($opts);
-            // $request = file_get_contents(sprintf('https://api.bitfinex.com/v2/trades/t%sUSD/hist?start=%s&end=1547510400000&limit=5000&sort=1', $coin, $start, $end) ,false,$context);
-            // H::pr($request);
-
-            $trades = file_get_contents($request);
-            $trades = json_decode($trades);
-            // H::pr($request);
-
-            foreach ($trades as $trade) {
-                // echo sprintf('%s ___ %s ___ %s ___ %s', $trade[0], date('H:i:s', $trade[1]/1000), $trade[2], $trade[3]);
-                // echo sprintf('%s,    %s,       %s,            %s', $trade[0], $trade[1], $trade[2], $trade[3]);
-                // echo "<br>";
-                // echo "<br>";
-                // $exist = App\Btctrade::where('bfx_id', $trade[0])->first();
-
-                $year = date('Y', $trade[1] / 1000);
-                $month = date('m', $trade[1] / 1000);
-                $day = date('d', $trade[1] / 1000);
-
-                if ($year == 2019 && $month == 04 && $day == 14) {
-                    echo "wrong start and end timestamps"; exit;
+                if (isset($lastTrade->timestamp)) {
+                    $start = $lastTrade->timestamp;
+                } else {
+                    $start = $startTimestamp;
                 }
 
-                DB::statement(sprintf('insert ignore into %strades (bfx_id, timestamp, amount, price, updated_at, created_at) values (%s, %s, %s, %s, "%s", "%s")', strtolower($coin), $trade[0], $trade[1], $trade[2], $trade[3], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
-                // if ($exist == null) {
-                //     $btctrade = new App\Btctrade;
-                //     $btctrade->bfx_id = $trade[0];
-                //     $btctrade->timestamp = $trade[1];
-                //     $btctrade->date = date('Y-m-d H:i:s', $trade[1] / 1000);
-                //     $btctrade->amount = $trade[2];
-                //     $btctrade->price = $trade[3];
-                //     $btctrade->save();
-                // }
+                if (date('Y-m-d', $start / 1000) == date('Y-m-d', time())) {
+                    break;
+                }
+
+                if ($coin == 'ETH' && date('Y-m-d', $start / 1000) == '2016-08-02') {
+                    $start = 1470865301000;
+                }
+
+                if ($coin == 'ETC' && date('Y-m-d', $start / 1000) == '2016-08-02') {
+                    $start = 1470865301000;
+                }
+
+                if ($coin == 'LTC' && date('Y-m-d', $start / 1000) == '2016-08-02') {
+                    $start = 1470865301000;
+                }
+
+                $end = $start + (86400000 * 1);
+
+                $request = sprintf('https://api.bitfinex.com/v2/trades/t%sUSD/hist?start=%s&end=%s&limit=5000&sort=1', $coin, $start, $end);
+
+                // $lastTrade = App\Btctrade::orderBy('id', 'desc')->first();
+
+                // $start = $lastTrade->timestamp;
+                // $end = $start + (86400000 * 1);
+
+                // $opts = array('http'=>array('header' => "User-Agent:MyAgent/1.0\r\n"));
+                // $context = stream_context_create($opts);
+                // $request = file_get_contents(sprintf('https://api.bitfinex.com/v2/trades/t%sUSD/hist?start=%s&end=1547510400000&limit=5000&sort=1', $coin, $start, $end) ,false,$context);
+                // H::pr($request);
+
+                $trades = file_get_contents($request);
+                $trades = json_decode($trades);
+                // H::pr($request);
+
+                foreach ($trades as $trade) {
+                    // echo sprintf('%s ___ %s ___ %s ___ %s', $trade[0], date('H:i:s', $trade[1]/1000), $trade[2], $trade[3]);
+                    // echo sprintf('%s,    %s,       %s,            %s', $trade[0], $trade[1], $trade[2], $trade[3]);
+                    // echo "<br>";
+                    // echo "<br>";
+                    // $exist = App\Btctrade::where('bfx_id', $trade[0])->first();
+
+                    $year = date('Y', $trade[1] / 1000);
+                    $month = date('m', $trade[1] / 1000);
+                    $day = date('d', $trade[1] / 1000);
+
+                    $currentYear = date('Y', time());
+                    $currentMonth = date('m', time());
+                    $currentDay = date('d', time());
+
+                    if ($year == $currentYear && $month == $currentMonth && $day == $currentDay) {
+                        echo "wrong start and end timestamps"; break;
+                    } else {
+                        DB::statement(sprintf('insert ignore into upw_%s_trades (bfx_id, timestamp, amount, price, updated_at, created_at) values (%s, %s, %s, %s, "%s", "%s")', strtolower($coin), $trade[0], $trade[1], $trade[2], $trade[3], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
+                    }
+                }
             }
         }
     }

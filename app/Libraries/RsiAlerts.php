@@ -23,9 +23,10 @@ class RsiAlerts
     	$tickers = [];
     	foreach ($tickersTmp as $key => $t) {
     		$condition1 = strpos($t->ticker, 'USD') !== false;
-    		$condition2 = $t->volume > 1000000;
+    		$condition2 = strpos($t->ticker, 'UST') === false;
+    		$condition3 = $t->volume > 1000000;
 
-    		if ($condition1 and $condition2) {
+    		if ($condition1 and $condition2 and $condition3) {
 			    $tickers[] = $t;
 			}
     	}
@@ -83,13 +84,13 @@ class RsiAlerts
 		        	if (! $lowRsiCheckpoint1 && !$lowRsiCheckpoint2) {
 		        		if ($c->rsi <= 30) {
 		        			$lowRsiCheckpoint1 = $c->rsi;
-		        			$priceAtLowRsiCheckpoint1 = $c->close;
+		        			$priceAtLowRsiCheckpoint1 = $c->low;
 		        		}
 		        	}
 
 		        	elseif ($c->rsi < $lowRsiCheckpoint1) {
 		        		$lowRsiCheckpoint1 = $c->rsi;
-		        		$priceAtLowRsiCheckpoint1 = $c->close;
+		        		$priceAtLowRsiCheckpoint1 = $c->low;
 		        		$lowRsiCheckpoint2 = false;
 	        			$priceAtLowRsiCheckpoint2 = false;
 		        	}
@@ -112,8 +113,10 @@ class RsiAlerts
 		        			$priceAtLowRsiCheckpoint2 = $c->close;
 
 		        			if (($lowRsiCheckpoint2 > $lowRsiCheckpoint1) && ($priceAtLowRsiCheckpoint2 < $priceAtLowRsiCheckpoint1)) {
-		        				$condition1 = true;
-		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16) {
+
+		        				$condition1 = (((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16;
+
+		        				if ($condition1) {
 		        					$messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE | '  . round((1-($t->high/$c->close))*100, 1).'%';
 		        				}
 		        				$lowRsiCheckpoint1 = false;
@@ -139,13 +142,13 @@ class RsiAlerts
 		        	if (! $highRsiCheckpoint1 && !$highRsiCheckpoint2) {
 		        		if ($c->rsi >= 70) {
 		        			$highRsiCheckpoint1 = $c->rsi;
-		        			$priceAtHighRsiCheckpoint1 = $c->close;
+		        			$priceAtHighRsiCheckpoint1 = $c->high;
 		        		}
 		        	}
 
 		        	elseif ($c->rsi > $highRsiCheckpoint1) {
 		        		$highRsiCheckpoint1 = $c->rsi;
-		        		$priceAtHighRsiCheckpoint1 = $c->close;
+		        		$priceAtHighRsiCheckpoint1 = $c->high;
 		        		$highRsiCheckpoint2 = false;
 	        			$priceAtHighRsiCheckpoint2 = false;
 		        	}
@@ -168,8 +171,9 @@ class RsiAlerts
 		        			$priceAtHighRsiCheckpoint2 = $c->close;
 
 		        			if (($highRsiCheckpoint2 < $highRsiCheckpoint1) && ($priceAtHighRsiCheckpoint2 > $priceAtHighRsiCheckpoint1)) {
-		        				$condition1 = true;
-		        				if ((((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16) {
+
+		        				$condition1 = (((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16;
+		        				if ($condition1) {
 		        					$messages[] = ':diamonds: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BEARISH DIVERGENCE | +' . round((1-($t->low/$c->close))*100, 1).'%';
 		        				}
 		        				$highRsiCheckpoint1 = false;
