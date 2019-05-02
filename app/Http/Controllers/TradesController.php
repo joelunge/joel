@@ -711,17 +711,17 @@ class TradesController extends Controller
     public function scrape()
     {
         $coins = [
-            // 'BTC' => 1364688000000, // KLAR
-            // 'ETH' => 1466812800000, // KLAR
-            // 'EOS' => 1498867200000, // KLAR
-            // 'BAB' => 1542067200000, // KLAR
-            // 'LTC' => 1383091200000, // KLAR
-            // 'XRP' => 1495152000000, // KLAR
-            // 'OMG' => 1499990400000, // KLAR
-            // 'IOT' => 1497225600000, // KLAR
-            // 'NEO' => 1504742400000, // KLAR
-            // 'XMR' => 1480464000000, // KLAR
-            // 'ETC' => 1470009600000, // KLAR
+            'BTC' => 1364688000000, // KLAR
+            'ETH' => 1466812800000, // KLAR
+            'EOS' => 1498867200000, // KLAR
+            'BAB' => 1542067200000, // KLAR
+            'LTC' => 1383091200000, // KLAR
+            'XRP' => 1495152000000, // KLAR
+            'OMG' => 1499990400000, // KLAR
+            'IOT' => 1497225600000, // KLAR
+            'NEO' => 1504742400000, // KLAR
+            'XMR' => 1480464000000, // KLAR
+            'ETC' => 1470009600000, // KLAR
             // 'BCH' => 1513728000000, // KLAR - BEHÖVER INTE UPPDATERAS
         ];
 
@@ -788,7 +788,7 @@ class TradesController extends Controller
                     $currentDay = date('d', time());
 
                     if ($year == $currentYear && $month == $currentMonth && $day == $currentDay) {
-                        echo "wrong start and end timestamps"; break;
+                        echo $coin . " wrong start and end timestamps<br />"; break 2;
                     } else {
                         DB::statement(sprintf('insert ignore into upw_%s_trades (bfx_id, timestamp, amount, price, updated_at, created_at) values (%s, %s, %s, %s, "%s", "%s")', strtolower($coin), $trade[0], $trade[1], $trade[2], $trade[3], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
                     }
