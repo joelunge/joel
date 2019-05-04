@@ -45,11 +45,11 @@
 			</div>
 			<div class="form-group">
 				<label for="price">Price</label>
-				<input type="text" value="{{$currentAlert->price}}" class="form-control" id="price" name="price" aria-describedby="price" placeholder="Price">
+				<input type="text" autocomplete="off" value="{{$currentAlert->price}}" class="form-control" id="price" name="price" aria-describedby="price" placeholder="Price">
 			</div>
 			<div class="form-group">
 				<label for="comment">Comment</label>
-				<input type="text" value="{{$currentAlert->comment}}" class="form-control" name="comment" id="comment" placeholder="Comment">
+				<input type="text" autocomplete="off" value="{{$currentAlert->comment}}" class="form-control" name="comment" id="comment" placeholder="Comment">
 			</div>
 			<br />
 			<div style="width: 100%;" class="btn-group btn-group-toggle" data-toggle="buttons">
