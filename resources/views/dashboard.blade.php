@@ -8,8 +8,8 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Alerts - Index') }}</title>
-
+    <title>{{ config('app.name', 'Crypto - Dashboard') }}</title>
+    <link rel="icon" href="{{ asset('favicon.ico')}}" />
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
 
