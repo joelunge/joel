@@ -30,7 +30,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body style="font-size: .6rem; background-color: #1b262d;">
-    <div class="container" id="app" style="width: 800px;">
+    <div class="container" id="app" style="max-width: 800px;">
     	<main class="py-4">
 		    <form method="post" action="/alerts/store/{{$currentAlert->id}}" enctype="multipart/form-data">
 			{{ csrf_field() }}
