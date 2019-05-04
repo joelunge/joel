@@ -49,9 +49,12 @@ class AlertsController extends Controller
 
     public function edit($id)
     {
-
         $alerts = \App\Alert::all();
         $currentAlert = \App\Alert::find($id);
+
+        if (! $currentAlert) {
+            return redirect()->route('alerts');
+        }
 
         $tickers = \Tickers::get(500000);
 
