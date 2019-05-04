@@ -35,7 +35,7 @@
     	<main class="py-4">
     		<div class="row">
 		  		<div class="col-md-12">
-				    <table class="table table-dark">
+				    <table class="table table-sm table-dark">
 					  <tbody>
 					  	@foreach ($tickers as $ticker)
 					  	<tr>
