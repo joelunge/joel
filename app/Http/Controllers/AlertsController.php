@@ -23,8 +23,21 @@ class AlertsController extends Controller
         // $this->middleware('auth');
     }
 
-    public function rsi15m()
+    public function alert()
     {
     	\Alerts::alert();
+    }
+
+    public function edit($id)
+    {
+        $alerts = \App\Alert::all();
+
+        return view('alerts/edit', $alerts);
+        
+    }
+
+    public function delete($id)
+    {
+        \App\Alert::find($id)->delete();
     }
 }

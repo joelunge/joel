@@ -27,15 +27,17 @@ class Alerts
 			if (array_key_exists('t' . strtoupper($priceAlert->ticker) . 'USD', $tickers)) {
 				$t = $tickers['t' . strtoupper($priceAlert->ticker) . 'USD'];
 
-				$message = '%s %s - %s THAN %s - <http://example.com|EDIT> | <http://example.com|DELETE>';
+				$editUrl = sprintf('<http://crypto.joelunge.site/alerts/edit/%s|EDIT>', $priceAlert->id);
+				$deleteUrl = sprintf('<http://crypto.joelunge.site/alerts/delete/%s|DELETE>', $priceAlert->id);
+				$message = '%s %s - %s THAN %s - %s | %s';
 				$icon = ($priceAlert->direction == 'up') ? ':four_leaf_clover:' : ':diamonds:';
 				$ticker = str_replace('t', '', str_replace('USD', '', $t->ticker));
 				$direction = ($priceAlert->direction == 'up') ? 'HIGHER' : 'LOWER';
 
 				if ($priceAlert->direction == 'up' && $t->lastPrice > $priceAlert->price) {
-					$alerts[] = sprintf($message, $icon, $ticker, $direction, $priceAlert->price);
+					$alerts[] = sprintf($message, $icon, $ticker, $direction, $priceAlert->price, $editUrl, $deleteUrl);
 				} elseif ($priceAlert->direction == 'down' && $t->lastPrice < $priceAlert->price) {
-					$alerts[] = sprintf($message, $icon, $ticker, $direction, $priceAlert->price);
+					$alerts[] = sprintf($message, $icon, $ticker, $direction, $priceAlert->price, $editUrl, $deleteUrl);
 				}
 			}
 		}
