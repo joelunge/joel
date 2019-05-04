@@ -23,7 +23,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        $tickers = \Tickers::get(50000);
+        $tickers = \Tickers::get(100000);
 
         // Desc sort
         usort($tickers,function($first,$second){
