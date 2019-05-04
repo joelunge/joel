@@ -32,7 +32,8 @@
 <body style="font-size: .6rem; background-color: #1b262d;">
     <div class="container" id="app" style="max-width: 800px;">
     	<main class="py-4">
-		    <form method="post" action="/alerts/store/{{$currentAlert->id}}" enctype="multipart/form-data">
+    		<a class="btn btn-xs btn-block btn-danger" href="/alerts/delete/{{$currentAlert->id}}" role="button">Delete</a>
+		    <form method="post" action="/alerts/delete/{{$currentAlert->id}}" enctype="multipart/form-data">
 			{{ csrf_field() }}
 			<div class="form-group">
 				<label for="ticker">Ticker</label>

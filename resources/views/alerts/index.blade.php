@@ -46,7 +46,7 @@
 						      <td style="text-align: center; width: 20%;">{{strtoupper($alert->ticker)}}</td>
 						      <td style="text-align: center; width: 20%;">{{$alert->price}}</td>
 						      <td style="text-align: center; width: 20%;">@if ($alert->direction == 'down') <i class="text-danger fas fa-chevron-down"></i> @else <i class="text-success fas fa-chevron-up"></i>@endif</td>
-						      <td style="text-align: center; width: 20%;"><a style="margin-right: 20px;" class="btn btn-xs btn-dark" href="/alerts/edit/{{$alert->id}}" role="button">Edit</a><a class="btn btn-xs btn-danger" href="/alerts/delete/{{$alert->id}}" role="button">Delete</a></td>
+						      <td style="text-align: center; width: 20%;"><a style="margin-right: 20px;" class="btn btn-xs btn-dark" href="/alerts/edit/{{$alert->id}}" role="button">Edit</a></td>
 						    </tr>
 						    @endforeach
 					   	@else
