@@ -16,28 +16,26 @@ class Alerts
 	{
 		$alerts = [];
 		$priceAlerts = \App\Alert::all();
-		// $priceAlerts = [
-		// 	'tBTCUSD' => [
-		// 		'up' => 5751,
-		// 		'down' => 7000,
-		// 	],
-		// ];
 
 		foreach ($priceAlerts as $priceAlert) {
 			if (array_key_exists('t' . strtoupper($priceAlert->ticker) . 'USD', $tickers)) {
 				$t = $tickers['t' . strtoupper($priceAlert->ticker) . 'USD'];
 
+				$chartUrl = sprintf('https://www.tradingview.com/chart?symbol=BITFINEX%s%sUSD', '%3A', strtoupper($priceAlert->ticker));
+				$chartUrl = '<'.$chartUrl.'|CHART>';
 				$editUrl = sprintf('<http://crypto.joelunge.site/alerts/edit/%s|EDIT>', $priceAlert->id);
 				$deleteUrl = sprintf('<http://crypto.joelunge.site/alerts/delete/%s|DELETE>', $priceAlert->id);
-				$message = '%s %s - %s THAN %s - %s | %s';
 				$icon = ($priceAlert->direction == 'up') ? ':four_leaf_clover:' : ':diamonds:';
 				$ticker = str_replace('t', '', str_replace('USD', '', $t->ticker));
-				$direction = ($priceAlert->direction == 'up') ? 'HIGHER' : 'LOWER';
+				$direction = $priceAlert->direction;
+				$comment = $priceAlert->comment ? '- ' . $priceAlert->comment : null;
+
+				$message = '%s %s %s %s - %s %s | %s | %s';
 
 				if ($priceAlert->direction == 'up' && $t->lastPrice > $priceAlert->price) {
-					$alerts[] = sprintf($message, $icon, $ticker, $direction, $priceAlert->price, $editUrl, $deleteUrl);
+					$alerts[] = sprintf($message, $icon, $ticker, strtoupper($direction), strtoupper($comment), $priceAlert->price, $chartUrl, $editUrl, $deleteUrl);
 				} elseif ($priceAlert->direction == 'down' && $t->lastPrice < $priceAlert->price) {
-					$alerts[] = sprintf($message, $icon, $ticker, $direction, $priceAlert->price, $editUrl, $deleteUrl);
+					$alerts[] = sprintf($message, $icon, $ticker, strtoupper($direction), strtoupper($comment), $priceAlert->price, $chartUrl, $editUrl, $deleteUrl);
 				}
 			}
 		}
@@ -47,33 +45,7 @@ class Alerts
 
 	private static function getTickers()
 	{
-		$tickersUrl = 'https://api-pub.bitfinex.com/v2/tickers?symbols=ALL';
-    	$tickersArr = file_get_contents($tickersUrl);
-    	$tickersArr = json_decode($tickersArr);
-
-    	$tickersTmp = [];
-    	foreach ($tickersArr as $key => $t) {
-    		$ticker = new \StdClass;
-    		$ticker->ticker = $t[0];
-    		$ticker->lastPrice = $t[7];
-    		$ticker->volume = $t[8] * $ticker->lastPrice;
-    		$ticker->high = $t[9];
-    		$ticker->low = $t[10];
-    		$tickersTmp[] = $ticker;
-    	}
-
-    	$tickers = [];
-    	foreach ($tickersTmp as $key => $t) {
-    		$condition1 = strpos($t->ticker, 'USD') !== false;
-    		$condition2 = strpos($t->ticker, 'UST') === false;
-    		$condition3 = $t->volume > 500000;
-
-    		if ($condition1 and $condition2 and $condition3) {
-			    $tickers[$t->ticker] = $t;
-			}
-    	}
-
-    	return $tickers;
+		return \Tickers::get(500000);
 	}
 
     private static function getRsiAlerts($tickers)

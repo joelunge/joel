@@ -32,30 +32,30 @@
 <body style="font-size: .6rem; background-color: #1b262d;">
     <div class="container" id="app" style="width: 800px;">
     	<main class="py-4">
-		    <form method="post" action="/alerts/store/{{$currentAlert->id}}" enctype="multipart/form-data">
+		    <form method="post" action="/alerts/store/0" enctype="multipart/form-data">
 			{{ csrf_field() }}
 			<div class="form-group">
 				<label for="ticker">Ticker</label>
 				<select class="form-control" name="ticker" id="ticker">
 				@foreach ($tickers as $ticker)
-				<option @if ($ticker->ticker == 't'.strtoupper($currentAlert->ticker).'USD') selected=selected @endif value="{{strtolower(str_replace('t', '', str_replace('USD', '', $ticker->ticker)))}}">{{str_replace('t', '', str_replace('USD', '', $ticker->ticker))}}</option>
+				<option value="{{strtolower(str_replace('t', '', str_replace('USD', '', $ticker->ticker)))}}">{{str_replace('t', '', str_replace('USD', '', $ticker->ticker))}}</option>
 				@endforeach
 				</select>
 			</div>
 			<div class="form-group">
 				<label for="price">Price</label>
-				<input type="text" value="{{$currentAlert->price}}" class="form-control" id="price" name="price" aria-describedby="price" placeholder="Price">
+				<input type="text" class="form-control" id="price" name="price" aria-describedby="price" placeholder="Price">
 			</div>
 			<div class="form-group">
 				<label for="comment">Comment</label>
-				<input type="text" value="{{$currentAlert->comment}}" class="form-control" name="comment" id="comment" placeholder="Comment">
+				<input type="text" class="form-control" name="comment" id="comment" placeholder="Comment">
 			</div>
 			<br />
 			<div style="width: 100%;" class="btn-group btn-group-toggle" data-toggle="buttons">
-			  <label @if ($currentAlert->direction == 'up') active @endif style="width: 50%;" class="btn btn-secondary @if ($currentAlert->direction == 'up') active @endif">
+			  <label style="width: 50%;" class="btn btn-secondary active">
 			    <input type="radio" value="up" name="direction" id="up" autocomplete="off" checked> UP
 			  </label>
-			  <label @if ($currentAlert->direction == 'down') active @endif style="width: 50%;" class="btn btn-secondary @if ($currentAlert->direction == 'down') active @endif">
+			  <label style="width: 50%;" class="btn btn-secondary">
 			    <input type="radio" value="down" name="direction" id="down" autocomplete="off"> DOWN
 			  </label>
 			</div>
