@@ -31,6 +31,7 @@
 </head>
 <body style="background-color: #1b262d;">
     <div class="container" id="app" style="max-width: 800px;">
+        @include('includes.header')
     	<main class="py-4">
     		<div class="row">
     			<div class="col-md-12">

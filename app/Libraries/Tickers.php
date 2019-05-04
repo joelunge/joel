@@ -12,6 +12,7 @@ class Tickers
     	foreach ($tickersArr as $key => $t) {
     		$ticker = new \StdClass;
     		$ticker->ticker = $t[0];
+            $ticker->dailyChange = $t[6];
     		$ticker->lastPrice = $t[7];
     		$ticker->volume = $t[8] * $ticker->lastPrice;
     		$ticker->high = $t[9];

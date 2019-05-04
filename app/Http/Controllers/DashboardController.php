@@ -23,6 +23,13 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        return view('dashboard');
+        $tickers = \Tickers::get();
+
+        // Desc sort
+        usort($tickers,function($first,$second){
+            return $first->volume < $second->volume;
+        });
+
+        return view('dashboard', ['tickers' => $tickers]);
     }
 }
