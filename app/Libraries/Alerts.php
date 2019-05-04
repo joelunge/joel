@@ -1,11 +1,39 @@
 <?php
 
-class RsiAlerts
+class Alerts
 {
-    public static function alert()
-    {
-    	$messages = [];
-    	$tickersUrl = 'https://api-pub.bitfinex.com/v2/tickers?symbols=ALL';
+	public static function alert()
+	{
+		$tickers = self::getTickers();
+		$rsiAlerts = self::getRsiAlerts($tickers);
+		$priceAlerts = self::getPriceAlerts($tickers);
+		$allAlerts = array_merge($rsiAlerts, $priceAlerts);
+
+		H::pr($allAlerts);
+		self::sendAlerts($allAlerts);
+	}
+
+	private static function getPriceAlerts($tickers)
+	{
+		$alerts = [];
+		$priceAlerts = [
+			'tBTCUSD' => [5751],
+		];
+
+		foreach ($tickers as $key => $t) {
+			if (array_key_exists($t->ticker, $priceAlerts)) {
+				if ($t->lastPrice > $priceAlerts[$t->ticker][0]) {
+					$alerts[] = 'hej';
+				}
+			}
+		}
+
+		return $alerts;
+	}
+
+	private static function getTickers()
+	{
+		$tickersUrl = 'https://api-pub.bitfinex.com/v2/tickers?symbols=ALL';
     	$tickersArr = file_get_contents($tickersUrl);
     	$tickersArr = json_decode($tickersArr);
 
@@ -24,13 +52,19 @@ class RsiAlerts
     	foreach ($tickersTmp as $key => $t) {
     		$condition1 = strpos($t->ticker, 'USD') !== false;
     		$condition2 = strpos($t->ticker, 'UST') === false;
-    		$condition3 = $t->volume > 1000000;
+    		$condition3 = $t->volume > 500000;
 
     		if ($condition1 and $condition2 and $condition3) {
 			    $tickers[] = $t;
 			}
     	}
 
+    	return $tickers;
+	}
+
+    private static function getRsiAlerts($tickers)
+    {
+    	$messages = [];
     	foreach ($tickers as $key => $t) {
 	    	$candleUrl = sprintf('https://api-pub.bitfinex.com/v2/candles/trade:15m:%s/hist?limit=5000', $t->ticker);
 	    	$candlesArr = file_get_contents($candleUrl);
@@ -114,7 +148,7 @@ class RsiAlerts
 
 		        			if (($lowRsiCheckpoint2 > $lowRsiCheckpoint1) && ($priceAtLowRsiCheckpoint2 < $priceAtLowRsiCheckpoint1)) {
 
-		        				$condition1 = (((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16;
+		        				$condition1 = (((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 1600;
 
 		        				if ($condition1) {
 		        					$messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE | '  . round((1-($t->high/$c->close))*100, 1).'%';
@@ -186,10 +220,16 @@ class RsiAlerts
 		        }
 			}
 		}
-		if (count($messages) >= 1) {
+
+		return $messages;
+    }
+
+    private static function sendAlerts($alerts)
+    {
+    	if (count($alerts) >= 1) {
 			\Notifications::slackMessage('======================');
 		}
-		foreach ($messages as $key => $m) {
+		foreach ($alerts as $key => $m) {
 			\Notifications::slackMessage($m);
 		}
     }

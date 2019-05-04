@@ -25,6 +25,6 @@ class AlertsController extends Controller
 
     public function rsi15m()
     {
-    	\RsiAlerts::alert();
+    	\Alerts::alert();
     }
 }

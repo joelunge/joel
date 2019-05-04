@@ -32,8 +32,8 @@ class Kernel extends ConsoleKernel
         })->hourly();
 
         $schedule->call(function () {
-            \RsiAlerts::alert();
-        })->everyMinute();        
+            \Alerts::alert();
+        })->everyMinute(); 
 
         $schedule->call(function () {
             $coins = config('coins.coins');
