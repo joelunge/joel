@@ -41,7 +41,7 @@
 					  	<tr>
 					  		<td class="text-center" style="width: 25%;">{{str_replace('t', '', str_replace('USD', '', $ticker->ticker))}}</td>
 					  		<td class="text-center" style="width: 25%;">{{round($ticker->lastPrice, 6)}}</td>
-					  		<td class="text-center" style="width: 25%;">@if ($ticker->dailyChange > 0) <span class="text-success">{{$ticker->dailyChange * 100}} @else <span class="text-danger">{{$ticker->dailyChange * 100}}@endif</span>%</td>
+					  		<td class="text-center" style="width: 25%;">@if ($ticker->dailyChange > 0) <span class="text-success">{{$ticker->dailyChange * 100}}% @else <span class="text-danger">{{$ticker->dailyChange * 100}}%@endif</span></td>
 					  		<td class="text-center" style="width: 25%;">{{$ticker->formattedVolume}}</td>
 					  		<td class="text-center" style="width: 25%;"><a class="text-center btn btn-xs btn-block btn-dark" href="{{sprintf('https://www.tradingview.com/chart?symbol=BITFINEX%s%s', '%3A', strtoupper(str_replace('t', '', $ticker->ticker)))}}" role="button"><i class="fas fa-chart-area"></i></a></td>
 					  		<td class="text-center" style="width: 25%;"><a class="text-center btn btn-xs btn-block btn-danger" href="/trade" role="button"><i class="fas fa-money-bill-alt"></i></td>
