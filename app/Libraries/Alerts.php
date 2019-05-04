@@ -9,21 +9,33 @@ class Alerts
 		$priceAlerts = self::getPriceAlerts($tickers);
 		$allAlerts = array_merge($rsiAlerts, $priceAlerts);
 
-		H::pr($allAlerts);
 		self::sendAlerts($allAlerts);
 	}
 
 	private static function getPriceAlerts($tickers)
 	{
 		$alerts = [];
-		$priceAlerts = [
-			'tBTCUSD' => [5751],
-		];
+		$priceAlerts = \App\Alert::all();
+		// $priceAlerts = [
+		// 	'tBTCUSD' => [
+		// 		'up' => 5751,
+		// 		'down' => 7000,
+		// 	],
+		// ];
 
-		foreach ($tickers as $key => $t) {
-			if (array_key_exists($t->ticker, $priceAlerts)) {
-				if ($t->lastPrice > $priceAlerts[$t->ticker][0]) {
-					$alerts[] = 'hej';
+		foreach ($priceAlerts as $priceAlert) {
+			if (array_key_exists('t' . strtoupper($priceAlert->ticker) . 'USD', $tickers)) {
+				$t = $tickers['t' . strtoupper($priceAlert->ticker) . 'USD'];
+
+				$message = '%s %s - %s THAN %s - <http://example.com|EDIT> | <http://example.com|DELETE>';
+				$icon = ($priceAlert->direction == 'up') ? ':four_leaf_clover:' : ':diamonds:';
+				$ticker = str_replace('t', '', str_replace('USD', '', $t->ticker));
+				$direction = ($priceAlert->direction == 'up') ? 'HIGHER' : 'LOWER';
+
+				if ($priceAlert->direction == 'up' && $t->lastPrice > $priceAlert->price) {
+					$alerts[] = sprintf($message, $icon, $ticker, $direction, $priceAlert->price);
+				} elseif ($priceAlert->direction == 'down' && $t->lastPrice < $priceAlert->price) {
+					$alerts[] = sprintf($message, $icon, $ticker, $direction, $priceAlert->price);
 				}
 			}
 		}
@@ -55,7 +67,7 @@ class Alerts
     		$condition3 = $t->volume > 500000;
 
     		if ($condition1 and $condition2 and $condition3) {
-			    $tickers[] = $t;
+			    $tickers[$t->ticker] = $t;
 			}
     	}
 
@@ -148,7 +160,7 @@ class Alerts
 
 		        			if (($lowRsiCheckpoint2 > $lowRsiCheckpoint1) && ($priceAtLowRsiCheckpoint2 < $priceAtLowRsiCheckpoint1)) {
 
-		        				$condition1 = (((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 1600;
+		        				$condition1 = (((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16;
 
 		        				if ($condition1) {
 		        					$messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE | '  . round((1-($t->high/$c->close))*100, 1).'%';
