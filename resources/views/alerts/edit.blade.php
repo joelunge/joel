@@ -54,10 +54,10 @@
 			<br />
 			<div style="width: 100%;" class="btn-group btn-group-toggle" data-toggle="buttons">
 			  <label @if ($currentAlert->direction == 'up') active @endif style="width: 50%;" class="btn btn-secondary @if ($currentAlert->direction == 'up') active @endif">
-			    <input type="radio" value="up" name="direction" id="up" autocomplete="off" checked> UP
+			    <input type="radio" value="up" name="direction" id="up" autocomplete="off" @if ($currentAlert->direction == 'up') checked @endif> UP
 			  </label>
 			  <label @if ($currentAlert->direction == 'down') active @endif style="width: 50%;" class="btn btn-secondary @if ($currentAlert->direction == 'down') active @endif">
-			    <input type="radio" value="down" name="direction" id="down" autocomplete="off"> DOWN
+			    <input type="radio" value="down" name="direction" id="down" autocomplete="off" @if ($currentAlert->direction == 'down') checked @endif> DOWN
 			  </label>
 			</div>
 			<hr />
