@@ -7,7 +7,8 @@ class Alerts
 		$tickers = self::getTickers();
 		$rsiAlerts = self::getRsiAlerts($tickers);
 		$priceAlerts = self::getPriceAlerts($tickers);
-		$allAlerts = array_merge($rsiAlerts, $priceAlerts);
+		$volumeAlerts = self::getVolumeAlerts($tickers);
+		$allAlerts = array_merge($rsiAlerts, $priceAlerts, $volumeAlerts);
 
 		self::sendAlerts($allAlerts);
 	}
@@ -41,6 +42,40 @@ class Alerts
 		}
 
 		return $alerts;
+	}
+
+	private static function getVolumeAlerts($tickers)
+	{
+		$messages = [];
+    	foreach ($tickers as $key => $t) {
+	    	$candleUrl = sprintf('https://api-pub.bitfinex.com/v2/candles/trade:1m:%s/hist?limit=2', $t->ticker);
+	    	$candlesArr = file_get_contents($candleUrl);
+	    	$candlesArr = json_decode($candlesArr);
+	    	$candlesArr = array_reverse($candlesArr);
+
+	    	$candles = [];
+	    	foreach ($candlesArr as $key => $c) {
+	    		$candle = new \StdClass;
+	    		$candle->id = $key;
+	    		$candle->timestamp = $c[0];
+	    		$candle->date = date('Y-m-d H:i:s', $candle->timestamp / 1000);
+	    		$candle->open = $c[1];
+	    		$candle->close = $c[2];
+	    		$candle->high = $c[3];
+	    		$candle->low = $c[4];
+	    		$candle->volume = $c[5];
+
+	    		$candles[] = $candle;
+	    	}
+
+	    	foreach ($candles as $key => $c) {
+	    		if ($c->volume * $c->close > 100000) {
+	    			$messages[] = sprintf('%s VOLUME %s', str_replace('t', '', str_replace('USD', '', $t->ticker)), round($c->volume));
+	    		}
+	    	}
+	    }
+
+	    return $messages;
 	}
 
 	private static function getTickers()
