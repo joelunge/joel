@@ -70,7 +70,7 @@ class Alerts
 
 	    	foreach ($candles as $key => $c) {
 	    		if ($c->volume * $c->close > 100000) {
-	    			$chartUrl = sprintf('https://www.tradingview.com/chart?symbol=BITFINEX%s%sUSD', '%3A', strtoupper(str_replace('t', '', str_replace('USD', '', $t->ticker)));
+	    			$chartUrl = sprintf('https://www.tradingview.com/chart?symbol=BITFINEX%s%sUSD', '%3A', strtoupper(str_replace('t', '', str_replace('USD', '', $t->ticker))));
 					$chartUrl = '<'.$chartUrl.'|CHART>';
 	    			if ($c->close > $c->open) {
 	    				$messages[] = sprintf(':four_leaf_clover: %s - VOLUME %s %s', str_replace('t', '', str_replace('USD', '', $t->ticker)), round($c->volume * $c->close), $chartUrl);
