@@ -110,9 +110,9 @@ class BacktestController extends Controller
 
     public function strategy2($c, $volumes, $lastTrade)
     {
-        $condition1 = $c->rsi_5m >= 85;
-        $condition2 = $c->rsi_5m <= 15;
-        $condition3 = $c->volume > 100000000;
+        // $condition1 = $c->rsi_5m >= 85;
+        // $condition2 = $c->rsi_5m <= 15;
+        $condition3 = $c->volumeUsd > 10000000;
 
         // if (($condition1 || $condition2) && $condition3) {
         if ($condition3) {
