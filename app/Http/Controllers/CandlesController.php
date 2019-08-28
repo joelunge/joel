@@ -26,8 +26,8 @@ class CandlesController extends Controller
 
     public function scrapeHist()
     {
-    	$coin = 'XRP';
-        $timeframe = '15m';
+    	$coin = 'EOS';
+        $timeframe = '1D';
         $loop = 30;
 
         for ($i=0; $i < $loop; $i++) {
@@ -35,9 +35,11 @@ class CandlesController extends Controller
             // $start = 1495216644000;
             // $end = $start + 86400000; // 24 hours
 
-            $lastCandle = App\Btccandle::orderBy('id', 'desc')->first();
+            // $lastCandle = App\Btccandle::orderBy('id', 'desc')->first();
 
-            $start = $lastCandle->timestamp;
+            // $start = $lastCandle->timestamp;
+
+            $start = 1498867200000;
             $end = $start + (86400000 * 1);
 
             $request = sprintf('https://api.bitfinex.com/v2/candles/trade:%s:t%sUSD/hist?sort=1&limit=5000&start=%s', $timeframe, $coin, $start, $end);
@@ -50,7 +52,7 @@ class CandlesController extends Controller
                 $month = date('m', $candle[0] / 1000);
                 $day = date('d', $candle[0] / 1000);
 
-                if ($year == 2019 && $month == 02 && $day == 02) {
+                if ($year == 2019 && $month == 05 && $day == 11) {
                     echo "wrong start and end timestamps"; exit;
                 }
 

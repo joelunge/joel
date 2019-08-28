@@ -875,7 +875,7 @@ class TradesController extends Controller
             $pagination = $_GET['pagination'];
         }
 
-        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-03-06 00:00:00');
+        $startDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', '2018-04-11 00:00:00');
 
         if (isset($pagination)) {
             $startDate = $startDate->modify('+'.$pagination.' days');
@@ -896,37 +896,39 @@ class TradesController extends Controller
 
     public function updateRsi()
     {
-        exit;
+        // exit;
         ini_set('memory_limit', '12000M');
         ini_set('max_execution_time', 86400);
 
         // $candles = \App\Btccandle::select('id', 'close', 'rsi', 'timestamp', 'checked')->get();
         $candles = \App\Btccandle::get();
 
-        foreach ($candles as $key => $candle) {
-            $candle->open = $candle->open * 6000;
-            $candle->close = $candle->close * 6000;
-            $candle->high = $candle->high * 6000;
-            $candle->low = $candle->low * 6000;
-            $candle->save();
-        }
-        exit;
-
-        // foreach ($candles as $key => $c) {
-        //     if ($c->id > 14) {
-        //         // DB::statement(sprintf('update xrp_1m_candles set rsi_5m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 299999)); // 5 min rsi
-        //         // DB::statement(sprintf('update xrp_1m_candles set rsi_15m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 899999)); // 15 min rsi
-        //         // DB::statement(sprintf('update xrp_1m_candles set rsi_30m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 1799999)); // 30 min rsi
-        //         DB::statement(sprintf('update xrp_1m_candles set rsi_1h = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 3599999)); // 1 hour rsi
-        //     }
+        // foreach ($candles as $key => $candle) {
+        //     $candle->open = $candle->open * 6000;
+        //     $candle->close = $candle->close * 6000;
+        //     $candle->high = $candle->high * 6000;
+        //     $candle->low = $candle->low * 6000;
+        //     $candle->save();
         // }
         // exit;
 
-        foreach ($candles as $key => $c) {
-            $c->date = date('Y-m-d H:i:s', $c->timestamp / 1000);
-            $c->save();
-        }
-        exit;
+        // foreach ($candles as $key => $c) {
+            // $c->timestamp = strtotime($c->date) * 1000;
+
+            // if ($c->id > 14) {
+                // DB::statement(sprintf('update btc_full_dataset set rsi_5m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 299999)); // 5 min rsi
+                // DB::statement(sprintf('update btc_full_dataset set rsi_15m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 899999)); // 15 min rsi
+                // DB::statement(sprintf('update btc_full_dataset set rsi_30m = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 1799999)); // 30 min rsi
+                // DB::statement(sprintf('update btc_full_dataset set rsi_1h = %s where timestamp between %s and %s' , $c->rsi, $c->timestamp, $c->timestamp + 3599999)); // 1 hour rsi
+            // }
+        // }
+        // exit;
+
+        // foreach ($candles as $key => $c) {
+        //     $c->date = date('Y-m-d H:i:s', $c->timestamp / 1000);
+        //     $c->save();
+        // }
+        // exit;
 
         $prices = [];
         $ids = [];
@@ -939,7 +941,7 @@ class TradesController extends Controller
 
         foreach ($candles as $key => $c) {
             if ($c->id > 14) {
-                $c->rsi = $rsis[$c->id];
+                $c->rsi_1m = $rsis[$c->id];
                 $c->save();
             }
         }
@@ -1352,10 +1354,11 @@ class TradesController extends Controller
 
     public function fillEmptyMinutes()
     {
+        exit;
         ini_set('memory_limit', '12000M');
         ini_set('max_execution_time', 86400);
         
-        $csv = array_map('str_getcsv', file(public_path() . '/v5_1.csv'));
+        $csv = array_map('str_getcsv', file(public_path() . '/new_full_dataset.csv'));
         unset($csv[0]);
 
         $prevClose = 0;
@@ -1387,20 +1390,20 @@ class TradesController extends Controller
                 $c->sellVolume  = $newDatapoints[$expectedDate][7];
                 $c->tradeCount  = $newDatapoints[$expectedDate][8];
                 $c->changedPrice  = $newDatapoints[$expectedDate][9];
-                $c->rsi_1m = $newDatapoints[$expectedDate][10];
-                $c->rsi_5m = $newDatapoints[$expectedDate][11];
-                $c->rsi_15m = $newDatapoints[$expectedDate][12];
-                $c->rsi_30m = $newDatapoints[$expectedDate][13];
-                $c->rsi_1h = $newDatapoints[$expectedDate][14];
+                $c->rsi_1m = round($newDatapoints[$expectedDate][10], 2);
+                $c->rsi_5m = round($newDatapoints[$expectedDate][11], 2);
+                $c->rsi_15m = round($newDatapoints[$expectedDate][12], 2);
+                $c->rsi_30m = round($newDatapoints[$expectedDate][13], 2);
+                $c->rsi_1h = round($newDatapoints[$expectedDate][14], 2);
 
                 $c->save();
 
-                $prevClose = $newDatapoints[$expectedDate][2];
-                $prevPhil1 = $newDatapoints[$expectedDate][10];
-                $prevPhil2 = $newDatapoints[$expectedDate][11];
-                $prevPhil3 = $newDatapoints[$expectedDate][12];
-                $prevPhil4 = $newDatapoints[$expectedDate][13];
-                $prevPhil5 = $newDatapoints[$expectedDate][14];
+                $prevClose = round($newDatapoints[$expectedDate][2], 2);
+                $prevPhil1 = round($newDatapoints[$expectedDate][10], 2);
+                $prevPhil2 = round($newDatapoints[$expectedDate][11], 2);
+                $prevPhil3 = round($newDatapoints[$expectedDate][12], 2);
+                $prevPhil4 = round($newDatapoints[$expectedDate][13], 2);
+                $prevPhil5 = round($newDatapoints[$expectedDate][14], 2);
             } else {
                 $c = new App\Btccandle;
 
@@ -1414,11 +1417,11 @@ class TradesController extends Controller
                 $c->sellVolume  = 0;
                 $c->tradeCount  = 0;
                 $c->changedPrice  = 0;
-                $c->rsi_1m = $prevPhil1;
-                $c->rsi_5m = $prevPhil2;
-                $c->rsi_15m = $prevPhil3;
-                $c->rsi_30m = $prevPhil4;
-                $c->rsi_1h = $prevPhil5;
+                $c->rsi_1m = round($prevPhil1, 2);
+                $c->rsi_5m = round($prevPhil2, 2);
+                $c->rsi_15m = round($prevPhil3, 2);
+                $c->rsi_30m = round($prevPhil4, 2);
+                $c->rsi_1h = round($prevPhil5, 2);
 
                 $c->save();
             }

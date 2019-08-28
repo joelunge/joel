@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Btccandle extends Model
 {
+        public static $returnable = ['id'];
+
 	protected $fillable = [
                 'rsi',
         	'open',
@@ -36,5 +38,6 @@ class Btccandle extends Model
                 'checked',
 	];
 
-        protected $table = 'upw_btc_15_min';
+        protected $table = 'new_full_dataset';
+        // protected $table = 'upw_xrp_1_min';
 }

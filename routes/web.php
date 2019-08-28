@@ -43,3 +43,5 @@ Route::get('/alerts/add', 'AlertsController@add')->name('alerts_add');
 Route::get('/candles/scrape_hist', 'CandlesController@scrapeHist')->name('candles_scrape_hist');
 
 Route::get('/test', 'TradesController@test')->name('test');
+
+Route::get('/backtest', 'BacktestController@index')->name('backtest');
