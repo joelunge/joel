@@ -205,7 +205,7 @@ class BacktestController extends Controller
     public function shouldExitTrade($c)
     {
         $condition1 = $this->isInTrade;
-        $condition2 = $this->getTradeResults($c) < -3 || $this->getTradeResults($c) > 3;
+        $condition2 = $this->getTradeResults($c) < -3 || $this->getTradeResults($c) > 15;
         if ($condition1 && $condition2) {
             return true;
         }
