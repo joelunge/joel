@@ -248,15 +248,13 @@ class BacktestController extends Controller
 
     public function testing()
     {
-        \Alerts::alert();
-        exit;
-        $startingBalance = 1000;
+        $startingBalance = 980;
         $entryFee = 0.998;
         $exitFee = 0.998;
         $winPercentage = 1.09;
         $lossPercentage = 0.94;
-        $tradesAmount = 14;
-        $winrate = 0.75;
+        $tradesAmount = 80;
+        $winrate = 0.70;
 
         $loserate = 1-$winrate;
 
@@ -276,7 +274,7 @@ class BacktestController extends Controller
             $balance = $balance * $exitFee;
         }
 
-        // $balance = $balance - $startingBalance;
+        $balance = $balance - $startingBalance;
 
         echo round($balance);
         exit;
