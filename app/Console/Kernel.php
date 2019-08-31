@@ -27,9 +27,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call(function () {
-            UsdToSek::updateUsdToSek();
-        })->hourly();
+        // $schedule->call(function () {
+        //     UsdToSek::updateUsdToSek();
+        // })->hourly();
 
         $schedule->call(function () {
             \Alerts::alert();

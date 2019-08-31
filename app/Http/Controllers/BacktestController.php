@@ -33,6 +33,7 @@ class BacktestController extends Controller
 
     public function index()
     {
+        $this->testing();
         $startingBalance = $this->balance;
         $this->strategy = 'strategy1';
         $candles = $this->getCandles(['2018-01-01 00:00:00', '2018-12-31 23:59:59']);
@@ -122,7 +123,10 @@ class BacktestController extends Controller
     {
         $maxVolumeLast24Hours = max(array_column($this->indicators['volumeLast7Days'], 'volume'));
 
-        if ($c->volumeUsd > $maxVolumeLast24Hours) {
+        $volumeDiff = $c->volumeUsd / $maxVolumeLast24Hours;
+
+        if (($c->volumeUsd > $maxVolumeLast24Hours) && $volumeDiff > 1) {
+            $this->volumeDiff = $volumeDiff;
             return true;
         }
     }
@@ -205,7 +209,7 @@ class BacktestController extends Controller
     public function shouldExitTrade($c)
     {
         $condition1 = $this->isInTrade;
-        $condition2 = $this->getTradeResults($c) < -3 || $this->getTradeResults($c) > 15;
+        $condition2 = $this->getTradeResults($c) < -3 || $this->getTradeResults($c) > 3;
         if ($condition1 && $condition2) {
             return true;
         }
@@ -218,15 +222,16 @@ class BacktestController extends Controller
         $this->isInTrade = true;
         $this->tradeData = $c;
         $this->tradeData->direction = $c->close > $c->open ? 'long' : 'short';
-        $this->balance = $this->balance * 0.998;
+        $this->balance = $this->balance * 0.999;
     }
 
     public function exitTrade($c)
     {
         $this->trades[$this->tradeData->date] = $this->tradeData;
         $this->trades[$this->tradeData->date]->resultPercentage = $this->getTradeResults($c);
+        $this->trades[$this->tradeData->date]->volumeDiff = $this->volumeDiff;
         $this->balance = $this->balance * (($this->getTradeResults($c) / 100) + 1);
-        $this->balance = $this->balance * 0.998;
+        $this->balance = $this->balance * 0.999;
         $this->isInTrade = false;
     }
 
@@ -239,5 +244,39 @@ class BacktestController extends Controller
         }
 
         return $resultPercentage;
+    }
+
+    public function testing()
+    {
+        $startingBalance = 1000;
+        $entryFee = 0.998;
+        $exitFee = 0.998;
+        $winPercentage = 1.09;
+        $lossPercentage = 0.94;
+        $tradesAmount = 14;
+        $winrate = 0.75;
+
+        $loserate = 1-$winrate;
+
+        $winsAmount = $tradesAmount * $winrate;
+        $lossAmount = $tradesAmount * $loserate;
+        $balance = $startingBalance;
+
+        for ($x = 0; $x < round($winsAmount); $x++) {
+            $balance = $balance * $entryFee;
+            $balance = $balance * $winPercentage;
+            $balance = $balance * $exitFee;
+        }
+
+        for ($x = 0; $x < round($lossAmount); $x++) {
+            $balance = $balance * $entryFee;
+            $balance = $balance * $lossPercentage;
+            $balance = $balance * $exitFee;
+        }
+
+        // $balance = $balance - $startingBalance;
+
+        echo round($balance);
+        exit;
     }
 }

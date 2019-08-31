@@ -63,7 +63,7 @@
 				<td>{{$t->date}}</td>
                 <td>{{$t->direction}}</td>
                 <td>{{round($t->resultPercentage, 2)}}%</td>
-                <td>{{number_format($t->volumeUsd, 0, ' ', ' ')}}</td>
+                <td>{{number_format($t->volumeUsd, 0, ' ', ' ')}} (x{{round($t->volumeDiff, 2)}})</td>
                 <td>{{number_format($t->buyVolumeUsd, 0, ' ', ' ')}}</td>
                 <td>{{number_format($t->sellVolumeUsd, 0, ' ', ' ')}}</td>
                 <td>{{round((($t->close-$t->open)/$t->close)*100,2)}}</td>
