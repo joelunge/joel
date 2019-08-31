@@ -248,6 +248,8 @@ class BacktestController extends Controller
 
     public function testing()
     {
+        \Alerts::alert();
+        exit;
         $startingBalance = 1000;
         $entryFee = 0.998;
         $exitFee = 0.998;
