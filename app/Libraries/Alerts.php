@@ -255,9 +255,9 @@ class Alerts
 
     private static function sendAlerts($alerts)
     {
-    	if (count($alerts) >= 1) {
-			\Notifications::slackMessage('======================');
-		}
+  //   	if (count($alerts) >= 1) {
+		// 	\Notifications::slackMessage('======================');
+		// }
 		foreach ($alerts as $key => $m) {
 			\Notifications::slackMessage($m);
 		}

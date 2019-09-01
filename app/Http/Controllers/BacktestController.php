@@ -33,9 +33,9 @@ class BacktestController extends Controller
 
     public function index()
     {
-        $this->testing();
+        // $this->testing();
         $startingBalance = $this->balance;
-        $this->strategy = 'strategy1';
+        $this->strategy = 'strategy2';
         $candles = $this->getCandles(['2018-01-01 00:00:00', '2018-12-31 23:59:59']);
         $volumes = $this->getVolumes($candles);
 
@@ -162,6 +162,7 @@ class BacktestController extends Controller
 
         // if (($condition1 || $condition2) && $condition3) {
         if ($condition3) {
+            $this->volumeDiff = 0;
             return true;
         }
 
