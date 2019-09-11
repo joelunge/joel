@@ -40,17 +40,17 @@
 	<table class="table table-sm">
         <thead style="background-color: white;">
             <th>Date</th>
+            <th>Close</th>
             <th>Direction</th>
+            <th>PriceMoveUp</th>
+            <th>PriceMoveDown</th>
             <th>PL</th>
             <th>Volume</th>
             <th>BuyVolume</th>
             <th>SellVolme</th>
             <th>Price move</th>
-            <th>R1</th>
-            <th>R5</th>
-            <th>R15</th>
-            <th>R30</th>
-            <th>R60</th>
+            <th>Changed Price</th>
+            <th>Changed Price UQ</th>
         </thead>
 		<tbody>
 			@foreach ($trades as $t)
@@ -61,17 +61,17 @@
 			@endif
             
 				<td>{{$t->date}}</td>
+                <td>{{$t->close}}</td>
                 <td>{{$t->direction}}</td>
+                <td>{{$t->priceDiffUp}}%</td>
+                <td>{{$t->priceDiffDown}}%</td>
                 <td>{{round($t->resultPercentage, 2)}}%</td>
                 <td>{{number_format($t->volumeUsd, 0, ' ', ' ')}} (x{{round($t->volumeDiff, 2)}})</td>
                 <td>{{number_format($t->buyVolumeUsd, 0, ' ', ' ')}}</td>
                 <td>{{number_format($t->sellVolumeUsd, 0, ' ', ' ')}}</td>
                 <td>{{round((($t->close-$t->open)/$t->close)*100,2)}}</td>
-                <td>{{round($t->rsi_1m)}}</td>
-                <td>{{round($t->rsi_5m)}}</td>
-                <td>{{round($t->rsi_15m)}}</td>
-                <td>{{round($t->rsi_30m)}}</td>
-                <td>{{round($t->rsi_1h)}}</td>
+                <td>{{$t->changedPrice}}</td>
+                <td>{{$t->changedPriceUnique}}</td>
 
 			</tr>
 			@endforeach

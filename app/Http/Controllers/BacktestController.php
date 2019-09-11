@@ -33,14 +33,15 @@ class BacktestController extends Controller
 
     public function index()
     {
-        // $this->testing();
+        $this->testing();
+        exit;
         $startingBalance = $this->balance;
         $this->strategy = 'strategy2';
         $candles = $this->getCandles(['2018-01-01 00:00:00', '2018-12-31 23:59:59']);
         $volumes = $this->getVolumes($candles);
 
         foreach ($candles as $key => $c) {
-            if ($this->shouldEnterTrade($c, $volumes, $this->lastTrade)) {
+            if (! $this->isInTrade && $this->shouldEnterTrade($c, $volumes, $this->lastTrade)) {
                 $this->enterTrade($c);
 
                 $this->lastTrade = strtotime($c->date);
@@ -50,7 +51,7 @@ class BacktestController extends Controller
                 $this->exitTrade($c);
             }
 
-            $this->saveIndicators($c);
+            // $this->saveIndicators($c);
         }
 
         // H::pr($this->indicators);
@@ -158,11 +159,25 @@ class BacktestController extends Controller
     {
         // $condition1 = $c->rsi_5m >= 85;
         // $condition2 = $c->rsi_5m <= 15;
-        $condition3 = $c->volumeUsd > 10000000;
+        $condition2 = $c->close > $c->open;
+        $condition3 = $c->volumeUsd > 5000000;
 
         // if (($condition1 || $condition2) && $condition3) {
-        if ($condition3) {
+        if ($condition2 && $condition3) {
             $this->volumeDiff = 0;
+
+            $priceDiff = $this->getPriceDiff($c, 1);
+            $this->priceDiffUp = round($priceDiff['up']);
+            $this->priceDiffDown = round($priceDiff['down']);
+
+            // if ($this->priceDiffDown > 5) {
+            //     return false;
+            // }
+
+            // if ($this->priceDiffUp > 5) {
+            //     return false;
+            // }
+
             return true;
         }
 
@@ -210,7 +225,7 @@ class BacktestController extends Controller
     public function shouldExitTrade($c)
     {
         $condition1 = $this->isInTrade;
-        $condition2 = $this->getTradeResults($c) < -3 || $this->getTradeResults($c) > 3;
+        $condition2 = $this->getTradeResults($c) < -2 || $this->getTradeResults($c) > 1;
         if ($condition1 && $condition2) {
             return true;
         }
@@ -223,6 +238,8 @@ class BacktestController extends Controller
         $this->isInTrade = true;
         $this->tradeData = $c;
         $this->tradeData->direction = $c->close > $c->open ? 'long' : 'short';
+        $this->tradeData->priceDiffUp = $this->priceDiffUp;
+        $this->tradeData->priceDiffDown = $this->priceDiffDown;
         $this->balance = $this->balance * 0.999;
     }
 
@@ -249,13 +266,13 @@ class BacktestController extends Controller
 
     public function testing()
     {
-        $startingBalance = 980;
+        $startingBalance = 3000;
         $entryFee = 0.998;
-        $exitFee = 0.998;
-        $winPercentage = 1.09;
-        $lossPercentage = 0.94;
-        $tradesAmount = 80;
-        $winrate = 0.70;
+        $exitFee = 0.999;
+        $winPercentage = 1.03;
+        $lossPercentage = 0.98;
+        $tradesAmount = 12;
+        $winrate = 0.90;
 
         $loserate = 1-$winrate;
 
@@ -279,5 +296,29 @@ class BacktestController extends Controller
 
         echo round($balance);
         exit;
+    }
+
+    public function getPriceDiff($c, $distance = 7)
+    {
+        $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $c->date);
+        $end = $start->modify('-'.$distance.' days');
+
+        $model = new App\Btccandle();
+        $table_name = $model->getTable();
+
+        $minClose = DB::table($table_name)
+            ->select(DB::raw('min(close) as minClose'))
+            ->whereBetween('date', [$end->format('Y-m-d H:i:s'), $start->format('Y-m-d H:i:s')])
+            ->get()[0]->minClose;
+
+        $maxClose = DB::table($table_name)
+            ->select(DB::raw('max(close) as maxClose'))
+            ->whereBetween('date', [$end->format('Y-m-d H:i:s'), $start->format('Y-m-d H:i:s')])
+            ->get()[0]->maxClose;
+
+        $priceMoveUp = (($c->close-$minClose)/$minClose)*100;
+        $priceMoveDown = (($maxClose-$c->close)/$c->close)*100;
+
+        return ['up' => $priceMoveUp, 'down' => $priceMoveDown];
     }
 }

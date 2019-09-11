@@ -39,5 +39,4 @@ class Btccandle extends Model
 	];
 
         protected $table = 'upw_btc_1_min';
-        // protected $table = 'upw_xrp_1_min';
 }
