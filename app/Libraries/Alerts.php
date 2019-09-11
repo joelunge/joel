@@ -144,6 +144,14 @@ class Alerts
 	        foreach ($candles as $key => $c) {
 	        	if ($c->rsi != 'x') {
 
+	        		if ($c->rsi >= 70) {
+	        			$messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - RSI 70+ | '  . round((1-($t->high/$c->close))*100, 1).'% - ' . $c->high;
+	        		}
+
+	        		if ($c->rsi <= 30) {
+	        			$messages[] = ':diamonds: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - RSI 30- | '  . round((1-($t->high/$c->close))*100, 1).'% - ' . $c->low;	
+	        		}
+
 		        	if (! $lowRsiCheckpoint1 && !$lowRsiCheckpoint2) {
 		        		if ($c->rsi <= 30) {
 		        			$lowRsiCheckpoint1 = $c->rsi;
@@ -180,7 +188,8 @@ class Alerts
 		        				$condition1 = (((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16;
 
 		        				if ($condition1) {
-		        					$messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE | '  . round((1-($t->high/$c->close))*100, 1).'%';
+		        					// UNCOMMENT BELOW TO ENABLE DIVERGENCE ALERTS
+		        					// $messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BULLISH DIVERGENCE | '  . round((1-($t->high/$c->close))*100, 1).'%';
 		        				}
 		        				$lowRsiCheckpoint1 = false;
 						        $priceAtLowRsiCheckpoint1 = false;
@@ -237,7 +246,8 @@ class Alerts
 
 		        				$condition1 = (((time() * 1000 - (int)$c->timestamp) / 1000) / 60) <= 16;
 		        				if ($condition1) {
-		        					$messages[] = ':diamonds: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BEARISH DIVERGENCE | +' . round((1-($t->low/$c->close))*100, 1).'%';
+		        					// UNCOMMENT BELOW TO ENABLE DIVERGENCE ALERTS
+		        					// $messages[] = ':diamonds: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - BEARISH DIVERGENCE | +' . round((1-($t->low/$c->close))*100, 1).'%';
 		        				}
 		        				$highRsiCheckpoint1 = false;
 						        $priceAtHighRsiCheckpoint1 = false;
