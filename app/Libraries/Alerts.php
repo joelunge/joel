@@ -134,13 +134,15 @@ class Alerts
 	        	}
 	        }
 
-	        if ($candles[count($candles)-1]->rsi >= 70) {
-    			$messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - RSI 70+ | '  . round((1-($t->high/$c->close))*100, 1).'% - ' . $c->high;
-    		}
+	        if (date('i') == 00 || date('i') == 15 || date('i') == 30 || date('i') == 45) {
+	        	if ($candles[count($candles)-1]->rsi >= 70) {
+	    			$messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - RSI 70+ | '  . round((1-($t->high/$c->close))*100, 1).'% - ' . $c->high;
+	    		}
 
-    		if ($candles[count($candles)-1]->rsi <= 30) {
-    			$messages[] = ':diamonds: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - RSI 30- | '  . round((1-($t->high/$c->close))*100, 1).'% - ' . $c->low;	
-    		}
+	    		if ($candles[count($candles)-1]->rsi <= 30) {
+	    			$messages[] = ':diamonds: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - RSI 30- | '  . round((1-($t->high/$c->close))*100, 1).'% - ' . $c->low;	
+	    		}
+	        }
 
 	        # BULLISH RSI DIVERGENCE
 
