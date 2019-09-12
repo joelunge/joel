@@ -134,7 +134,7 @@ class Alerts
 	        	}
 	        }
 
-	        if (date('i') == 00 || date('i') == 15 || date('i') == 30 || date('i') == 45) {
+	        if (date('i') == 59 || date('i') == 14 || date('i') == 29 || date('i') == 44) {
 	        	if ($candles[count($candles)-1]->rsi >= 70) {
 	    			$messages[] = ':four_leaf_clover: ' . date('H:i', $c->timestamp / 1000) . ' - ' . str_replace('t', '', str_replace('USD', '', $t->ticker)) .' - RSI 70+ | '  . round((1-($t->high/$c->close))*100, 1).'% - ' . $c->high;
 	    		}
