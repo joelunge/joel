@@ -24,9 +24,11 @@ class Tickers
     	foreach ($tickersTmp as $key => $t) {
     		$condition1 = strpos($t->ticker, 'USD') !== false;
     		$condition2 = strpos($t->ticker, 'UST') === false;
-    		$condition3 = $t->volume > $volumeRequirement;
+            $condition3 = strpos($t->ticker, 'LEO') === false;
+            $condition4 = strpos($t->ticker, 'ZEC') === false;
+    		$condition5 = $t->volume > $volumeRequirement;
 
-    		if ($condition1 and $condition2 and $condition3) {
+    		if ($condition1 and $condition2 and $condition3 and $contidion4 and $condition5) {
 			    $tickers[$t->ticker] = $t;
 			}
     	}
