@@ -28,7 +28,7 @@ class Tickers
             $condition4 = strpos($t->ticker, 'ZEC') === false;
     		$condition5 = $t->volume > $volumeRequirement;
 
-    		if ($condition1 and $condition2 and $condition3 and $contidion4 and $condition5) {
+    		if ($condition1 and $condition2 and $condition3 and $condition4 and $condition5) {
 			    $tickers[$t->ticker] = $t;
 			}
     	}
