@@ -5,7 +5,7 @@ class Notifications
     public static function slack($coins)
     {
     	$message = implode('\r\n', $coins);
-    	$webhook = end('SLACK_URL');
+    	$webhook = env('SLACK_URL');
 
     	exec(sprintf("curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"%s\"}' %s", $message, $webhook));
     }
@@ -13,7 +13,7 @@ class Notifications
     public static function slackMessage($message)
     {
     	$message = $message;
-    	$webhook = end('SLACK_URL');
+    	$webhook = env('SLACK_URL');
 
     	exec(sprintf("curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"%s\"}' %s", $message, $webhook));
     }
