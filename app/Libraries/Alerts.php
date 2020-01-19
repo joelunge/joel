@@ -5,9 +5,9 @@ class Alerts
 	public static function alert()
 	{
 		$tickers = self::getTickers();
-		$rsiAlerts = self::getRsiAlerts($tickers);
+		// $rsiAlerts = self::getRsiAlerts($tickers);
 		$priceAlerts = self::getPriceAlerts($tickers);
-		$volumeAlerts = self::getVolumeAlerts($tickers);
+		// $volumeAlerts = self::getVolumeAlerts($tickers);
 		$allAlerts = array_merge($rsiAlerts, $priceAlerts, $volumeAlerts);
 
 		self::sendAlerts($allAlerts);
