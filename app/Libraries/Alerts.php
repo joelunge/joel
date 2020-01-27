@@ -8,7 +8,8 @@ class Alerts
 		// $rsiAlerts = self::getRsiAlerts($tickers);
 		$priceAlerts = self::getPriceAlerts($tickers);
 		// $volumeAlerts = self::getVolumeAlerts($tickers);
-		$allAlerts = array_merge($rsiAlerts, $priceAlerts, $volumeAlerts);
+		// $allAlerts = array_merge($rsiAlerts, $priceAlerts, $volumeAlerts);
+		$allAlerts = array_merge($priceAlerts);
 
 		self::sendAlerts($allAlerts);
 	}
