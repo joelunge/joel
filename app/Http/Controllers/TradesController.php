@@ -29,21 +29,51 @@ class TradesController extends Controller
 
     public function test()
     {
-        $curl = curl_init('https://api.apify.com/v2/browser-info');
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($curl, CURLOPT_PROXY, 'http://proxy.apify.com:8000');
-        // Replace <YOUR_PROXY_PASSWORD> below with your password
-        // found at https://my.apify.com/proxy
-        curl_setopt($curl, CURLOPT_PROXYUSERPWD, 'auto:E8eGjqtyRkREDFzBfXEdKMi83');
-        $response = curl_exec($curl);
-        curl_close($curl);
-        if ($response) {
-            echo "hej";
-            echo $response;
-        } else {
-            echo "inte hej";
-        }
+        exit;
+        $url = 'http://109.74.9.164:3002/api/order/test';
+
+        $data = array(
+          'apiKey' => 't6kQ5tsb2zOmcIgivbQDKVZwSFbvwquZ4T8QrzxnOgk',
+          'apiSecret' => 'Ob3s3eOBHQdkHbh5vMvEDnYhAECCsu0vKHyAmTMgius',
+          'price' => 9342,
+          'symbol' => 'tBTCUSD',
+          'intent' => 'SELL'
+        );
+
+        $options = array(
+          'http' => array(
+            'method'  => 'POST',
+            'content' => json_encode($data),
+            'header'=>  "Content-Type: application/json\r\n" . "Accept: application/json\r\n"
+            )
+        );
+
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+        $response = json_decode($result);
+
+        echo "<pre>";
+        print_r($response);
+        exit;
     }
+
+    // public function test()
+    // {
+    //     $curl = curl_init('https://api.apify.com/v2/browser-info');
+    //     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    //     curl_setopt($curl, CURLOPT_PROXY, 'http://proxy.apify.com:8000');
+    //     // Replace <YOUR_PROXY_PASSWORD> below with your password
+    //     // found at https://my.apify.com/proxy
+    //     curl_setopt($curl, CURLOPT_PROXYUSERPWD, 'auto:E8eGjqtyRkREDFzBfXEdKMi83');
+    //     $response = curl_exec($curl);
+    //     curl_close($curl);
+    //     if ($response) {
+    //         echo "hej";
+    //         echo $response;
+    //     } else {
+    //         echo "inte hej";
+    //     }
+    // }
 
     public function hot()
     {
@@ -565,14 +595,14 @@ class TradesController extends Controller
             'winrate' => $winrate,
             'net_sum' => $netSum,
             'net_percentage' => $netPercentage,
-            'avg_usd_wins' => $gainUsdWins / $wins,
+            'avg_usd_wins' => ($wins) ? $gainUsdWins / $wins : 0,
             'avg_usd_losses' => ($losses) ? $gainUsdLosses / $losses : 0,
-            'avg_percentage_wins' => $gainPercentageWins / $wins,
+            'avg_percentage_wins' => ($wins) ? $gainPercentageWins / $wins: 0,
             'avg_percentage_losses' => ($losses) ? $gainPercentageLosses / $losses : 0,
             'volume' => $volume,
             'position_size' => $positionSize,
-            'duration' => $duration / count($allTrades),
-            'duration_wins' => $durationWins / $wins,
+            'duration' => (count($allTrades)) ? $duration / count($allTrades) : 0,
+            'duration_wins' => ($wins) ? $durationWins / $wins : 0,
             'duration_losses' => ($losses) ? $durationLosses / $losses : 0,
             'fees' => $fees,
         ];
@@ -1501,4 +1531,34 @@ class TradesController extends Controller
             // H::pr(strtotime($d[0]));
         }
     }
+
+
+    public function elias()
+    {
+        $urls = [
+            'https://56kdigital.com/',
+            // 'https://56kdigital.com/what-we-do/',
+        ];
+
+        foreach ($urls as $url) {
+            $html = file_get_contents($url);
+
+            H::pr($html);
+
+            $words = $this->getAllH2($html);
+            // $this->saveToDB($words);
+        }
+    }
+
+    public function getAllH2($html)
+    {
+        // $htmlContent = '<h2>Content goes here...</h2>';
+        preg_match('/<h2(.*?)<\/h2>/s', $html, $match);
+
+
+        H::pr($match);
+    }
+
+
+
 }

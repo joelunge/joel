@@ -33,11 +33,11 @@ class BacktestController extends Controller
 
     public function index()
     {
-        $this->testing();
-        exit;
+        // $this->testing();
+        // exit;
         $startingBalance = $this->balance;
         $this->strategy = 'strategy2';
-        $candles = $this->getCandles(['2018-01-01 00:00:00', '2018-12-31 23:59:59']);
+        $candles = $this->getCandles(['2018-01-01 00:00:00', '2018-01-31 23:59:59']);
         $volumes = $this->getVolumes($candles);
 
         foreach ($candles as $key => $c) {
@@ -157,14 +157,23 @@ class BacktestController extends Controller
 
     public function strategy2($c, $volumes, $lastTrade)
     {
-        // $condition1 = $c->rsi_5m >= 85;
-        // $condition2 = $c->rsi_5m <= 15;
+        // $condition1 = $c->rsi_1m >= 70;
         $condition2 = $c->close > $c->open;
         $condition3 = $c->volumeUsd > 5000000;
+        $condition4 = (strtotime($c->date) - $this->lastTrade) > 172800;
+        $condition5 = ((($c->close - $c->open) / $c->open) * 100 > 0.4);
+        $condition6 = $c->changedPrice > 200;
 
         // if (($condition1 || $condition2) && $condition3) {
-        if ($condition2 && $condition3) {
+        if ($condition2 && $condition3 && $condition4 && $condition6) {
             $this->volumeDiff = 0;
+
+            // echo strtotime($c->date);
+            // echo "<br>";
+            // echo $this->lastTrade;
+            // echo "<br>";
+            // echo "<br>";
+
 
             $priceDiff = $this->getPriceDiff($c, 1);
             $this->priceDiffUp = round($priceDiff['up']);
@@ -225,7 +234,7 @@ class BacktestController extends Controller
     public function shouldExitTrade($c)
     {
         $condition1 = $this->isInTrade;
-        $condition2 = $this->getTradeResults($c) < -2 || $this->getTradeResults($c) > 1;
+        $condition2 = $this->getTradeResults($c) < -1 || $this->getTradeResults($c) > 1;
         if ($condition1 && $condition2) {
             return true;
         }

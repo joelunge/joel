@@ -51,6 +51,7 @@
             <th>Price move</th>
             <th>Changed Price</th>
             <th>Changed Price UQ</th>
+            <th>R1</th>
         </thead>
 		<tbody>
 			@foreach ($trades as $t)
@@ -72,7 +73,7 @@
                 <td>{{round((($t->close-$t->open)/$t->close)*100,2)}}</td>
                 <td>{{$t->changedPrice}}</td>
                 <td>{{$t->changedPriceUnique}}</td>
-
+                <td>{{$t->rsi_1m}}</td>
 			</tr>
 			@endforeach
 		</tbody>
