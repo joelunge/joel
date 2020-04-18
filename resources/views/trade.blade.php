@@ -8,7 +8,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Crypto - Dashboard') }}</title>
+    <title>{{ config('app.name', 'Crypto - Trade') }}</title>
     <link rel="icon" href="{{ asset('favicon.ico')}}" />
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
@@ -43,8 +43,8 @@
 					  		<td class="text-center" style="width: 25%;">{{round($ticker->lastPrice, 6)}}</td>
 					  		<td class="text-center" style="width: 25%;">@if ($ticker->dailyChange > 0) <span class="text-success">{{$ticker->dailyChange * 100}}% @else <span class="text-danger">{{$ticker->dailyChange * 100}}%@endif</span></td>
 					  		<td class="text-center" style="width: 25%;">{{$ticker->formattedVolume}}</td>
-					  		<td class="text-center" style="width: 25%;"><a class="text-center btn btn-xs btn-block btn-dark" target="_blank" href="{{sprintf('https://www.tradingview.com/chart?symbol=BITFINEX%s%s', '%3A', strtoupper(str_replace('t', '', $ticker->ticker)))}}" role="button"><i class="fas fa-chart-area"></i></a></td>
-					  		<td class="text-center" style="width: 25%;"><a class="text-center btn btn-xs btn-block btn-danger" href="/trade" role="button"><i class="fas fa-money-bill-alt"></i></td>
+					  		<td class="text-center" style="width: 25%;"><a class="text-center btn btn-xs btn-block btn-dark" href="{{sprintf('/trade/%s/%s/%s', strtolower(str_replace('USD', '', str_replace('t', '', $ticker->ticker))), 'buy', $ticker->lastPrice)}}" role="button">LONG {{str_replace('USD', '', str_replace('t', '', $ticker->ticker))}} <i class="fas text-success fa-arrow-alt-circle-up"></i></a></td>
+					  		<td class="text-center" style="width: 25%;"><a class="text-center btn btn-xs btn-block btn-dark" href="{{sprintf('/trade/%s/%s/%s', strtolower(str_replace('USD', '', str_replace('t', '', $ticker->ticker))), 'sell', $ticker->lastPrice)}}" role="button">SHORT {{str_replace('USD', '', str_replace('t', '', $ticker->ticker))}} <i class="fas text-danger fa-arrow-alt-circle-down"></i></a></td>
 					  	</tr>
 					  	@endforeach
 					  </tbody>

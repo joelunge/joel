@@ -43,6 +43,8 @@ Route::get('/alerts/add', 'AlertsController@add')->name('alerts_add');
 Route::get('/coins', 'CoinsController@index')->name('coins');
 
 Route::get('/toggle', 'DashboardController@toggle')->name('toggle');
+Route::get('/trade', 'DashboardController@trade')->name('trade');
+Route::get('/trade/{coin}/{direction}/{price}', 'TradesController@placeTrade')->name('placetrade');
 
 Route::get('/trades/{enabledisable}/{coin}/{direction}', 'TradesController@enabledisable')->name('enabledisable');
 

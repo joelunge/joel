@@ -1535,11 +1535,17 @@ class TradesController extends Controller
 
     public function enabledisable($enabledisable, $coin, $direction)
     {
-        exec(sprintf('curl --header "Content-Type: application/json" --request POST --data \'\' http://13.48.209.13:3002/api/trades/%s/t%sUSD/%s', strtolower($enabledisable), strtoupper($coin), strtoupper($direction)));
+        exec(sprintf('curl --header "Content-Type: application/json" --request POST --data \'\' http://%s:3002/api/trades/%s/t%sUSD/%s', env('TRADE_IP'), strtolower($enabledisable), strtoupper($coin), strtoupper($direction)));
 
         return redirect('toggle');
     }
 
+    public function placeTrade($coin, $direction, $price)
+    {
+        echo sprintf('curl --header "Content-Type: application/json" --request POST --data \'{"apiKey":"%s","apiSecret":"%s","price":"%s","symbol":"t%sUSD","intent":"%s"}\' http://%s:3002/api/order/new', env('BFX_K'), env('BFX_SC'), $price, strtoupper($coin), strtoupper($direction), env('TRADE_IP'));
+    exit;
 
+        return redirect('trade');
+    }    
 
 }

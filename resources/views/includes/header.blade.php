@@ -19,7 +19,11 @@
                 </li>
 
                 <li class="nav-item">
-                  <a class="nav-link" style="margin-right: 0px;" href="/coins">Coins <span class="sr-only">(current)</span></a>
+                  <a class="nav-link" style="margin-right: 20px;" href="/toggle">Toggle <span class="sr-only">(current)</span></a>
+                </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" style="margin-right: 0px;" href="/trade">Trade <span class="sr-only">(current)</span></a>
                 </li>
             </ul>
 
