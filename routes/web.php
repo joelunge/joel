@@ -40,6 +40,12 @@ Route::get('/alerts/delete/{id}', 'AlertsController@delete')->name('alerts_delet
 Route::get('/alerts/edit/{id}', 'AlertsController@edit')->name('alerts_edit');
 Route::get('/alerts/add', 'AlertsController@add')->name('alerts_add');
 
+Route::get('/coins', 'CoinsController@index')->name('coins');
+
+Route::get('/toggle', 'DashboardController@toggle')->name('toggle');
+
+Route::get('/trades/{enabledisable}/{coin}/{direction}', 'TradesController@enabledisable')->name('enabledisable');
+
 Route::get('/candles/scrape_hist', 'CandlesController@scrapeHist')->name('candles_scrape_hist');
 
 Route::get('/test', 'TradesController@test')->name('test');

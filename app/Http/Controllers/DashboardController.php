@@ -46,4 +46,30 @@ class DashboardController extends Controller
 
         return view('dashboard', ['tickers' => $tickers]);
     }
+
+    public function toggle()
+    {
+        $tickers = \Tickers::get(100000);
+
+        // Desc sort
+        usort($tickers,function($first,$second){
+            return $first->volume < $second->volume;
+        });
+
+        foreach ($tickers as $key => $ticker) {
+            if ($ticker->volume < 100000) {
+                $ticker->formattedVolume = round($ticker->volume);
+            } elseif ($ticker->volume >= 100000 && $ticker->volume < 1000000) {
+                $ticker->formattedVolume = round($ticker->volume / 1000).'K';
+            } elseif ($ticker->volume >= 1000000 && $ticker->volume < 1000000000) {
+                $ticker->formattedVolume = round($ticker->volume / 1000000).'M';
+            } elseif ($ticker->volume >= 1000000000) {
+                $ticker->formattedVolume = round($ticker->volume / 1000000000).'B';
+            } else {
+                $ticker->formattedVolume = round($ticker->volume);
+            }
+        }
+
+        return view('toggle', ['tickers' => $tickers]);
+    }
 }

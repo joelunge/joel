@@ -1533,30 +1533,11 @@ class TradesController extends Controller
     }
 
 
-    public function elias()
+    public function enabledisable($enabledisable, $coin, $direction)
     {
-        $urls = [
-            'https://56kdigital.com/',
-            // 'https://56kdigital.com/what-we-do/',
-        ];
+        exec(sprintf('curl --header "Content-Type: application/json" --request POST --data \'\' http://13.48.209.13:3002/api/trades/%s/t%sUSD/%s', strtolower($enabledisable), strtoupper($coin), strtoupper($direction)));
 
-        foreach ($urls as $url) {
-            $html = file_get_contents($url);
-
-            H::pr($html);
-
-            $words = $this->getAllH2($html);
-            // $this->saveToDB($words);
-        }
-    }
-
-    public function getAllH2($html)
-    {
-        // $htmlContent = '<h2>Content goes here...</h2>';
-        preg_match('/<h2(.*?)<\/h2>/s', $html, $match);
-
-
-        H::pr($match);
+        return redirect('toggle');
     }
 
 
