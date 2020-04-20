@@ -1542,8 +1542,7 @@ class TradesController extends Controller
 
     public function placeTrade($coin, $direction, $price)
     {
-        echo sprintf('curl --header "Content-Type: application/json" --request POST --data \'{"apiKey":"%s","apiSecret":"%s","price":"%s","symbol":"t%sUSD","intent":"%s"}\' http://%s:3002/api/order/new', env('BFX_K'), env('BFX_SC'), $price, strtoupper($coin), strtoupper($direction), env('TRADE_IP'));
-    exit;
+        exec(sprintf('curl --header "Content-Type: application/json" --request POST --data \'{"apiKey":"%s","apiSecret":"%s","price":"%s","symbol":"t%sUSD","intent":"%s"}\' http://%s:3002/api/order/new', env('BFX_K'), env('BFX_SC'), $price, strtoupper($coin), strtoupper($direction), env('TRADE_IP')));
 
         return redirect('trade');
     }    
