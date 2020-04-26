@@ -33,6 +33,18 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function () {
             \Alerts::alert();
+        })->everyMinute();
+
+        $schedule->call(function () {
+            $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+            $positions = $bfx->get_positions();
+
+            foreach (range(1, 2) as $i) {
+                if (! empty($positions)) {
+                    \Trade::disableAll();
+                }
+                sleep(30);
+            }
         })->everyMinute(); 
 
         $schedule->call(function () {
