@@ -72,6 +72,27 @@
 			    <input type="radio" value="down" name="direction" id="down" autocomplete="off" @if ($currentAlert->direction == 'down') checked @endif> DOWN
 			  </label>
 			</div>
+
+			<br />
+			<br />
+
+			<div class="row">
+				<div class="col-md-6">
+					<select class="form-control" name="enabledisable" id="enabledisable">
+					<option value="">-</option>
+					<option @if ($currentAlert->enabledisable == 'enable') selected @endif value="enable">Enable</option>
+					<option @if ($currentAlert->enabledisable == 'disable') selected @endif value="disable">Disable</option>
+					</select>
+				</div>
+				<div class="col-md-6">
+					<select class="form-control" name="enabledisable_direction" id="enabledisable_direction">
+					<option value="">-</option>
+					<option @if ($currentAlert->enabledisable_direction == 'buy') selected @endif value="buy">Long</option>
+					<option @if ($currentAlert->enabledisable_direction == 'sell') selected @endif value="sell">Short</option>
+					</select>
+				</div>
+			</div>
+
 			<hr />
 			<button type="submit" class="btn btn-block btn-success">Submit</button>
 			</form>

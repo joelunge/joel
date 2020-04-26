@@ -48,10 +48,23 @@ class Alerts
                     $alerts[] = sprintf($message, $icon, $ticker, strtoupper($direction), strtoupper($comment), $priceAlert->price, $chartUrl, $editUrl, $deleteUrl);
                     $priceAlert->last_notification_sent = date("Y-m-d H:i:s");
                     $priceAlert->save();
+
+                    if ($priceAlert->enabledisable && $priceAlert->enabledisable_direction) {
+                    	$bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+                    	$positions = $bfx->get_positions();
+
+                    	if (empty($positions)) {
+                    		exec(sprintf('curl --header "Content-Type: application/json" --request POST --data \'\' http://%s:3002/api/trades/%s/t%sUSD/%s', env('TRADE_IP'), strtolower($priceAlert->enabledisable), strtoupper($ticker), strtoupper($priceAlert->enabledisable_direction)));
+                    	}
+	                }
                 } elseif ($priceAlert->direction == 'down' && $t->lastPrice < $priceAlert->price) {
                     $alerts[] = sprintf($message, $icon, $ticker, strtoupper($direction), strtoupper($comment), $priceAlert->price, $chartUrl, $editUrl, $deleteUrl);
                     $priceAlert->last_notification_sent = date("Y-m-d H:i:s");
                     $priceAlert->save();
+
+                    if (empty($positions)) {
+                    		exec(sprintf('curl --header "Content-Type: application/json" --request POST --data \'\' http://%s:3002/api/trades/%s/t%sUSD/%s', env('TRADE_IP'), strtolower($priceAlert->enabledisable), strtoupper($ticker), strtoupper($priceAlert->enabledisable_direction)));
+                    	}
                 }
             }
         }

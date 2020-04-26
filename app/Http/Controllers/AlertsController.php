@@ -80,6 +80,9 @@ class AlertsController extends Controller
         $alert->comment = request('comment');
         $alert->direction = request('direction');
         $alert->notification_frequency = request('notification_frequency');
+        $alert->enabledisable = request('enabledisable');
+        $alert->enabledisable_direction = request('enabledisable_direction');
+
         $alert->save();
 
         return redirect()->route('alerts');

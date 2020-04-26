@@ -71,6 +71,26 @@
 			    <input type="radio" value="down" name="direction" id="down" autocomplete="off"> DOWN
 			  </label>
 			</div>
+
+			<br />
+			<br />
+
+			<div class="row">
+				<div class="col-md-6">
+					<select class="form-control" name="enabledisable" id="enabledisable">
+					<option value="">-</option>
+					<option value="enable">Enable</option>
+					<option value="disable">Disable</option>
+					</select>
+				</div>
+				<div class="col-md-6">
+					<select class="form-control" name="enabledisable_direction" id="enabledisable_direction">
+					<option value="">-</option>
+					<option value="buy">Long</option>
+					<option value="sell">Short</option>
+					</select>
+				</div>
+			</div>
 			
 			<hr />
 			<button type="submit" class="btn btn-block btn-success">Submit</button>
