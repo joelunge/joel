@@ -51,6 +51,18 @@
 				<input type="text" class="form-control" name="comment" id="comment" placeholder="Comment">
 			</div>
 			<br />
+
+			<select name="notification_frequency" id="notification_frequency" class="form-control form-control-md">
+				<option value="0">Only once</option>
+				<option value="1">Every 1 mins</option>
+		  		<option value="5">Every 5 mins</option>
+		  		<option value="15">Every 15 mins</option>
+		  		<option value="30">Every 30 mins</option>
+		  		<option value="60">Every 60 mins</option>
+			</select>
+
+			<br />
+
 			<div style="width: 100%;" class="btn-group btn-group-toggle" data-toggle="buttons">
 			  <label style="width: 50%;" class="btn btn-secondary active">
 			    <input type="radio" value="up" name="direction" id="up" autocomplete="off" checked> UP
@@ -59,6 +71,7 @@
 			    <input type="radio" value="down" name="direction" id="down" autocomplete="off"> DOWN
 			  </label>
 			</div>
+			
 			<hr />
 			<button type="submit" class="btn btn-block btn-success">Submit</button>
 			</form>

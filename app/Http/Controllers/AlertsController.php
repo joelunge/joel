@@ -74,11 +74,12 @@ class AlertsController extends Controller
         } else {
             $alert = new \App\Alert;
         }
-        
+
         $alert->ticker = request('ticker');
         $alert->price = request('price');
         $alert->comment = request('comment');
         $alert->direction = request('direction');
+        $alert->notification_frequency = request('notification_frequency');
         $alert->save();
 
         return redirect()->route('alerts');

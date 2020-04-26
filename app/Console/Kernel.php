@@ -45,7 +45,7 @@ class Kernel extends ConsoleKernel
                 }
                 sleep(30);
             }
-        })->everyMinute(); 
+        })->everyMinute();
 
         $schedule->call(function () {
             $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
@@ -62,37 +62,37 @@ class Kernel extends ConsoleKernel
 
         })->everyMinute();
 
-        $schedule->call(function () {
-            $coins = config('coins.coins');
+        // $schedule->call(function () {
+        //     $coins = config('coins.coins');
 
-            $actionCoins = [];
-            foreach ($coins as $coin) {
-                $avgChangedPrice = DB::connection('mongodb')->table($coin)->avg('changedPrice');
-                $avgCount = DB::connection('mongodb')->table($coin)->avg('count');
-                $latest = DB::connection('mongodb')->table($coin)->orderBy('timestamp', 'DESC')->first();
+        //     $actionCoins = [];
+        //     foreach ($coins as $coin) {
+        //         $avgChangedPrice = DB::connection('mongodb')->table($coin)->avg('changedPrice');
+        //         $avgCount = DB::connection('mongodb')->table($coin)->avg('count');
+        //         $latest = DB::connection('mongodb')->table($coin)->orderBy('timestamp', 'DESC')->first();
 
-                if (time() - ($latest['timestamp'] / 1000) > 120) {
-                    continue;
-                }
+        //         if (time() - ($latest['timestamp'] / 1000) > 120) {
+        //             continue;
+        //         }
 
-                if ($latest['changedPrice'] > ($avgChangedPrice * 7)) {
-                    $actionCoins[] = strtoupper(str_replace('usds', '', str_replace('trades-t', '', $coin)));
-                    $actionCoins[] = 'avgChangedPrice: ' . round($avgChangedPrice);
-                    $actionCoins[] = 'latest: ' . round($latest['changedPrice']);
-                }
+        //         if ($latest['changedPrice'] > ($avgChangedPrice * 7)) {
+        //             $actionCoins[] = strtoupper(str_replace('usds', '', str_replace('trades-t', '', $coin)));
+        //             $actionCoins[] = 'avgChangedPrice: ' . round($avgChangedPrice);
+        //             $actionCoins[] = 'latest: ' . round($latest['changedPrice']);
+        //         }
 
-                if ($latest['count'] > ($avgCount * 7)) {
-                    $actionCoins[] = strtoupper(str_replace('usds', '', str_replace('trades-t', '', $coin)));
-                    $actionCoins[] = 'avgCount: ' . round($avgCount);
-                    $actionCoins[] = 'latest: ' . round($latest['count']);
-                }
-            }
+        //         if ($latest['count'] > ($avgCount * 7)) {
+        //             $actionCoins[] = strtoupper(str_replace('usds', '', str_replace('trades-t', '', $coin)));
+        //             $actionCoins[] = 'avgCount: ' . round($avgCount);
+        //             $actionCoins[] = 'latest: ' . round($latest['count']);
+        //         }
+        //     }
 
-            if (count($actionCoins)) {
-                Notifications::slack($actionCoins);
-            }
+        //     if (count($actionCoins)) {
+        //         Notifications::slack($actionCoins);
+        //     }
 
-        })->everyMinute();
+        // })->everyMinute();
     }
 
     /**

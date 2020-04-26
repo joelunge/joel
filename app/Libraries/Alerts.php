@@ -17,30 +17,40 @@ class Alerts
 	private static function getPriceAlerts($tickers)
 	{
 		$alerts = [];
-		$priceAlerts = \App\Alert::all();
+        $priceAlerts = \App\Alert::all();
 
-		foreach ($priceAlerts as $priceAlert) {
-			if (array_key_exists('t' . strtoupper($priceAlert->ticker) . 'USD', $tickers)) {
-				$t = $tickers['t' . strtoupper($priceAlert->ticker) . 'USD'];
+        foreach ($priceAlerts as $priceAlert) {
+            if (array_key_exists('t' . strtoupper($priceAlert->ticker) . 'USD', $tickers)) {
+                $t = $tickers['t' . strtoupper($priceAlert->ticker) . 'USD'];
 
-				$chartUrl = sprintf('https://www.tradingview.com/chart?symbol=BITFINEX%s%sUSD', '%3A', strtoupper($priceAlert->ticker));
-				$chartUrl = '<'.$chartUrl.'|CHART>';
-				$editUrl = sprintf('<http://crypto.joelunge.site/alerts/edit/%s|EDIT>', $priceAlert->id);
-				$deleteUrl = sprintf('<http://crypto.joelunge.site/alerts/delete/%s|DELETE>', $priceAlert->id);
-				$icon = ($priceAlert->direction == 'up') ? ':four_leaf_clover:' : ':diamonds:';
-				$ticker = str_replace('t', '', str_replace('USD', '', $t->ticker));
-				$direction = $priceAlert->direction;
-				$comment = $priceAlert->comment ? '- ' . $priceAlert->comment : null;
+                $chartUrl = sprintf('https://www.tradingview.com/chart?symbol=BITFINEX%s%sUSD', '%3A', strtoupper($priceAlert->ticker));
+                $chartUrl = '<'.$chartUrl.'|CHART>';
+                $editUrl = sprintf('<http://crypto.joelunge.site/alerts/edit/%s|EDIT>', $priceAlert->id);
+                $deleteUrl = sprintf('<http://crypto.joelunge.site/alerts/delete/%s|DELETE>', $priceAlert->id);
+                $icon = ($priceAlert->direction == 'up') ? ':four_leaf_clover:' : ':diamonds:';
+                $ticker = str_replace('t', '', str_replace('USD', '', $t->ticker));
+                $direction = $priceAlert->direction;
+                $comment = $priceAlert->comment ? '- ' . $priceAlert->comment : null;
 
-				$message = '%s %s %s %s - %s %s | %s | %s';
+                $message = '%s %s %s %s - %s %s | %s | %s';
 
-				if ($priceAlert->direction == 'up' && $t->lastPrice > $priceAlert->price) {
-					$alerts[] = sprintf($message, $icon, $ticker, strtoupper($direction), strtoupper($comment), $priceAlert->price, $chartUrl, $editUrl, $deleteUrl);
-				} elseif ($priceAlert->direction == 'down' && $t->lastPrice < $priceAlert->price) {
-					$alerts[] = sprintf($message, $icon, $ticker, strtoupper($direction), strtoupper($comment), $priceAlert->price, $chartUrl, $editUrl, $deleteUrl);
-				}
-			}
-		}
+                $notificationDiff = (time() - strtotime($priceAlert->last_notification_sent)) / 60;
+
+                if ($priceAlert->notification_frequency == 0 || ($notificationDiff < $priceAlert->notification_frequency)) {
+                    continue;
+                }
+
+                if ($priceAlert->direction == 'up' && $t->lastPrice > $priceAlert->price) {
+                    $alerts[] = sprintf($message, $icon, $ticker, strtoupper($direction), strtoupper($comment), $priceAlert->price, $chartUrl, $editUrl, $deleteUrl);
+                    $priceAlert->last_notification_sent = date("Y-m-d H:i:s");
+                    $priceAlert->save();
+                } elseif ($priceAlert->direction == 'down' && $t->lastPrice < $priceAlert->price) {
+                    $alerts[] = sprintf($message, $icon, $ticker, strtoupper($direction), strtoupper($comment), $priceAlert->price, $chartUrl, $editUrl, $deleteUrl);
+                    $priceAlert->last_notification_sent = date("Y-m-d H:i:s");
+                    $priceAlert->save();
+                }
+            }
+        }
 
 		return $alerts;
 	}
