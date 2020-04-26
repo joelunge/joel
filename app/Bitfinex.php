@@ -968,7 +968,7 @@ class Bitfinex {
     */
     private function prepare_header($data)
     {
-    	$data['nonce'] = (string) number_format(round(microtime(true) * 100000), 0, '.', '');
+    	$data['nonce'] = (string) number_format(round(microtime(true) * 10000000), 0, '.', '');
     	
     	$payload = base64_encode(json_encode($data));
     	$signature = hash_hmac('sha384', $payload, $this->api_secret);
