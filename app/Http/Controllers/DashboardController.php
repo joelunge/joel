@@ -51,10 +51,9 @@ class DashboardController extends Controller
     {
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
         $positions = $bfx->get_positions();
+        $orders = $bfx->get_orders();
 
-        // \H::pr($positions);
-
-        return view('positions', ['positions' => $positions]);
+        return view('positions', ['positions' => $positions, 'orders' => $orders]);
     }
 
     public function toggle()

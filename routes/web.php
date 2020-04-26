@@ -45,8 +45,11 @@ Route::get('/coins', 'CoinsController@index')->name('coins');
 Route::get('/toggle', 'DashboardController@toggle')->name('toggle');
 Route::get('/positions', 'DashboardController@positions')->name('positions');
 Route::get('/orders', 'DashboardController@positions')->name('orders');
-Route::get('/orders/add', 'DashboardController@positions')->name('orders_add');
-Route::get('/orders/edit', 'DashboardController@positions')->name('orders_edit');
+Route::get('/trade/new/{coin}/{amount}/{price}/{direction}/{type}', 'TradesController@new')->name('new_trade');
+Route::get('/orders/new/{coin}/{amount}', 'OrdersController@new')->name('orders_new');
+Route::post('/orders/sendorder', 'OrdersController@sendorder')->name('orders_send');
+Route::post('/orders/replaceorder', 'OrdersController@replaceorder')->name('orders_replace');
+Route::get('/orders/edit/{coin}/{amount}/{order_id}/{order_type}', 'OrdersController@edit')->name('orders_edit');
 Route::get('/orders/delete', 'DashboardController@positions')->name('orders_delete');
 
 Route::get('/trade', 'DashboardController@trade')->name('trade');

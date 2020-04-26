@@ -27,9 +27,19 @@ class TradesController extends Controller
         // $this->middleware('auth');
     }
 
+    public function new($coin, $amount, $price, $direction, $type)
+    {
+        $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+        $bfx->cancel_all_orders();
+        $bfx->new_order($coin, strval($amount), strval($price), 'bitfinex', $direction, $type);
+
+        return redirect('/positions');
+    }
+
     public function test()
     {
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+        \H::pr($bfx->new_order('ETHUSD', '0.316467', '184.00', 'bitfinex', 'buy', 'limit'));
         \H::pr($bfx->get_symbols());
 
         exit;

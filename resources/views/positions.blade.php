@@ -60,6 +60,47 @@
                             <td class="text-center @if ($position['pl'] > 0) text-success @else text-danger @endif">{{round($position['pl'], 2)}} USD</td>
                             <td class="text-center @if ($position['pl'] > 0) text-success @else text-danger @endif">{{round(($position['pl'] / (abs($position['amount']) * $position['base'])) * 100, 2)}}%</td>
 					  	</tr>
+
+                        <tr>
+                            <td></td>
+                            @foreach ($orders as $order)
+                                @if ($order['type'] == 'stop')
+                                    <td class="text-center" colspan="3">Stop: {{round((($position['base'] - $order['price']) / $position['base']) * 100, 2)}}% ({{$order['price']}})</td>
+                                @endif
+                            @endforeach
+
+                            @foreach ($orders as $order)
+                                @if ($order['type'] == 'limit')
+                                    <td class="text-center" colspan="3">Target: {{abs(round((($order['price'] - $position['base']) / $position['base']) * 100, 2))}}% ({{$order['price']}})</td>
+                                @endif
+                            @endforeach
+                        </tr>
+
+                        <tr>
+                            @foreach ($orders as $order)
+                                @if ($order['type'] == 'stop')
+                                    <td class="text-center" colspan="4"><a class="btn btn-block btn-dark text-center" href="/orders/edit/{{strtoupper($position['symbol'])}}/{{($position['amount'] * -1)}}/{{$order['id']}}/stop" role="button">Edit stop</a></td>
+                                @endif
+                            @endforeach
+
+                            @foreach ($orders as $order)
+                                @if ($order['type'] == 'limit')
+                                    <td class="text-center" colspan="3"><a class="btn btn-block btn-dark text-center" href="/orders/edit/{{strtoupper($position['symbol'])}}/{{($position['amount'] * -1)}}/{{$order['id']}}/limit" role="button">Edit target</a></td>
+                                @endif
+
+                                @if (count($orders) <= 1)
+                                    <td class="text-center" colspan="3"><a class="btn btn-block btn-success text-center" href="/orders/new/{{strtoupper($position['symbol'])}}/{{($position['amount'] * -1)}}" role="button">Add target</a></td>
+                                @endif
+                            @endforeach
+                        </tr>
+
+                        <tr>
+                            @if ($position['amount'] > 0)
+                            <td class="text-center" colspan="7"><a class="btn btn-block @if ($position['pl'] > 0) btn-success @else btn-danger @endif text-center" href="/trade/new/{{strtoupper($position['symbol'])}}/{{$position['amount']*-1}}/{{($position['base'] * 1.2)}}/sell/market" role="button" onclick="return confirm('Are you sure?')">@if ($position['pl'] > 0) TAKE PROFIT @else TAKE LOSS @endif</a></td>
+                            @else
+                            <td class="text-center" colspan="7"><a class="btn btn-block @if ($position['pl'] > 0) btn-success @else btn-danger @endif text-center" href="/trade/new/{{strtoupper($position['symbol'])}}/{{$position['amount']*-1}}/{{($position['base'] * 0.8)}}/buy/market" role="button" onclick="return confirm('Are you sure?')">@if ($position['pl'] > 0) TAKE PROFIT @else TAKE LOSS @endif</a></td>
+                            @endif
+                        </tr>
 					  	@endforeach
 					  </tbody>
 					</table>
