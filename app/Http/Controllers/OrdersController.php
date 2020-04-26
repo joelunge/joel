@@ -41,7 +41,7 @@ class OrdersController extends Controller
     	foreach ($positions as $key => $position) {
     		if ($position['symbol'] == strtolower(request('ticker'))) {
     			$amount = request('amount');
-    			$direction = ($amount > 0) ? 'buy' : 'sell';
+    			$direction = (floatval($amount) > 0) ? 'buy' : 'sell';
 
     			if ($direction == 'buy') {
     				$price = $position['base']*(1-(request('target')/100));
@@ -64,7 +64,7 @@ class OrdersController extends Controller
     	foreach ($positions as $key => $position) {
     		if ($position['symbol'] == strtolower(request('ticker'))) {
     			$amount = request('amount');
-    			$direction = ($amount > 0) ? 'buy' : 'sell';
+    			$direction = (floatval($amount) > 0) ? 'buy' : 'sell';
 
     			if (request('order_type') == 'limit') {
     				if ($direction == 'buy') {

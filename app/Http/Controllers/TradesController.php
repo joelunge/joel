@@ -38,8 +38,8 @@ class TradesController extends Controller
 
     public function test()
     {
+        \Order::automaticTarget();
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
-        \H::pr($bfx->new_order('ETHUSD', '0.316467', '184.00', 'bitfinex', 'buy', 'limit'));
         \H::pr($bfx->get_symbols());
 
         exit;

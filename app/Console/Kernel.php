@@ -36,6 +36,10 @@ class Kernel extends ConsoleKernel
         })->everyMinute();
 
         $schedule->call(function () {
+            \Order::automaticTarget();
+        })->everyMinute();
+
+        $schedule->call(function () {
             $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
             $positions = $bfx->get_positions();
 
