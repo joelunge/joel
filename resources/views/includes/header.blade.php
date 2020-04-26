@@ -14,6 +14,11 @@
                 <li class="nav-item float-left">
                   <a class="nav-link" style="margin-right: 20px;" href="{{route('dashboard')}}">Dashboard <span class="sr-only">(current)</span></a>
                 </li>
+
+                <li class="nav-item">
+                  <a class="nav-link" style="margin-right: 20px;" href="/positions">Positions <span class="sr-only">(current)</span></a>
+                </li>
+
                 <li class="nav-item">
                   <a class="nav-link" style="margin-right: 20px;" href="/alerts">Alerts <span class="sr-only">(current)</span></a>
                 </li>

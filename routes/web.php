@@ -43,6 +43,12 @@ Route::get('/alerts/add', 'AlertsController@add')->name('alerts_add');
 Route::get('/coins', 'CoinsController@index')->name('coins');
 
 Route::get('/toggle', 'DashboardController@toggle')->name('toggle');
+Route::get('/positions', 'DashboardController@positions')->name('positions');
+Route::get('/orders', 'DashboardController@positions')->name('orders');
+Route::get('/orders/add', 'DashboardController@positions')->name('orders_add');
+Route::get('/orders/edit', 'DashboardController@positions')->name('orders_edit');
+Route::get('/orders/delete', 'DashboardController@positions')->name('orders_delete');
+
 Route::get('/trade', 'DashboardController@trade')->name('trade');
 Route::get('/trade/{coin}/{direction}/{price}', 'TradesController@placeTrade')->name('placetrade');
 

@@ -47,6 +47,16 @@ class DashboardController extends Controller
         return view('dashboard', ['tickers' => $tickers]);
     }
 
+    public function positions()
+    {
+        $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+        $positions = $bfx->get_positions();
+
+        // \H::pr($positions);
+
+        return view('positions', ['positions' => $positions]);
+    }
+
     public function toggle()
     {
         $tickers = \Tickers::get(100000);
