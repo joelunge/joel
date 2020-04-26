@@ -30,16 +30,7 @@ class TradesController extends Controller
     public function test()
     {
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
-
-        foreach (range(1, 5) as $i) {
-            $positions = $bfx->get_positions();
-            $orders = $bfx->get_orders();
-
-            if (empty($positions) && ! empty($orders)) {
-                $bfx->cancel_all_orders();
-            }
-            sleep(8);
-        }
+        \H::pr($bfx->get_symbols());
 
         exit;
         // echo "return_var is: $return_var" . "\n";
