@@ -52,6 +52,18 @@
 				<input type="text" autocomplete="off" value="{{$currentAlert->comment}}" class="form-control" name="comment" id="comment" placeholder="Comment">
 			</div>
 			<br />
+
+			<select name="notification_frequency" id="notification_frequency" class="form-control form-control-md">
+				<option value="0" @if ($currentAlert->notification_frequency == 0) selected @endif>Only once</option>
+				<option value="1" @if ($currentAlert->notification_frequency == 1) selected @endif>Every 1 mins</option>
+		  		<option value="5" @if ($currentAlert->notification_frequency == 5) selected @endif>Every 5 mins</option>
+		  		<option value="15" @if ($currentAlert->notification_frequency == 15) selected @endif>Every 15 mins</option>
+		  		<option value="30" @if ($currentAlert->notification_frequency == 30) selected @endif>Every 30 mins</option>
+		  		<option value="60" @if ($currentAlert->notification_frequency == 60) selected @endif>Every 60 mins</option>
+			</select>
+
+			<br />
+
 			<div style="width: 100%;" class="btn-group btn-group-toggle" data-toggle="buttons">
 			  <label @if ($currentAlert->direction == 'up') active @endif style="width: 50%;" class="btn btn-secondary @if ($currentAlert->direction == 'up') active @endif">
 			    <input type="radio" value="up" name="direction" id="up" autocomplete="off" @if ($currentAlert->direction == 'up') checked @endif> UP
