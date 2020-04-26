@@ -55,6 +55,10 @@ class Alerts
 
                     	if (empty($positions)) {
                     		exec(sprintf('curl --header "Content-Type: application/json" --request POST --data \'\' http://%s:3002/api/trades/%s/t%sUSD/%s', env('TRADE_IP'), strtolower($priceAlert->enabledisable), strtoupper($ticker), strtoupper($priceAlert->enabledisable_direction)));
+                    		$alerts[] = sprintf('%s - %s %s', strtoupper($ticker), strtoupper($priceAlert->enabledisable), strtoupper($priceAlert->enabledisable_direction));
+                    		$priceAlert->enabledisable = NULL;
+                    		$priceAlert->enabledisable_direction = NULL;
+                    		$priceAlert->save();
                     	}
 	                }
                 } elseif ($priceAlert->direction == 'down' && $t->lastPrice < $priceAlert->price) {
@@ -64,6 +68,10 @@ class Alerts
 
                     if (empty($positions)) {
                     		exec(sprintf('curl --header "Content-Type: application/json" --request POST --data \'\' http://%s:3002/api/trades/%s/t%sUSD/%s', env('TRADE_IP'), strtolower($priceAlert->enabledisable), strtoupper($ticker), strtoupper($priceAlert->enabledisable_direction)));
+                    		$alerts[] = sprintf('%s - %s %s', strtoupper($ticker), strtoupper($priceAlert->enabledisable), strtoupper($priceAlert->enabledisable_direction));
+                    		$priceAlert->enabledisable = NULL;
+                    		$priceAlert->enabledisable_direction = NULL;
+                    		$priceAlert->save();
                     	}
                 }
             }
