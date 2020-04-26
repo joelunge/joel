@@ -29,8 +29,53 @@ class TradesController extends Controller
 
     public function test()
     {
+        $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+
+        foreach (range(1, 5) as $i) {
+            $positions = $bfx->get_positions();
+            $orders = $bfx->get_orders();
+
+            if (empty($positions) && ! empty($orders)) {
+                $bfx->cancel_all_orders();
+            }
+            sleep(8);
+        }
+
         exit;
-        $url = 'http://109.74.9.164:3002/api/order/test';
+        // echo "return_var is: $return_var" . "\n";
+        // var_dump($output);
+
+        // $url = 'https://api.bitfinex.com/v2/auth/r/positions';
+
+        // $data = array(
+        //   'apiKey' => 't6kQ5tsb2zOmcIgivbQDKVZwSFbvwquZ4T8QrzxnOgk',
+        //   'apiSecret' => 'Ob3s3eOBHQdkHbh5vMvEDnYhAECCsu0vKHyAmTMgius',
+        //   'price' => 9342,
+        //   'symbol' => 'tBTCUSD',
+        //   'intent' => 'SELL'
+        // );
+
+        // $options = array(
+        //   'http' => array(
+        //     'method'  => 'POST',
+        //     'content' => json_encode($data),
+        //     'header'=>  "Content-Type: application/json\r\n" . "Accept: application/json\r\n"
+        //     )
+        // );
+
+        // $context  = stream_context_create($options);
+        // $result = file_get_contents($url, false, $context);
+        // $response = json_decode($result);
+
+        // echo "<pre>";
+        // print_r($response);
+        // exit;
+    }
+
+    public function test2()
+    {
+        exit;
+        $url = 'http://13.48.209.13:3002/api/order/new';
 
         $data = array(
           'apiKey' => 't6kQ5tsb2zOmcIgivbQDKVZwSFbvwquZ4T8QrzxnOgk',

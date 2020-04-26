@@ -36,6 +36,21 @@ class Kernel extends ConsoleKernel
         })->everyMinute(); 
 
         $schedule->call(function () {
+            $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+
+            foreach (range(1, 5) as $i) {
+                $positions = $bfx->get_positions();
+                $orders = $bfx->get_orders();
+
+                if (empty($positions) && ! empty($orders)) {
+                    $bfx->cancel_all_orders();
+                }
+                sleep(8);
+            }
+
+        })->everyMinute();
+
+        $schedule->call(function () {
             $coins = config('coins.coins');
 
             $actionCoins = [];
