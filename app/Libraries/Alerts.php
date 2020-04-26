@@ -36,7 +36,11 @@ class Alerts
 
                 $notificationDiff = (time() - strtotime($priceAlert->last_notification_sent)) / 60;
 
-                if ($priceAlert->notification_frequency == 0 || ($notificationDiff < $priceAlert->notification_frequency)) {
+                if ($priceAlert->notification_frequency == 0 && ! $priceAlert->last_notification_sent) {
+                	continue;
+                }
+
+                if ($notificationDiff < $priceAlert->notification_frequency) {
                     continue;
                 }
 
