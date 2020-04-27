@@ -32,37 +32,9 @@ class Kernel extends ConsoleKernel
         // })->hourly();
 
         $schedule->command('alerts:alert')->everyMinute()->runInBackground();
-
-        $schedule->call(function () {
-            \Order::automaticTarget();
-        })->everyMinute()->runInBackground();
-
-        $schedule->call(function () {
-            $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
-            $positions = $bfx->get_positions();
-
-            foreach (range(1, 2) as $i) {
-                if (! empty($positions)) {
-                    \Trade::disableAll();
-                }
-                sleep(30);
-            }
-        })->everyMinute()->runInBackground();
-
-        $schedule->call(function () {
-            $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
-
-            foreach (range(1, 5) as $i) {
-                $positions = $bfx->get_positions();
-                $orders = $bfx->get_orders();
-
-                if (empty($positions) && ! empty($orders)) {
-                    $bfx->cancel_all_orders();
-                }
-                sleep(8);
-            }
-
-        })->everyMinute()->runInBackground();
+        $schedule->command('trades:disableAll')->everyMinute()->runInBackground();
+        $schedule->command('orders:automaticTarget')->everyMinute()->runInBackground();
+        $schedule->command('orders:cancelall')->everyMinute()->runInBackground();
 
         // $schedule->call(function () {
         //     $coins = config('coins.coins');
