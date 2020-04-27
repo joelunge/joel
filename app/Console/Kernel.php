@@ -33,7 +33,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function () {
             \Alerts::alert();
-        })->everyMinute();
+        })->everyMinute()->runInBackground();
 
         $schedule->call(function () {
             \Order::automaticTarget();
