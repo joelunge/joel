@@ -48,7 +48,7 @@ class OrdersController extends Controller
     			} else {
     				$price = $position['base'] * ((request('target') / 100) + 1);
     			}
-    			$bfx->new_order(request('ticker'), strval(request('amount')), strval($price), 'bitfinex', $direction, 'limit');
+    			$bfx->new_order(request('ticker'), strval(abs(request('amount'))), strval($price), 'bitfinex', $direction, 'limit');
     		}
     	}
 
@@ -80,7 +80,7 @@ class OrdersController extends Controller
 	    			}
     			}
     			
-    			$bfx->new_order(request('ticker'), strval(request('amount')), strval($price), 'bitfinex', $direction, request('order_type'));
+    			$bfx->new_order(request('ticker'), strval(abs(request('amount'))), strval($price), 'bitfinex', $direction, request('order_type'));
     		}
     	}
 
