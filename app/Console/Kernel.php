@@ -31,9 +31,9 @@ class Kernel extends ConsoleKernel
         //     UsdToSek::updateUsdToSek();
         // })->hourly();
 
+        $schedule->command('orders:automaticTarget')->everyMinute()->runInBackground();
         $schedule->command('alerts:alert')->everyMinute()->runInBackground();
         $schedule->command('trades:disableAll')->everyMinute()->runInBackground();
-        $schedule->command('orders:automaticTarget')->everyMinute()->runInBackground();
         $schedule->command('orders:cancelall')->everyMinute()->runInBackground();
 
         // $schedule->call(function () {
