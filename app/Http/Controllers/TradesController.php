@@ -31,7 +31,7 @@ class TradesController extends Controller
     {
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
         $bfx->cancel_all_orders();
-        $bfx->new_order($coin, strval($amount), strval(abs($price)), 'bitfinex', $direction, $type);
+        $bfx->new_order($coin, strval(abs($amount)), strval($price), 'bitfinex', $direction, $type);
 
         return redirect('/positions');
     }
