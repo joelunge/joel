@@ -37,7 +37,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->call(function () {
             \Order::automaticTarget();
-        })->everyMinute();
+        })->everyMinute()->runInBackground();
 
         $schedule->call(function () {
             $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
@@ -49,7 +49,7 @@ class Kernel extends ConsoleKernel
                 }
                 sleep(30);
             }
-        })->everyMinute();
+        })->everyMinute()->runInBackground();
 
         $schedule->call(function () {
             $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
@@ -64,7 +64,7 @@ class Kernel extends ConsoleKernel
                 sleep(8);
             }
 
-        })->everyMinute();
+        })->everyMinute()->runInBackground();
 
         // $schedule->call(function () {
         //     $coins = config('coins.coins');
