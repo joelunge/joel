@@ -48,8 +48,8 @@ class TradesController extends Controller
         // $url = 'https://api.bitfinex.com/v2/auth/r/positions';
 
         // $data = array(
-        //   'apiKey' => 't6kQ5tsb2zOmcIgivbQDKVZwSFbvwquZ4T8QrzxnOgk',
-        //   'apiSecret' => 'Ob3s3eOBHQdkHbh5vMvEDnYhAECCsu0vKHyAmTMgius',
+        //   'apiKey' => '',
+        //   'apiSecret' => '',
         //   'price' => 9342,
         //   'symbol' => 'tBTCUSD',
         //   'intent' => 'SELL'
@@ -78,8 +78,8 @@ class TradesController extends Controller
         $url = 'http://13.48.209.13:3002/api/order/new';
 
         $data = array(
-          'apiKey' => 't6kQ5tsb2zOmcIgivbQDKVZwSFbvwquZ4T8QrzxnOgk',
-          'apiSecret' => 'Ob3s3eOBHQdkHbh5vMvEDnYhAECCsu0vKHyAmTMgius',
+          'apiKey' => env('BFX_K'),
+          'apiSecret' => env('BFX_SC'),
           'price' => 9342,
           'symbol' => 'tBTCUSD',
           'intent' => 'SELL'
