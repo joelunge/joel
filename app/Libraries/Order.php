@@ -25,7 +25,7 @@ class Order
     				$price = $position['base'] * ((2 / 100) + 1);
     			}
 
-    			\H::pr($bfx->new_order(strtoupper($position['symbol']), strval(abs($position['amount'])), strval($price), 'bitfinex', $direction, 'limit'));
+    			$bfx->new_order(strtoupper($position['symbol']), strval(abs($position['amount'])), strval($price), 'bitfinex', $direction, 'limit');
     		}
     	}
     }
