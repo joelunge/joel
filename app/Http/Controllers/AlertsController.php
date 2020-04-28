@@ -30,7 +30,7 @@ class AlertsController extends Controller
 
     public function index()
     {
-        $alerts = \App\Alert::orderBy('ticker', 'ASC')->get();
+        $alerts = \App\Alert::orderBy('ticker', 'ASC')->orderBy('price', 'desc')->get();
 
         return view('alerts.index', ['alerts' => $alerts]);
     }
