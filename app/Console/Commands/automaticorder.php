@@ -37,6 +37,7 @@ class automaticorder extends Command
      */
     public function handle()
     {
+        \Log::debug('orders:automaticTarget - start');
         \Order::automaticTarget();
     }
 }

@@ -38,7 +38,16 @@ class TradesController extends Controller
 
     public function test()
     {
-        \Order::automaticTarget();
+        \Log::debug('logggtest');
+        exit;
+        $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+        $positions = $bfx->get_positions();
+        foreach (range(1, 2) as $i) {
+            if (! empty($positions)) {
+                echo "wtf";
+            }
+        }
+        exit;
         // $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
         // \H::pr($bfx->get_symbols());
 

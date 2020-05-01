@@ -34,7 +34,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('orders:automaticTarget')->everyMinute()->runInBackground();
         $schedule->command('alerts:alert')->everyMinute()->runInBackground();
         $schedule->command('trades:disableAll')->everyMinute()->runInBackground();
-        $schedule->command('orders:cancelall')->everyMinute()->runInBackground();
+        $schedule->command('orders:cancelAll')->everyMinute()->runInBackground();
 
         // $schedule->call(function () {
         //     $coins = config('coins.coins');

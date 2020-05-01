@@ -11,7 +11,7 @@ class cancelorders extends Command
      *
      * @var string
      */
-    protected $signature = 'orders:cancelall';
+    protected $signature = 'orders:cancelAll';
 
     /**
      * The console command description.
@@ -37,6 +37,7 @@ class cancelorders extends Command
      */
     public function handle()
     {
+        \Log::debug('orders:cancelAll - start');
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
 
         foreach (range(1, 5) as $i) {
