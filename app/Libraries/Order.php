@@ -51,6 +51,7 @@ class Order
 
             if (! $stopOrder) {
                 $bfx->cancel_all_orders();
+                sleep(2);
                 $direction = (floatval($position['amount']) < 0) ? 'buy' : 'sell';
                 if ($direction == 'buy') {
                     $price = $position['base'] * ((2 / 100) + 1);
