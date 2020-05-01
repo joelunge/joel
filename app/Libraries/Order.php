@@ -4,6 +4,7 @@ class Order
 {
     public static function automaticTarget()
     {
+        \Log::debug('automaticTarget - Start');
     	$bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
         usleep(rand(1000000, 3000000));
     	$positions = $bfx->get_positions();
@@ -30,5 +31,6 @@ class Order
     			$bfx->new_order(strtoupper($position['symbol']), strval(abs($position['amount'])), strval($price), 'bitfinex', $direction, 'limit');
     		}
     	}
+        \Log::debug('automaticTarget - End');
     }
 }
