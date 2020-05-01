@@ -11,7 +11,7 @@ class automaticorder extends Command
      *
      * @var string
      */
-    protected $signature = 'orders:automaticTarget';
+    protected $signature = 'orders:automaticOrders';
 
     /**
      * The console command description.
@@ -38,5 +38,6 @@ class automaticorder extends Command
     public function handle()
     {
         \Order::automaticTarget();
+        \Order::automaticStop();
     }
 }
