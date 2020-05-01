@@ -4,6 +4,7 @@ class Alerts
 {
 	public static function alert()
 	{
+		\Log::debug('Alerts - Start');
 		$tickers = self::getTickers();
 		// $rsiAlerts = self::getRsiAlerts($tickers);
 		$priceAlerts = self::getPriceAlerts($tickers);
@@ -12,6 +13,7 @@ class Alerts
 		$allAlerts = array_merge($priceAlerts);
 
 		self::sendAlerts($allAlerts);
+		\Log::debug('Alerts - End');
 	}
 
 	private static function getPriceAlerts($tickers)
