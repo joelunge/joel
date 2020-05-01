@@ -49,6 +49,6 @@ class disabletrades extends Command
             }
             sleep(30);
         }
-        \Log::debug('disableAll - Start');
+        \Log::debug('disableAll - End');
     }
 }
