@@ -60,6 +60,8 @@ class Order
                 }
 
                 $bfx->new_order(strtoupper($position['symbol']), strval(abs($position['amount'])), strval($price), 'bitfinex', $direction, 'stop');
+                sleep(2);
+                self::automaticTarget();
             }
         }
     }
