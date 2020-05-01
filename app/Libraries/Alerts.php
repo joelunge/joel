@@ -13,7 +13,6 @@ class Alerts
 		$allAlerts = array_merge($priceAlerts);
 
 		self::sendAlerts($allAlerts);
-		\Log::debug('Alerts - End');
 	}
 
 	private static function getPriceAlerts($tickers)
@@ -311,5 +310,6 @@ class Alerts
 		foreach ($alerts as $key => $m) {
 			\Notifications::slackMessage($m);
 		}
+		\Log::debug('Alerts - End');
     }
 }
