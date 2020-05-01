@@ -45,6 +45,7 @@ class cancelorders extends Command
             usleep(rand(1000000, 3000000));
             $orders = $bfx->get_orders();
 
+            \Log::debug('cancelall');
             if (empty($positions) && ! empty($orders)) {
                 $bfx->cancel_all_orders();
             }
