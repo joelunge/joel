@@ -51,6 +51,7 @@ class Alerts
 
                     if ($priceAlert->enabledisable && $priceAlert->enabledisable_direction) {
                     	$bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+                    	usleep(rand(1000000, 3000000));
                     	$positions = $bfx->get_positions();
 
                     	if (empty($positions)) {

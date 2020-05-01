@@ -5,7 +5,9 @@ class Order
     public static function automaticTarget()
     {
     	$bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+        usleep(rand(1000000, 3000000));
     	$positions = $bfx->get_positions();
+        usleep(rand(1000000, 3000000));
     	$orders = $bfx->get_orders();
 
     	foreach ($positions as $key => $position) {

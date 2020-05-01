@@ -37,7 +37,6 @@ class alerts extends Command
      */
     public function handle()
     {
-        \Log::debug('alerts:alert - start');
         \Alerts::alert();
     }
 }

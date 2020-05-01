@@ -37,8 +37,8 @@ class disabletrades extends Command
      */
     public function handle()
     {
-        \Log::debug('trades:disableAll - start');
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
+        usleep(rand(1000000, 3000000));
         $positions = $bfx->get_positions();
 
         foreach (range(1, 2) as $i) {
