@@ -4,7 +4,6 @@ class Alerts
 {
 	public static function alert()
 	{
-		\Log::debug('Alerts - Start');
 		$tickers = self::getTickers();
 		// $rsiAlerts = self::getRsiAlerts($tickers);
 		$priceAlerts = self::getPriceAlerts($tickers);
@@ -310,6 +309,5 @@ class Alerts
 		foreach ($alerts as $key => $m) {
 			\Notifications::slackMessage($m);
 		}
-		\Log::debug('Alerts - End');
     }
 }

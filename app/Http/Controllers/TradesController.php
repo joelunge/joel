@@ -38,7 +38,6 @@ class TradesController extends Controller
 
     public function test()
     {
-        \Log::debug('logggtest');
         exit;
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
         $positions = $bfx->get_positions();
