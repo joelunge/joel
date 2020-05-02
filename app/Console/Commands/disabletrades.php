@@ -44,8 +44,12 @@ class disabletrades extends Command
 
         foreach (range(1, 2) as $i) {
             if (! empty($positions)) {
-                if (array_key_exists('amount', $position)) {
-                    \Trade::disableAll();
+                foreach ($positions as $key => $position) {
+                    if (is_array($position)) {
+                        if (array_key_exists('amount', $position)) {
+                            \Trade::disableAll();
+                        }
+                    }
                 }
             }
             sleep(30);
