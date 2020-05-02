@@ -11,7 +11,7 @@ class Order
     	$orders = $bfx->get_orders();
 
     	foreach ($positions as $key => $position) {
-            if (! array_key_exists('amount', $position)) {
+            if (! is_array($position)) {
                 break;
             }
     		$limitOrder = null;
@@ -44,7 +44,7 @@ class Order
         $orders = $bfx->get_orders();
 
         foreach ($positions as $key => $position) {
-            if (! array_key_exists('amount', $position)) {
+            if (! is_array($position)) {
                 break;
             }
             $stopOrder = null;
