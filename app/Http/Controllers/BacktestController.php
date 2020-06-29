@@ -19,315 +19,355 @@ class BacktestController extends Controller
      * @return Response
      */
 
-    public $lastTrade = 0;
-    public $isInTrade = false;
-    public $trades = [];
-    public $balance = 10000;
-    public $indicators = [];
+    public $strategy = 26409;
+    public $balance = 10;
+    public $dateRange = ['2020-01-01', '2020-12-31'];
+    public $printAllCandles = 1;
+    public $printLog = 1;
+    public $printResults = 1;
+    public $limitFee = -0.00025;
+    public $marketFee = 0.00075;
+    public $avgFundingFee = 1;
+    public $tradeSizeLimit = 100000;
+    public $direction = 'long';
 
     public function __construct()
     {
-
-        $this->middleware('auth');
     }
 
     public function index()
     {
-        // $this->testing();
-        // exit;
-        $startingBalance = $this->balance;
-        $this->strategy = 'strategy2';
-        $candles = $this->getCandles(['2018-01-01 00:00:00', '2018-01-31 23:59:59']);
-        $volumes = $this->getVolumes($candles);
+    	$this->initiateBacktest();
+    	$this->setStrategy();
 
-        foreach ($candles as $key => $c) {
-            if (! $this->isInTrade && $this->shouldEnterTrade($c, $volumes, $this->lastTrade)) {
-                $this->enterTrade($c);
+    	// FORCE STRATEGY VARIABLES HERE
+    	$this->leverage = 25;
+        // $this->length = 75
+        // $this->fib = 0.000001;
+        // $this->diffRequirement = 75
+        $this->sl = 0.5;
+        $this->tp = 0.5;
 
-                $this->lastTrade = strtotime($c->date);
+        foreach ($this->candles as $candle) {
+        	$this->pushArray($candle);
+            $this->i++;
+            if (count($this->lastCandles) >= $this->length) {
+            	$this->shiftArray();
+
+                $this->low = $this->getLow();
+                $this->high = $this->getHigh();
+
+                $this->bullFib = $this->getBullFib();
+
+                $this->currentPrice = end($this->lastCandles)['low'];
+                $this->currentHigh = end($this->lastCandles)['high'];
+
+                if (($this->currentPrice <= $this->bullFib) && ($this->bullFib != $this->oldFib)) {
+                    if ((($this->high-$this->low)/$this->low) > $this->diffRequirement) {
+                        if (! $this->inPosition) {
+                //         	echo $this->bullFib;
+				            // echo ' - ' . $this->low;
+			            	// echo ' - TRADE!!!';
+				            // echo "<br>";
+                        	$this->enterPosition($candle, $this->direction);
+                        }
+                    }
+                }
+
+                if ($this->inPosition) {
+                	$this->resultDecrease = 0;
+        			$this->resultIncrease = 0;
+
+        			$this->resultDecrease = $this->getResultDecrease($candle);
+                    if ($candle['date'] != $this->entryDatetime) {
+                        $this->resultIncrease = $this->getResultIncrease($candle);
+                    }
+
+                    if ($this->isLoss()) {
+                        $this->inPosition = false;
+
+                        $pl = $this->calculateLossPl($candle);
+
+                        $this->balance = $this->balance + $pl;
+
+                        if ($this->printLog) {
+                        	$this->logTrade($pl, 'LOSS');
+                        }
+                        // echo "LOSS <br />";
+                        $this->losses++;
+                        if ($this->balance < 0) {
+                            break;
+                        }
+                    } elseif ($this->isWin()) {
+                        $this->inPosition = false;
+
+                        $pl = $this->calculateWinPl($candle);
+                        
+                        $this->balance = $this->balance + round($pl, 10);
+
+                        if ($this->printLog) {
+                        	$this->logTrade($pl, 'WIN');
+                        }
+
+                        // echo "WIN <br />";
+                        $this->wins++;
+                        if ($this->balance < 0) {
+                            exit;
+                        }
+                    }
+                }
+                $this->oldFib = $this->bullFib;
+
+                $this->printAllCandles($candle);
             }
-
-            if ($this->isInTrade && $this->shouldExitTrade($c)) {
-                $this->exitTrade($c);
-            }
-
-            // $this->saveIndicators($c);
         }
 
-        // H::pr($this->indicators);
-        $resultPercentage = (($this->balance - $startingBalance) / $startingBalance) * 100;
-
-        return view('backtest', ['trades' => $this->trades, 'resultPercentage' => $resultPercentage, 'balance' => $this->balance]);
+        $this->printResults();
     }
 
-    public function saveIndicators($c)
+    public function initiateBacktest()
     {
-        // $this->saveIndicator($c, 'volumeLast24Hours', config('times.hoursToSeconds')[24]);
-        // $this->saveIndicator($c, 'volumeLast2Days', config('times.hoursToSeconds')[24] * 2);
-        // $this->saveIndicator($c, 'volumeLast3Days', config('times.hoursToSeconds')[24] * 3);
-        // $this->saveIndicator($c, 'volumeLast4Days', config('times.hoursToSeconds')[24] * 4);
-        // $this->saveIndicator($c, 'volumeLast5Days', config('times.hoursToSeconds')[24] * 5);
-        // $this->saveIndicator($c, 'volumeLast6Days', config('times.hoursToSeconds')[24] * 6);
-        $this->saveIndicator($c, 'volumeLast7Days', config('times.hoursToSeconds')[24] * 7);
-        // $this->saveIndicator($c, 'volumeLast14Days', config('times.hoursToSeconds')[24] * 14);
-        // $this->saveIndicator($c, 'volumeLast30Days', config('times.hoursToSeconds')[24] * 30);
-        // $this->saveIndicator($c, 'volumeLast60Days', config('times.hoursToSeconds')[24] * 60);
-        // $this->saveIndicator($c, 'volumeLast90Days', config('times.hoursToSeconds')[24] * 90);
-        // $this->saveIndicator($c, 'volumeLast180Days', config('times.hoursToSeconds')[24] * 180);
-        // $this->saveIndicator($c, 'volumeLast365Days', config('times.hoursToSeconds')[24] * 365);
+ 		$this->candles = $this->getCandles();
+ 		$this->setNecessaryVariables();
     }
 
-    public function saveIndicator($c, $name, $seconds)
+    public function setNecessaryVariables()
     {
-        $this->indicators[$name][] = ['date' => $c->date, 'volume' => $c->volumeUsd];
-
-        $first = strtotime($this->indicators[$name][0]['date']);
-        $last = strtotime($this->indicators[$name][count($this->indicators[$name])-1]['date']);
-
-        if ($last - $first > $seconds) {
-            array_shift($this->indicators[$name]);
-        }
+    	$this->inPosition = false;
+        $this->basePrice = false;
+        $this->losses = 0;
+        $this->wins = 0;
+        $this->oldFib = 0;
+        $this->entryDatetime = '';
+        $this->entryFib = 0;
+        $this->entryLow = 0;
+        $this->entryHigh = 0;
+        $this->lastCandles = [];
+        $this->lows = [];
+        $this->highs = [];
+        $this->i = 0;
+        $this->entryFee = $this->limitFee;
+	    $this->winningFee = $this->limitFee;
+	    $this->losingFee = $this->marketFee;
     }
 
-    public function getCandles($dateRange)
+    public function getCandles()
     {
-        $candles = App\Btccandle::whereBetween('date', $dateRange)->get();
+    	$candles = \App\Btccandle::whereBetween('date', $this->dateRange)->get()->toArray();
 
-        return $candles;
+    	return $candles;
     }
 
-    public function getVolumes($candles)
+    public function setStrategy()
     {
-        $volumes = [];
-        foreach ($candles as $key => $c) {
-            $volumes[strtotime($c->date)] = $c->volume;
-        }
-
-        return $volumes;
-    }
-
-    public function shouldEnterTrade($c, $volumes, $lastTrade)
-    {
-        if ($this->isInTrade) {
-            return false;
-        }
-
-        if (strpos($c->date, '2018-01-01') !== false) {
-            return false;
-        }
-
-        $strategy = $this->strategy;
-        return $this->$strategy($c, $volumes, $lastTrade);
-    }
-
-    public function strategy1($c, $volumes, $lastTrade)
-    {
-        $maxVolumeLast24Hours = max(array_column($this->indicators['volumeLast7Days'], 'volume'));
-
-        $volumeDiff = $c->volumeUsd / $maxVolumeLast24Hours;
-
-        if (($c->volumeUsd > $maxVolumeLast24Hours) && $volumeDiff > 1) {
-            $this->volumeDiff = $volumeDiff;
-            return true;
+    	if ($this->strategy) {
+            $backtest = \App\Backtest::where('id', $this->strategy)->take(1)->get();
+            $this->leverage = $backtest[0]->leverage;
+            $this->length = $backtest[0]->length;
+            $this->fib = $backtest[0]->fib;
+            $this->diffRequirement = $backtest[0]->diffrequirement;
+            $this->sl = $backtest[0]->sl;
+            $this->tp = $backtest[0]->tp;
         }
     }
 
-    // public function strategy1($c, $volumes, $lastTrade)
-    // {
-    //     $fromTime = strtotime($c->date) - 86400;
-    //     $toTime = strtotime($c->date) - 1;
-
-    //     $volumesLast24Hours = (array_filter($volumes, function($k) use ($fromTime, $toTime) {
-    //         return $k > $fromTime && $k < ($toTime);
-    //     }, ARRAY_FILTER_USE_KEY));
-
-    //     if ($volumesLast24Hours) {
-    //         $maxVolumeLast24Hours = max($volumesLast24Hours);
-    //     } else {
-    //         $maxVolumeLast24Hours = 0;
-    //     }
-    //     if ($c->volume > $maxVolumeLast24Hours) {
-    //         if (strtotime($c->date) - $lastTrade > 86400) {
-    //             return true;
-    //         }
-    //     }
-
-    //     return false;
-    // }
-
-    public function strategy2($c, $volumes, $lastTrade)
+    public function pushArray($candle)
     {
-        // $condition1 = $c->rsi_1m >= 70;
-        $condition2 = $c->close > $c->open;
-        $condition3 = $c->volumeUsd > 5000000;
-        $condition4 = (strtotime($c->date) - $this->lastTrade) > 172800;
-        $condition5 = ((($c->close - $c->open) / $c->open) * 100 > 0.4);
-        $condition6 = $c->changedPrice > 200;
-
-        // if (($condition1 || $condition2) && $condition3) {
-        if ($condition2 && $condition3 && $condition4 && $condition6) {
-            $this->volumeDiff = 0;
-
-            // echo strtotime($c->date);
-            // echo "<br>";
-            // echo $this->lastTrade;
-            // echo "<br>";
-            // echo "<br>";
-
-
-            $priceDiff = $this->getPriceDiff($c, 1);
-            $this->priceDiffUp = round($priceDiff['up']);
-            $this->priceDiffDown = round($priceDiff['down']);
-
-            // if ($this->priceDiffDown > 5) {
-            //     return false;
-            // }
-
-            // if ($this->priceDiffUp > 5) {
-            //     return false;
-            // }
-
-            return true;
-        }
-
-        return false;
+    	array_push($this->lastCandles, $candle);
+        array_push($this->lows, $candle['low']);
+        array_push($this->highs, $candle['high']);
     }
 
-    public function strategy5($c, $volumes, $lastTrade)
+    public function shiftArray()
     {
-        // if ((($c->close - $c->open) / $c->open) * 100 > 1 && $c->volume > 10000000) {
-        if ($c->changedPriceUnique > 50 && $c->volumeUsd > 2000000) {
-            return true;
-        }
+    	array_shift($this->lastCandles);
+        array_shift($this->lows);
+        array_shift($this->highs);
     }
 
-    public function strategy4($c, $volume, $lastTrade)
+    public function printResults()
     {
-        if ((($c->close - $c->open) / $c->open) * 100 > 2 && $c->rsi_1h > 27 && $c->buyVolume / $c->sellVolume > 7) {
-            return true;
-        }
+    	if (! $this->printResults) {
+    		return false;
+    	}
+    	echo "</table>";
+        echo "Length: " . $this->length;
+        echo "<br>";
+        echo "Fib: " . $this->fib;
+        echo "<br>";
+        echo "Wins: " . $this->wins;
+        echo "<br>";
+        echo "Losses: " . $this->losses;
+        echo "<br>";
+        echo "Diffrequirement: " . $this->diffRequirement;
+        echo "<br>";
+        echo "Leverage: " . $this->leverage;
+        echo "<br>";
+        echo "SL: " . $this->sl;
+        echo "<br>";
+        echo "TP: " . $this->tp;
+        echo "<br>";
+        echo round($this->balance, 10);
     }
 
-    public function strategy3($c, $volumes, $lastTrade)
+    public function logTrade($pl, $winloss)
     {
-        $fromTime = strtotime($c->date) - 86400;
-        $toTime = strtotime($c->date) - 1;
+    	echo $this->entryDatetime . ' - ';
+    	echo $pl . ' - ' .$this->balance;
+        echo "<br>";
 
-        $priceMoveLast24Hours = (array_filter($volumes, function($k) use ($fromTime, $toTime) {
-            return $k > $fromTime && $k < ($toTime);
-        }, ARRAY_FILTER_USE_KEY));
+        echo $winloss;
+        echo number_format($this->balance, 10, '.', ',');
+        echo "<br>";
+    }
 
-        if ($volumesLast24Hours) {
-            $maxVolumeLast24Hours = max($volumesLast24Hours);
+    public function getLow()
+    {
+    	$low = min($this->lows);
+
+    	return $low;
+    }
+
+    public function getHigh()
+    {
+    	// Get all candles after the low and get the highest value from there
+    	$highStack = array_keys($this->lows, min($this->lows))[0] + 1;
+        $highStackTmp = $highStack;
+        $highStackArr = array_slice($this->highs, $highStackTmp);
+
+        // TODO: UNDERSTAND THIS SHIT
+
+        if (! count($highStackArr)) {
+            $high = $this->low+1;
         } else {
-            $maxVolumeLast24Hours = 0;
+            $high = max($highStackArr);
         }
-        if ($c->volume > $maxVolumeLast24Hours) {
-            if (strtotime($c->date) - $lastTrade > 86400) {
-                return true;
+
+        return $high;
+    }
+
+    public function enterPosition($candle, $longshort = 'long')
+    {
+    	if ($candle['close'] > $candle['open']) {
+            if ($candle['high'] != $this->high) {
+                $this->entryDatetime = $candle['date'];
+                $this->entryFib = $this->bullFib;
+                $this->entryLow = $this->low;
+                $this->entryHigh = $this->high;
+                $this->basePrice = $this->bullFib;
+                $this->inPosition = true;
+                echo $this->bullFib;
+                echo ' - ' . $this->low;
+            	echo ' - TRADE!!! - ' . $candle['date'];
+                echo "<br>";
             }
+        } elseif ($candle['close'] < $candle['open']) {
+            $this->entryDatetime = $candle['date'];
+            $this->entryFib = $this->bullFib;
+            $this->entryLow = $this->low;
+            $this->entryHigh = $this->high;
+            $this->basePrice = $this->bullFib;
+            $this->inPosition = true;
+            echo $this->bullFib;
+            echo ' - ' . $this->low;
+        	echo ' - TRADE!!! - ' . $candle['date'];
+            echo "<br>";
+        }
+    }
+
+    public function getTradeSize()
+    {
+    	$tradeSize = $this->balance * $this->leverage;
+
+        if ($tradeSize > $this->tradeSizeLimit) {
+            $tradeSize = $this->tradeSizeLimit;
         }
 
-        return false;
+        return $tradeSize;
     }
 
-    public function shouldExitTrade($c)
+    public function calculateLossPl($candle)
     {
-        $condition1 = $this->isInTrade;
-        $condition2 = $this->getTradeResults($c) < -1 || $this->getTradeResults($c) > 1;
-        if ($condition1 && $condition2) {
-            return true;
+    	$tradeSize = $this->getTradeSize();
+    	$pl = ((($tradeSize-($tradeSize*$this->entryFee))*(1-($this->sl/100)))-($tradeSize*$this->losingFee)-$tradeSize);
+
+    	$fundingFee = $this->getFundingFee($candle);
+        $pl = $pl - $fundingFee;
+
+    	return $pl;
+    }
+
+    public function calculateWinPl($candle)
+    {
+    	$tradeSize = $this->getTradeSize();
+    	$pl = ((($tradeSize-($tradeSize*$this->entryFee))*(1+($this->tp/100)))-($tradeSize*$this->winningFee)-$tradeSize);
+
+    	$fundingFee = $this->getFundingFee($candle);
+        $pl = $pl - $fundingFee;
+
+    	return $pl;
+    }
+
+    public function getFundingFee($candle)
+    {
+    	if (! $this->avgFundingFee) {
+    		return false;
+    	}
+
+    	$timeInTrade = strtotime($candle['date']) - strtotime($this->entryDatetime);
+        $fundingTimes = floor($timeInTrade / 28800);
+
+        if ($fundingTimes == 0) {
+            $fundingTimes = $this->avgFundingFee;
         }
+        $fundingFee = $this->getTradeSize() * ($fundingTimes / 1000);
 
-        return false;
+        return $fundingFee;
     }
 
-    public function enterTrade($c)
+    public function isLoss()
     {
-        $this->isInTrade = true;
-        $this->tradeData = $c;
-        $this->tradeData->direction = $c->close > $c->open ? 'long' : 'short';
-        $this->tradeData->priceDiffUp = $this->priceDiffUp;
-        $this->tradeData->priceDiffDown = $this->priceDiffDown;
-        $this->balance = $this->balance * 0.999;
+    	return $this->resultDecrease > $this->sl;
     }
 
-    public function exitTrade($c)
+    public function isWin()
     {
-        $this->trades[$this->tradeData->date] = $this->tradeData;
-        $this->trades[$this->tradeData->date]->resultPercentage = $this->getTradeResults($c);
-        $this->trades[$this->tradeData->date]->volumeDiff = $this->volumeDiff;
-        $this->balance = $this->balance * (($this->getTradeResults($c) / 100) + 1);
-        $this->balance = $this->balance * 0.999;
-        $this->isInTrade = false;
+    	return $this->resultIncrease > $this->tp;
     }
 
-    public function getTradeResults($c)
+    public function getBullFib()
     {
-        if ($this->tradeData->direction == 'long') {
-            $resultPercentage = (($c->close - $this->tradeData->close) / $this->tradeData->close) * 100;
-        } else {
-            $resultPercentage = (($this->tradeData->close - $c->close) / $c->close) * 100;
-        }
+		$bullFib = ((($this->high-$this->low)*$this->fib)+$this->low);
 
-        return $resultPercentage;
+		return $bullFib;
     }
 
-    public function testing()
+    public function getResultIncrease($candle)
     {
-        $startingBalance = 3000;
-        $entryFee = 0.998;
-        $exitFee = 0.999;
-        $winPercentage = 1.03;
-        $lossPercentage = 0.98;
-        $tradesAmount = 12;
-        $winrate = 0.90;
+    	$resultIncrease = (($candle['high'] - $this->basePrice) / $this->basePrice) * 100;
 
-        $loserate = 1-$winrate;
-
-        $winsAmount = $tradesAmount * $winrate;
-        $lossAmount = $tradesAmount * $loserate;
-        $balance = $startingBalance;
-
-        for ($x = 0; $x < round($winsAmount); $x++) {
-            $balance = $balance * $entryFee;
-            $balance = $balance * $winPercentage;
-            $balance = $balance * $exitFee;
-        }
-
-        for ($x = 0; $x < round($lossAmount); $x++) {
-            $balance = $balance * $entryFee;
-            $balance = $balance * $lossPercentage;
-            $balance = $balance * $exitFee;
-        }
-
-        $balance = $balance - $startingBalance;
-
-        echo round($balance);
-        exit;
+    	return $resultIncrease;
     }
 
-    public function getPriceDiff($c, $distance = 7)
-    {
-        $start = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $c->date);
-        $end = $start->modify('-'.$distance.' days');
+   	public function getResultDecrease($candle)
+   	{
+   		$resultDecrease = (($this->basePrice - $candle['low']) / $this->basePrice) * 100;
 
-        $model = new App\Btccandle();
-        $table_name = $model->getTable();
+   		return $resultDecrease;
+   	}
 
-        $minClose = DB::table($table_name)
-            ->select(DB::raw('min(close) as minClose'))
-            ->whereBetween('date', [$end->format('Y-m-d H:i:s'), $start->format('Y-m-d H:i:s')])
-            ->get()[0]->minClose;
-
-        $maxClose = DB::table($table_name)
-            ->select(DB::raw('max(close) as maxClose'))
-            ->whereBetween('date', [$end->format('Y-m-d H:i:s'), $start->format('Y-m-d H:i:s')])
-            ->get()[0]->maxClose;
-
-        $priceMoveUp = (($c->close-$minClose)/$minClose)*100;
-        $priceMoveDown = (($maxClose-$c->close)/$c->close)*100;
-
-        return ['up' => $priceMoveUp, 'down' => $priceMoveDown];
-    }
+   	public function printAllCandles($candle)
+   	{
+   		if (! $this->printAllCandles) {
+   			return false;
+   		}
+   		echo 'Date: ' . $candle['date'];
+        echo " - ";
+        echo 'Low: ' . $this->low;
+        echo " - ";
+        echo 'High: ' . $this->high;
+        echo " - ";
+        echo 'Fib: ' . $this->bullFib;
+        echo "<br>";
+   	}
 }

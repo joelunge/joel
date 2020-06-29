@@ -38,6 +38,490 @@ class TradesController extends Controller
 
     public function test()
     {
+        $text = '12   0:00    SCV   
+  13    0:12    SCV   
+  14    0:17    Supply Depot    
+  14    0:24    SCV   
+  15    0:38    SCV   
+  15    0:40    Barracks    
+  16    0:44    Refinery    
+  16    0:51    SCV   
+  17    1:03    SCV   
+  18    1:15    SCV   
+  19    1:27    Orbital Command   
+  19    1:28    Reaper    
+  20    1:38    Command Center    
+  20    1:48    Supply Depot    
+  20    1:53    Refinery    
+  20    1:54    SCV   
+  20    2:00    Reaper    
+  22    2:07    SCV   
+  23    2:19    Factory, SCV    
+  24    2:31    SCV   
+  24    2:33    Barracks Reactor    
+  25    2:43    SCV   
+  26    2:51    Orbital Command   
+  26    2:55    SCV   
+  27    3:06    Starport    
+  27    3:07    SCV   
+  28    3:15    Barracks Tech Lab   
+  28    3:17    SCV   
+  28    3:19    SCV   
+  34    3:20    Hellion x2    
+  34    3:25    Supply Depot    
+  34    3:29    SCV   
+  34    3:31    SCV   
+  40    3:41    Hellion x2, SCV   
+  40    3:43    SCV   
+  40    3:47    Marine    
+  43    3:52    Viking    
+  43    3:54    SCV   
+  46    3:55    SCV   
+  46    3:59    Supply Depot    
+  46    4:02    Hellion x2    
+  51    4:06    SCV   
+  51    4:08    Liberator, SCV    
+  53    4:17    Barracks Tech Lab   
+  53    4:18    SCV   
+  53    4:21    SCV   
+  53    4:22    Command Center    
+  62    4:35    Stimpack    
+  62    4:36    SCV x2    
+  60    4:41    Marine    
+  60    4:44    Factory Reactor, Supply Depot, Barracks x2    
+  61    4:48    SCV   
+  61    4:51    Engineering Bay x2    
+  62    5:05    Marine    
+  62    5:06    SCV x2    
+  65    5:07    Supply Depot, Refinery    
+  65    5:08    Refinery    
+  65    5:18    Terran Infantry Weapons Level 1, SCV x2, Terran Infantry Armor Level 1    
+  67    5:22    Starport Reactor    
+  67    5:23    Marine    
+  68    5:30    SCV x2    
+  68    5:32    Marine x2   
+  68    5:33    Siege Tank    
+  68    5:34    Barracks    
+  68    5:35    Barracks    
+  75    5:41    Marine x2   
+  75    5:42    SCV x2    
+  79    5:43    Marine    
+  79    5:46    Orbital Command   
+  79    5:49    Marine    
+  80    5:54    SCV x2    
+  81    5:57    Marine    
+  81    5:59    Marine x2, Medivac x2   
+  81    6:01    Marine    
+  87    6:05    Supply Depot    
+  87    6:06    SCV   
+  87    6:08    Supply Depot, SCV   
+  89    6:15    Marine    
+  90    6:18    SCV   
+  90    6:22    SCV   
+  90    6:23    Orbital Command   
+  89    6:25    Siege Tank    
+  89    6:27    Marine x2   
+  89    6:28    Marine    
+  89    6:29    Marine    
+  89    6:30    SCV   
+  93    6:33    Marine    
+  93    6:34    Medivac   
+  93    6:35    SCV   
+  93    6:37    Combat Shield   
+  93    6:38    Barracks Reactor x2   
+  89    6:42    SCV   
+  89    6:45    Marine x2   
+  93    6:47    SCV   
+  93    6:50    Supply Depot    
+  93    6:51    SCV   
+  93    6:52    Marine x2   
+  93    6:53    Marine    
+  97    6:54    SCV   
+  97    6:59    Armory, SCV   
+  99    7:03    Marine x2, SCV    
+  99    7:06    Siege Tank    
+  99    7:07    SCV   
+  106   7:11    SCV   
+  106   7:13    Marine    
+  106   7:14    Marine x2   
+  106   7:15    Marine x2, SCV    
+  112   7:16    Medivac   
+  112   7:19    SCV, Medivac    
+  112   7:20    Marine    
+  117   7:23    Refinery    
+  117   7:25    Refinery    
+  117   7:26    Supply Depot    
+  117   7:29    Supply Depot    
+  117   7:44    Supply Depot    
+  117   7:45    Supply Depot    
+  117   7:47    Marine x2, Factory    
+  117   7:48    Marine x6   
+  117   7:50    Supply Depot x2, Marine   
+  126   7:53    Terran Vehicle And Ship Armor Level 1   
+  126   7:54    Widow Mine    
+  126   7:57    Terran Infantry Weapons Level 2, Terran Infantry Armor Level 2    
+  128   8:05    Marine x6   
+  128   8:12    Marine x3   
+  132   8:19    Thor, Missile Turret    
+  136   8:21    Missile Turret    
+  136   8:23    Marine x4   
+  140   8:31    Factory Reactor, Command Center   
+  140   8:32    Supply Depot    
+  140   8:33    Drilling Claws    
+  140   8:36    Medivac x2    
+  140   8:37    Marine x2   
+  146   8:45    Marine x2   
+  148   8:50    Marine x2   
+  148   8:51    Marine x3   
+  148   8:55    Marine x2   
+  155   8:57    Supply Depot    
+  155   9:03    Marine x2   
+  155   9:04    Thor    
+  155   9:08    Marine x4, SCV x3, Missile Turret   
+  155   9:09    Supply Depot, Marine    
+  171   9:12    Marine    
+  171   9:13    Marine    
+  173   9:20    Marine    
+  173   9:21    Marine    
+  163   9:26    Marine x5   
+  163   9:30    Marine x2   
+  161   9:31    Widow Mine x2   
+  158   9:38    Marine, Barracks x2   
+  158   9:39    Barracks    
+  158   9:42    Marine    
+  158   9:44    Marine x2   
+  162   9:49    Marine x2   
+  161   9:55    Marine x2   
+  161   9:57    Marine x2, Medivac x2   
+  155   10:02   Marine    
+  155   10:03   Marine x2   
+  155   10:04   Thor, Widow Mine x2   
+  159   10:09   SCV   
+  159   10:10   SCV x2    
+  162   10:15   Marine x3, Missile Turret   
+  162   10:16   Marine x2   
+  162   10:17   Marine    
+  162   10:20   Marine x2   
+  162   10:21   Marine    
+  168   10:23   SCV x2    
+  165   10:30   Widow Mine x2   
+  165   10:32   Planetary Fortress    
+  165   10:33   Marine x4   
+  165   10:35   Marine    
+  168   10:37   Barracks Tech Lab   
+  168   10:38   Barracks Tech Lab x2    
+  167   10:44   Marine    
+  167   10:46   Marine    
+  169   10:52   Marine x2, Missile Turret x2    
+  169   10:54   Widow Mine x2   
+  172   11:01   Marauder    
+  174   11:04   Sensor Tower    
+  174   11:07   Sensor Tower    
+  174   11:09   Terran Infantry Weapons Level 3   
+  174   11:10   Missile Turret    
+  174   11:13   Marauder x3   
+  180   11:20   Terran Infantry Armor Level 3   
+  180   11:23   Terran Vehicle And Ship Armor Level 2   
+  180   11:25   Marauder    
+  178   11:34   Marauder x2   
+  178   11:35   Marauder    
+  184   11:42   Marine x2   
+  184   11:44   Marine    
+  184   11:45   Marine    
+  184   11:46   Marauder    
+  189   11:52   Missile Turret x2, Medivac x2   
+  193   11:55   Widow Mine x3   
+  199   12:03   Command Center    
+  199   12:05   Marine, Sensor Tower    
+  200   12:22   Medivac   
+  200   12:49   Marine, Marauder x2   
+  175   12:52   Marauder    
+  175   12:54   Marine x3   
+  175   12:55   Marine x3   
+  174   12:58   Marine    
+  174   12:59   Marine    
+  171   13:07   Marine    
+  171   13:10   Marauder    
+  171   13:11   Marine, Marauder    
+  154   13:13   Thor, Widow Mine x2   
+  154   13:14   Marauder    
+  154   13:15   Marine    
+  154   13:16   Marine x2   
+  154   13:17   Marine, Marauder    
+  154   13:18   Marine    
+  169   13:22   Marine    
+  169   13:24   Marine    
+  164   13:29   Orbital Command, Marine   
+  164   13:32   Marauder x2   
+  164   13:33   Marine    
+  142   13:34   Widow Mine x2   
+  142   13:35   SCV x2, Marauder    
+  142   13:38   Marauder    
+  142   13:40   Marine x2   
+  148   13:41   Marine    
+  148   13:42   Marine    
+  148   13:47   Marine, SCV   
+  148   13:48   SCV   
+  154   13:53   Marauder x2   
+  154   13:54   Sensor Tower    
+  154   13:55   Marine, Widow Mine    
+  161   13:56   Marauder    
+  161   13:57   Missile Turret    
+  161   13:58   Marine, Missile Turret    
+  161   14:00   SCV x2, Marauder    
+  160   14:03   SCV   
+  142   14:11   Marine    
+  142   14:12   Marine, SCV x2    
+  142   14:14   Widow Mine    
+  142   14:15   SCV, Marauder x2    
+  153   14:18   Marauder    
+  153   14:19   Planetary Fortress    
+  153   14:21   Marauder    
+  153   14:24   SCV x2    
+  158   14:27   SCV, Missile Turret   
+  159   14:32   Widow Mine    
+  159   14:33   Widow Mine    
+  159   14:36   Marine x2, SCV x2, Marauder x2    
+  159   14:38   Marine x2   
+  172   14:39   SCV   
+  172   14:40   Medivac   
+  172   14:41   Medivac   
+  172   14:44   Marine x2, Marauder   
+  182   14:46   Marine    
+  182   14:47   Marine    
+  182   14:48   SCV x2    
+  182   14:50   Marauder    
+  184   14:53   Liberator   
+  184   14:54   Liberator, Marine x2    
+  184   14:56   Marine x2   
+  184   14:57   Marine x2   
+  190   15:01   Marine    
+  190   15:03   Widow Mine x2   
+  190   15:05   Marauder    
+  196   15:11   Marauder    
+  196   15:13   SCV   
+  196   15:14   SCV x3    
+  187   15:15   Marauder x2   
+  192   15:26   SCV x4, Marauder    
+  192   15:28   Concussive Shells   
+  198   15:32   Marine x2   
+  200   15:46   Marauder x2   
+  200   15:47   Marine x2   
+  200   15:49   Marine x3   
+  193   15:51   Marauder    
+  167   15:59   Marauder    
+  167   16:00   Marine x2   
+  167   16:01   Widow Mine x2   
+  167   16:03   Medivac x2    
+  165   16:08   Marauder x2   
+  158   16:11   Marine    
+  158   16:12   Marine    
+  158   16:13   Widow Mine    
+  158   16:16   Marauder    
+  159   16:19   Marine    
+  159   16:21   Marauder    
+  159   16:23   Widow Mine    
+  156   16:27   Marine x2   
+  156   16:29   Marine x4, Marauder x2    
+  156   16:31   Widow Mine    
+  161   16:33   Medivac x2    
+  161   16:34   Widow Mine    
+  161   16:37   Marine x2, Marauder   
+  169   16:40   Orbital Command   
+  169   16:41   Refinery    
+  169   16:42   Unknown, Marauder   
+  169   16:44   Widow Mine    
+  169   16:45   Marine x2   
+  169   16:47   Marine x2   
+  175   16:50   Marine, Marauder    
+  175   16:51   Marine, Marauder    
+  160   16:57   Marine x2   
+  160   16:58   Marauder    
+  155   17:02   Marine    
+  155   17:03   Marine x2, Medivac    
+  160   17:08   Marine x2   
+  160   17:09   Marine    
+  160   17:10   Marine, Command Center    
+  160   17:11   Marine    
+  160   17:12   Marauder    
+  160   17:14   Marine    
+  160   17:15   Widow Mine    
+  170   17:18   Widow Mine    
+  170   17:20   Marauder    
+  174   17:23   Marauder    
+  174   17:25   Marine x2   
+  174   17:27   Marine    
+  174   17:28   Marine x4   
+  173   17:40   Marine, Marauder x2   
+  173   17:41   Marine    
+  170   17:45   Widow Mine    
+  170   17:46   Widow Mine    
+  170   17:50   Marauder    
+  157   17:55   Marine    
+  141   18:00   Marauder    
+  141   18:01   Marine, Marauder    
+  141   18:03   Marine    
+  141   18:04   Marine, Marauder    
+  141   18:05   Widow Mine    
+  143   18:07   Widow Mine x2   
+  143   18:08   Marine    
+  143   18:09   Marine x2   
+  143   18:11   Marauder    
+  148   18:20   Marine x2   
+  148   18:21   Marauder, Medivac x2    
+  148   18:22   Marauder    
+  148   18:23   Marine x3   
+  148   18:25   Marine    
+  148   18:26   Marine    
+  146   18:29   Marine x2   
+  146   18:33   Marauder    
+  138   18:38   Marine x2   
+  132   18:41   Marine    
+  132   18:42   Marine, Marauder    
+  132   18:45   Marine    
+  137   18:49   Marauder    
+  137   18:51   Medivac   
+  137   18:52   Marine    
+  137   18:53   Marine x2   
+  140   19:02   Marauder    
+  118   19:10   Orbital Command   
+  118   19:12   Marine x3   
+  118   19:13   Marine, Marauder x2, Medivac    
+  125   19:17   Marine    
+  125   19:18   Marauder    
+  125   19:19   Marine x2   
+  125   19:21   Medivac   
+  125   19:23   Marine x2   
+  134   19:27   Widow Mine x2   
+  134   19:28   Widow Mine    
+  134   19:30   Marine    
+  141   19:34   Marauder    
+  141   19:35   Marine x2, Marauder   
+  141   19:36   Marine    
+  141   19:37   Marine x2   
+  150   19:40   Marine x2   
+  152   19:49   Widow Mine x3   
+  152   19:50   Refinery    
+  158   19:53   Orbital Command   
+  158   19:55   Medivac   
+  159   20:04   Marauder    
+  159   20:06   Orbital Command, Marauder   
+  157   20:11   Marine x2   
+  157   20:15   Marine    
+  157   20:16   Marine x2   
+  157   20:17   Marine    
+  157   20:18   Marauder    
+  157   20:20   Marine x2, Marauder   
+  166   20:24   Marine, Widow Mine x2   
+  166   20:26   Widow Mine, Medivac   
+  166   20:27   Marine    
+  174   20:29   Marine x2   
+  174   20:33   Marine    
+  177   20:39   Marauder    
+  177   20:41   Marauder    
+  158   20:45   Widow Mine    
+  158   20:47   Marine    
+  158   20:48   Marine    
+  164   20:50   Marauder x2   
+  164   20:53   Widow Mine x2   
+  164   20:55   Marine x2   
+  172   21:00   Marauder    
+  172   21:03   Marauder    
+  158   21:07   Marine x3   
+  158   21:08   Widow Mine    
+  152   21:11   Marauder    
+  152   21:12   Marauder    
+  152   21:13   Marine    
+  152   21:14   Orbital Command, Widow Mine   
+  152   21:15   Marine x2   
+  159   21:20   Medivac x2    
+  159   21:26   Marauder    
+  159   21:27   Marine    
+  159   21:31   Marine, Marauder    
+  163   21:33   Marauder    
+  163   21:35   Widow Mine x2   
+  163   21:36   Marine x2   
+  169   21:43   Marine x2, Marauder   
+  166   21:47   Marine    
+  166   21:49   Marine    
+  168   21:59   Marauder    
+  168   22:00   Marine x2   
+  162   22:07   Marauder x2   
+  142   22:09   Marine    
+  142   22:10   Marine x3, Medivac    
+  142   22:13   Marine x2   
+  146   22:17   Medivac   
+  146   22:20   Marauder    
+  146   22:22   Marine x3   
+  152   22:27   Marine x2   
+  152   22:28   Marine x2   
+  152   22:29   Marine x2   
+  157   22:33   Widow Mine x2   
+  157   22:35   Widow Mine    
+  161   22:41   Marauder    
+  161   22:42   Marauder    
+  165   22:49   Marauder    
+  165   22:51   Marine, Marauder    
+  164   22:52   Marine x2   
+  164   22:54   Marine x2   
+  168   23:01   Widow Mine x3   
+  168   23:02   Marauder    
+  168   23:03   Marauder    ';
+
+    $text = explode(PHP_EOL, $text);
+
+    $text = str_replace('      ', ',', $text);
+    $text = str_replace('     ', ',', $text);
+    $text = str_replace('    ', ',', $text);
+    $text = str_replace('   ', ',', $text);
+    $text = str_replace('  ', '', $text);
+
+    foreach ($text as $key => $t) {
+        $text[$key] = substr($t, 0, -1);
+    }
+
+    foreach ($text as $key => $t) {
+        $text[$key] = explode(',', $t);
+    }
+
+    foreach ($text as $key => $t) {
+        unset($text[$key][0]);
+    }
+
+    foreach ($text as $key => $t) {
+        $minutes = explode(':', $t[1]);
+        if ($key > 0) {
+            $minutes = (($minutes[0] * 60) + $minutes[1]) - 2;
+        } else {
+            $minutes = ($minutes[0] * 60) + $minutes[1];
+        }
+        $text[$key][0] = $minutes;
+    }
+
+    foreach ($text as $key => $t) {
+        if (! isset($t[3])) {
+            $text[$key][3] = '';
+        }
+
+        if (! isset($t[4])) {
+            $text[$key][4] = '';
+        }
+
+        if (! isset($t[5])) {
+            $text[$key][5] = '';
+        }
+    }
+
+    foreach ($text as $key => $t) {
+        echo sprintf('[%s,\'%s,%s,%s,%s\',0],', $t[0], $t[2], $t[3], $t[4], $t[5]);
+        echo "<br />";
+    }
+
+    // H::pr($text);
+    }
+
+    public function test4()
+    {
         exit;
         $bfx = new \App\Bitfinex(env('BFX_K'), env('BFX_SC'), 'v1');
         $positions = $bfx->get_positions();
@@ -883,22 +1367,20 @@ class TradesController extends Controller
 
     public function scrapeCandles()
     {
-        $coin = 'XRP';
-        $timeframe = '1m';
+        $coin = 'BTC';
+        $timeframe = '15';
         $loop = 30;
 
         for ($i=0; $i < $loop; $i++) {
             sleep(4);
             // $start = 1495216644000;
             // $end = $start + 86400000; // 24 hours
-
+            
             $lastCandle = App\Btccandle::orderBy('id', 'desc')->first();
-
             $start = $lastCandle->timestamp;
             $end = $start + (86400000 * 1);
 
-            $request = sprintf('https://api.bitfinex.com/v2/candles/trade:%s:t%sUSD/hist?sort=1&limit=5000&start=%s', $timeframe, $coin, $start, $end);
-
+            $request = sprintf('https://api-pub.bitfinex.com/v2/candles/trade:%sm:t%sUSD/hist?sort=1&limit=10000&start=%s', $timeframe, $coin, $start, $end);
             $candles = file_get_contents($request);
             $candles = json_decode($candles);
 
@@ -907,11 +1389,11 @@ class TradesController extends Controller
                 $month = date('m', $candle[0] / 1000);
                 $day = date('d', $candle[0] / 1000);
 
-                if ($year == 2019 && $month == 02 && $day == 02) {
+                if ($year == 2020 && $month == 6 && $day == 8) {
                     echo "wrong start and end timestamps"; exit;
                 }
-
-                DB::statement(sprintf('insert ignore into %s_%s_candles (timestamp, open, close, high, low, volume, updated_at, created_at) values (%s, %s, %s, %s, %s, %s, "%s", "%s")', $coin, $timeframe, $candle[0], $candle[1], $candle[2], $candle[3], $candle[4], $candle[5], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
+                DB::statement(sprintf('insert ignore into upw_%s_%s_min (timestamp, date, open, close, high, low, volume, updated_at, created_at) values (%s, "%s", %s, %s, %s, %s, %s, "%s", "%s")', strtolower($coin), $timeframe, $candle[0], date('Y-m-d H:i:s', $candle[0] / 1000), $candle[1], $candle[2], $candle[3], $candle[4], $candle[5], date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
+                // exit;
                 // $exist = App\Btccandle::where('timestamp', $candle[0])->first();
                 // if ($exist == null) {
                 //     $bfxcandle = new App\Btccandle;
@@ -923,6 +1405,53 @@ class TradesController extends Controller
                 //     $bfxcandle->volume = $candle[5];
                 //     $bfxcandle->save();
                 // }
+            }
+        }
+    }
+
+    public function scrapeBybitCandles()
+    {
+        $coin = 'BTC';
+        $timeframe = '15';
+        $loop = 30;
+
+        for ($i=0; $i < $loop; $i++) {
+            sleep(4);
+            // $start = 1585180800;
+            // $end = $start + 86400000; // 24 hours
+            
+            $lastCandle = App\Btccandle::orderBy('id', 'desc')->first();
+            $start = $lastCandle->timestamp;
+            // $end = $start + (86400000 * 1);
+            $request = sprintf('https://api.bybit.com/public/linear/kline?symbol=%sUSDT&interval=%s&limit=200&from=%s', $coin, $timeframe, $start);
+
+            $candles = file_get_contents($request);
+            $candles = json_decode($candles);
+
+            if ($candles->ret_msg) {
+              foreach ($candles->result as $candle) {
+                  // H::pr($candle);
+                  $year = date('Y', $candle->open_time);
+                  $month = date('m', $candle->open_time);
+                  $day = date('d', $candle->open_time);
+
+                  if ($year == 2020 && $month == 6 && $day == 23) {
+                      echo "wrong start and end timestamps"; exit;
+                  }
+                  DB::statement(sprintf('insert ignore into upw_%s_%s_min_bybit (timestamp, date, open, close, high, low, volume, updated_at, created_at) values (%s, "%s", %s, %s, %s, %s, %s, "%s", "%s")', strtolower($coin), $timeframe, $candle->open_time, date('Y-m-d H:i:s', $candle->open_time), $candle->open, $candle->close, $candle->high, $candle->low, $candle->volume, date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
+                  // exit;
+                  // $exist = App\Btccandle::where('timestamp', $candle[0])->first();
+                  // if ($exist == null) {
+                  //     $bfxcandle = new App\Btccandle;
+                  //     $bfxcandle->timestamp = $candle[0];
+                  //     $bfxcandle->open = $candle[1];
+                  //     $bfxcandle->close = $candle[2];
+                  //     $bfxcandle->high = $candle[3];
+                  //     $bfxcandle->low = $candle[4];
+                  //     $bfxcandle->volume = $candle[5];
+                  //     $bfxcandle->save();
+                  // }
+              }
             }
         }
     }

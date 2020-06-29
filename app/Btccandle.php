@@ -38,5 +38,5 @@ class Btccandle extends Model
                 'checked',
 	];
 
-        protected $table = 'upw_btc_1_min';
+        protected $table = 'upw_btc_15_min';
 }
