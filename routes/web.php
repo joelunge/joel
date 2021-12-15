@@ -22,6 +22,7 @@ Route::get('/hot/{coin}', 'TradesController@hotSingle')->name('hot_single');
 Route::post('/trades/import/upload', 'TradesController@upload')->name('upload');
 Route::get('/trades/scrape', 'TradesController@scrape')->name('scrape_trades');
 Route::get('/trades/scrape_candles', 'TradesController@scrapeCandles')->name('scrape_candles');
+Route::get('/trades/scrape_bybit_candles', 'TradesController@scrapeBybitCandles')->name('scrape_bybit_candles');
 Route::get('/trades/bfxtrades', 'TradesController@showBfxTrades')->name('show_bfx_trades');
 Route::get('/trades/bfxcandles', 'TradesController@showBfxCandles')->name('show_bfx_candles');
 Route::get('/make_indicators', 'TradesController@makeIndicators')->name('make_indicators');
