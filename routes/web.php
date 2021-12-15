@@ -10,7 +10,6 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
 // Auth::routes();
 Route::get('trades', 'TradesController@list')->name('trades')->middleware('auth');
 Route::get('trades/edit/{bitfinex_id}', 'TradesController@edit')->middleware('auth');
