@@ -52,6 +52,47 @@ class ScrapeBybitCandles extends Command
             }
         }
 
+        unset($coins['BTCM21']);
+        unset($coins['BTCU21']);
+        unset($coins['ETHU21']);
+        unset($coins['BTCH22']);
+        unset($coins['ETHZ21']);
+        unset($coins['BTCZ21']);
+        unset($coins['QNT']);
+        unset($coins['USDC']);
+        unset($coins['GODS']);
+        unset($coins['ETHH22']);
+        unset($coins['CBX']);
+        unset($coins['CWAR']);
+        unset($coins['GENE']);
+        unset($coins['GM']);
+        unset($coins['AVA']);
+        unset($coins['PTU']);
+        unset($coins['MKR']);
+        unset($coins['TRVL']);
+        unset($coins['CAKE']);
+        unset($coins['XYM']);
+        unset($coins['SIS']);
+        unset($coins['HOT']);
+        unset($coins['WEMIX']);
+        unset($coins['SHIB']);
+        unset($coins['DEVT']);
+        unset($coins['REAL']);
+        unset($coins['PSP']);
+        unset($coins['AGLD']);
+        unset($coins['NU']);
+        unset($coins['1SOL']);
+        unset($coins['IZI']);
+        unset($coins['UMA']);
+        unset($coins['BTCM22']);
+        unset($coins['SOS']);
+        unset($coins['RUN']);
+
+        $coins = [];
+        $coins['BTC'] = 'BTC';
+
+        \H::pr($coins, false);
+
         foreach ($coins as $key => $coin) {
             $loop = 9999;
 
@@ -61,15 +102,17 @@ class ScrapeBybitCandles extends Command
                 if ($lastCandle) {
                     $from = $lastCandle->open_time;
                 } else {
-                    $from = \App\Commissiontotal::where('coin', $coin)->orderBy('date', 'ASC')->first();
-                    $from = strtotime($from->date);
+                    // $from = \App\Commissiontotal::where('coin', $coin)->orderBy('date', 'ASC')->first();
+                    // $from = strtotime($from->date);
+                    $from = 1585702800;
 
                     // echo $coin . ' ' . date('Y-m-d', $from / 1000).PHP_EOL;
                 }
 
                 // $request = sprintf('https://api.bybit.com/spot/quote/v1/kline?symbol=%sUSDT&interval=1d&startTime=%s', $coin, $from);
 
-                $request = sprintf('https://api.bybit.com/public/linear/kline?symbol=%sUSDT&interval=D&limit=200&from=%s', $coin, $from);
+                $request = sprintf('https://api.bybit.com/public/linear/kline?symbol=%sUSDT&interval=5&limit=200&from=%s', $coin, $from);
+                echo $request.PHP_EOL.PHP_EOL;
                 $candles = file_get_contents($request);
                 $candles = json_decode($candles);
 
@@ -78,12 +121,16 @@ class ScrapeBybitCandles extends Command
                     $month = date('m', $candle->open_time);
                     $day = date('d', $candle->open_time);
 
-                    if ($year == 2021 && $month == 12 && $day == 12) {
+                    if ($year == 2022 && $month == 06 && $day == 27) {
                         // echo "wrong start and end timestamps"; exit;
                         break 2;
                     }
 
-                    \DB::statement(sprintf('insert ignore into allbybitperpetualcoins (coin, open_time, open_datetime, open, high, low, close, created_at, updated_at) values ("%s", %s, "%s", %s, %s, %s, %s, "%s", "%s")', $coin, $candle->open_time, date('Y-m-d H:i:s', $candle->open_time), $candle->open, $candle->high, $candle->low, $candle->close, date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
+                    $highPerc = round((100-($candle->open/$candle->high)*100), 2);
+                    $lowPerc = round((100-($candle->open/$candle->low)*100), 2);
+                    $closePerc = round((100-($candle->open/$candle->close)*100), 2);
+
+                    \DB::statement(sprintf('insert ignore into allbybitperpetualcoins (coin, open_time, open_datetime, open, high, low, close, high2, low2, close2, created_at, updated_at) values ("%s", %s, "%s", %s, %s, %s, %s, %s, %s, %s, "%s", "%s")', $coin, $candle->open_time, date('Y-m-d H:i:s', $candle->open_time), $candle->open, $candle->high, $candle->low, $candle->close, $highPerc, $lowPerc, $closePerc, date('Y-m-d H:i:s', time()), date('Y-m-d H:i:s', time())));
 
                     $lastCandle = null;
                     $from = null;
@@ -121,10 +168,14 @@ class ScrapeBybitCandles extends Command
             }
         }
 
-        unset($coins['CRO']);
-        unset($coins['ETC']);
-        unset($coins['LIDO']);
-        unset($coins['CRAFT']);
+        unset($coins['BTCM21']);
+        unset($coins['BTCU21']);
+        unset($coins['ETHU21']);
+        unset($coins['BTCH22']);
+        unset($coins['ETHZ21']);
+        unset($coins['BTCZ21']);
+        unset($coins['ETHH22']);
+        unset($coins['BTCM22']);
 
         // $coins = [
         //     'BTCZ21' => 'BTCZ21',
@@ -163,7 +214,7 @@ class ScrapeBybitCandles extends Command
                     $month = date('m', $candle[0] / 1000);
                     $day = date('d', $candle[0] / 1000);
 
-                    if ($year == 2021 && $month == 12 && $day == 12) {
+                    if ($year == 2022 && $month == 02 && $day == 01) {
                         // echo "wrong start and end timestamps"; exit;
                         break 2;
                     }
@@ -222,7 +273,7 @@ class ScrapeBybitCandles extends Command
                 $month = date('m', $candle->open_time);
                 $day = date('d', $candle->open_time);
 
-                if ($year == 2021 && $month == 11 && $day == 16) {
+                if ($year == 2022 && $month == 4 && $day == 24) {
                     echo "wrong start and end timestamps"; exit;
                 }
 
